@@ -1,0 +1,121 @@
+name: Dev - prayoonorchid-api-nestjs's Workflow.
+
+on:
+  push:
+    branches:
+      - develop
+
+jobs:
+  build_n_push:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Setup environment variables
+        run: |
+          echo "GITHUB_REPOSITORY_NAME=$(echo '${{ github.repository }}' | awk -F '/' '{print $2}')" >> $GITHUB_ENV
+          echo "GITHUB_BRANCH=$(echo $GITHUB_REF | awk -F '/' '{print $3}')" >> $GITHUB_ENV
+          echo "GITHUB_COMMIT=$(echo $GITHUB_SHA | cut -c1-7)" >> $GITHUB_ENV
+          printenv
+        shell: bash
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Login to Amazon Elastic Container Registry (ECR)
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+
+      - name: Build, tag, and push image to Amazon Elastic Container Registry (ECR)
+        id: build_n_push
+        env:
+          AWS_ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          AWS_ECR_REPOSITORY: ${{ env.GITHUB_REPOSITORY_NAME }}
+          DOCKER_IMAGE_TAG_ENV: ${{ env.GITHUB_BRANCH }}
+          DOCKER_IMAGE_TAG_ENV_COMMIT: ${{ env.GITHUB_COMMIT }}
+        run: |
+          docker build --tag $AWS_ECR_REGISTRY/$AWS_ECR_REPOSITORY:$DOCKER_IMAGE_TAG_ENV .
+          docker push $AWS_ECR_REGISTRY/$AWS_ECR_REPOSITORY:$DOCKER_IMAGE_TAG_ENV
+          docker tag $AWS_ECR_REGISTRY/$AWS_ECR_REPOSITORY:$DOCKER_IMAGE_TAG_ENV $AWS_ECR_REGISTRY/$AWS_ECR_REPOSITORY:$DOCKER_IMAGE_TAG_ENV-$DOCKER_IMAGE_TAG_ENV_COMMIT
+          docker push $AWS_ECR_REGISTRY/$AWS_ECR_REPOSITORY:$DOCKER_IMAGE_TAG_ENV-$DOCKER_IMAGE_TAG_ENV_COMMIT
+  deploy_application:
+    needs: build_n_push
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Setup environment variables
+        run: |
+          echo "GITHUB_REPOSITORY_NAME=$(echo '${{ github.repository }}' | awk -F '/' '{print $2}')" >> $GITHUB_ENV
+          echo "GITHUB_BRANCH=$(echo $GITHUB_REF | awk -F '/' '{print $3}')" >> $GITHUB_ENV
+          echo "GITHUB_ACTIONS=$GITHUB_ACTIONS" >> $GITHUB_ENV
+          printenv
+        shell: bash
+      - name: Deploy application on Dev environment
+        uses: appleboy/ssh-action@master
+        id: deploy
+        env:
+          ##
+          ## PIPELINES ENV CONFIGURE
+          ##
+          REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
+          REMOTE_PORT: ${{ secrets.REMOTE_PORT }}
+          REMOTE_USER: ${{ secrets.REMOTE_USER }}
+          DEPLOY_KEY: ${{ secrets.DEPLOY_PRIVATE_KEY }}
+          AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+        with:
+          host: ${{ env.REMOTE_HOST }}
+          username: ${{ env.REMOTE_USER }}
+          port: ${{ env.REMOTE_PORT }}
+          key: ${{ env.DEPLOY_KEY }}
+          script: |
+            set -e
+            ##
+            ## PASS PIPELINE ENV CONFIGURES
+            ##
+            REPOSITORY_NAME=${{ env.GITHUB_REPOSITORY_NAME }}
+            BRANCH_NAME=${{ env.GITHUB_BRANCH }}
+            ACTIONS=${{ env.GITHUB_ACTIONS }}
+            AWS_ACCOUNT_ID=${{ env.AWS_ACCOUNT_ID }}
+            AWS_REGION=${{ env.AWS_REGION }}
+            ##
+            ## Setup Pipeline Compose Environment
+            ##
+            if [[ "${BRANCH_NAME}" =~ ^(develop)$ ]]; then
+              PIPELINE_COMPOSE_ENVIRONMENT=dev
+            elif  [[ "${BRANCH_NAME}" =~ ^(main)$ ]]; then
+              PIPELINE_COMPOSE_ENVIRONMENT=prod
+            fi
+            ##
+            ## Setup AWS ECR authentication
+            ##
+            aws ecr get-login-password --region "${AWS_REGION}" | docker login --username AWS --password-stdin "${AWS_ACCOUNT_ID}".dkr.ecr.ap-southeast-1.amazonaws.com
+            if [[ "$?" -eq 0 ]]; then
+              echo "AWS Elastic Container Registry Authenticated."
+            else
+              echo "AWS Elastic Container Registry Authenticate FAILED!."
+              exit 1
+            fi
+            ##
+            ## Deploy Application
+            ##
+            if [[ "${ACTIONS}" == true ]]; then
+              echo "Docker Image Latest Version Downloading..."
+              docker-compose -f "${PIPELINE_COMPOSE_ENVIRONMENT}"-prayoonorchid/docker-compose.yml pull
+              echo "Docker Image Latest Version Download Success."
+              echo "Application Deploying..."
+              docker-compose -f "${PIPELINE_COMPOSE_ENVIRONMENT}"-prayoonorchid/docker-compose.yml up -d
+              if [[ "$?" -eq 0 ]]; then
+                echo "Application Deployed.."
+                rm -rf "${REPOSITORY_NAME}"
+              else
+                echo "Application FAILED."
+                rm -rf "${REPOSITORY_NAME}"
+              fi
+            fi
