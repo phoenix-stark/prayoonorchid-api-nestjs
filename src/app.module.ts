@@ -6,6 +6,7 @@ import { AppService } from './app.service';
 import { ExcelModule } from './excel/excel.module';
 import { AppConfigModule } from './config/app';
 import { DbConfigModule, DbConfigService } from './config/database';
+import { ReceiptModule } from './receipt/receipt.module';
 
 @Module({
   imports: [
@@ -31,6 +32,7 @@ import { DbConfigModule, DbConfigService } from './config/database';
     HttpModule,
     AppConfigModule,
     ExcelModule,
+    ReceiptModule,
   ],
   controllers: [AppController],
   providers: [AppService],
