@@ -129,4 +129,23 @@ export class ExcelController {
     });
     stream.pipe(res);
   }
+
+  @Get('receipt')
+  @HttpCode(200)
+  @Header('Content-Type', 'text/xlsx')
+  async exportReceipt(@Res() res: Response) {
+    const result = await this.excelService.exportReceipt();
+    const buffer = readFileSync(result);
+
+    const stream = new Readable();
+    stream.push(buffer);
+    stream.push(null);
+
+    res.set({
+      'Content-Type':
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      'Content-Length': buffer.length,
+    });
+    stream.pipe(res);
+  }
 }

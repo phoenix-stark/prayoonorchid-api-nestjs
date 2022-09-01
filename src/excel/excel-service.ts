@@ -1,9 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { Workbook } from 'exceljs';
+import { ReceiptService } from 'src/receipt/receipt.service';
 import * as tmp from 'tmp';
 import { ExcelExportReportStockInput } from './dto/excel-export-report-stock.input';
 @Injectable()
 export class ExcelService {
+  constructor(private readonly receiptService: ReceiptService) {}
+
   async exportReportBottle(input: ExcelExportReportStockInput): Promise<any> {
     const book = new Workbook();
     const sheet = book.addWorksheet('Sheet1');
@@ -863,6 +866,126 @@ export class ExcelService {
         {
           discardDescriptor: true,
           prefix: '20.12-29.12.2022 เสียหาย',
+          postfix: '.xlsx',
+          mode: parseInt('0600', 8),
+        },
+        async (_err, _file) => {
+          if (_err) throw _err;
+          book.xlsx
+            .writeFile(_file)
+            .then(() => {
+              resolve(_file);
+            })
+            .catch((err) => {
+              reject(err);
+            });
+        },
+      );
+    });
+    return file;
+  }
+
+  async exportReceipt(): Promise<any> {
+    const book = new Workbook();
+    const sheet = book.addWorksheet('Sheet1');
+
+    const data = [];
+    const rows = [];
+    data.push({
+      code: 'รหัสใบงาน',
+      name: 'ชื่อพันธุ์ไม้',
+      family_name: 'สายพันธุ์',
+      customer: 'ชื่อคู่ค้า',
+    });
+    // Add Data Row
+    const result = await this.receiptService.getReceipts(null);
+    // Styles Data Row
+    for (let i = 0; i < result.length; i++) {
+      const rowsDB = result[i];
+      data.push({
+        code: rowsDB.code,
+        name: rowsDB.name,
+        family_name: rowsDB.family_main_id,
+        customer: rowsDB.customer_id,
+      });
+    }
+
+    data.forEach((doc) => {
+      rows.push(Object.values(doc));
+    });
+    sheet.addRows(rows);
+
+    // Styles Data Row
+    for (let i = 1; i < result.length; i++) {
+      [`A${i + 1}`, `B${i + 1}`, `C${i + 1}`, `D${i + 1}`].map((cell) => {
+        sheet.getCell(cell).style = {
+          border: {
+            top: { style: 'thin' },
+            left: { style: 'thin' },
+            bottom: { style: 'thin' },
+            right: { style: 'thin' },
+          },
+        };
+      });
+    }
+
+    // Column style
+    const colsStyle = [
+      { key: 'A', width: 5, align: 'left' },
+      { key: 'B', width: 20, align: 'left' },
+      { key: 'C', width: 20, align: 'left' },
+      { key: 'D', width: 20, align: 'left' },
+    ];
+
+    // Column Row Data
+    colsStyle.forEach((column, key) => {
+      sheet.getColumn(column.key).width = column.width;
+      sheet.getColumn(column.key).alignment = {
+        horizontal: 'center',
+      };
+    });
+
+    colsStyle.forEach((column, key) => {
+      sheet.getColumn(column.key).width = column.width;
+      if (column.align === 'center') {
+        sheet.getColumn(column.key).alignment = {
+          horizontal: 'center',
+        };
+      } else if (column.align === 'right') {
+        sheet.getColumn(column.key).alignment = {
+          horizontal: 'right',
+        };
+      } else {
+        sheet.getColumn(column.key).alignment = {
+          horizontal: 'left',
+        };
+      }
+    });
+
+    // Header
+    ['A2', 'B2', 'C2', 'D2'].map((cell) => {
+      sheet.getCell(cell).style = {
+        font: {
+          bold: true,
+        },
+        alignment: {
+          horizontal: 'center',
+        },
+        border: {
+          top: { style: 'thin' },
+          left: { style: 'thin' },
+          bottom: { style: 'thin' },
+          right: { style: 'thin' },
+        },
+      };
+    });
+
+    // Write Excel
+    const file = new Promise((resolve, reject) => {
+      tmp.file(
+        {
+          discardDescriptor: true,
+          prefix: 'ใบงาน',
           postfix: '.xlsx',
           mode: parseInt('0600', 8),
         },
