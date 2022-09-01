@@ -11,7 +11,7 @@ export class CustomerService {
     private readonly customerRepository: Repository<Customer>,
   ) {}
 
-  async getReceipts(): Promise<any[]> {
+  async getReceipts(): Promise<any> {
     return [];
   }
 }
