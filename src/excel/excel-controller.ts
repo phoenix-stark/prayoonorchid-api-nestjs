@@ -130,13 +130,10 @@ export class ExcelController {
     stream.pipe(res);
   }
 
-  @Get('recipet')
+  @Get('receipt')
   @HttpCode(200)
   @Header('Content-Type', 'text/xlsx')
-  async exportReceipt(
-    @Query() input: ExcelExportReportStockInput,
-    @Res() res: Response,
-  ) {
+  async exportReceipt(@Res() res: Response) {
     const result = await this.excelService.exportReceipt();
     const buffer = readFileSync(result);
 
