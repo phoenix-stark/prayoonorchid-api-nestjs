@@ -1,4 +1,5 @@
-import { Entity, Column, PrimaryColumn } from 'typeorm';
+import { PlantFamilyMain } from 'src/plant-family-main/entity/plant-family-main-entity.model';
+import { Entity, Column, PrimaryColumn, JoinColumn, OneToOne } from 'typeorm';
 
 @Entity({ name: 'receipt', synchronize: false })
 export class Receipt {
