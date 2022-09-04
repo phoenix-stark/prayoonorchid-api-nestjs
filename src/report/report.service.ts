@@ -226,4 +226,83 @@ export class ReportService {
       .addOrderBy('receipt_tb.code', 'ASC')
       .getRawMany();
   }
+
+  async getReportBottle(): Promise<any> {
+    return await this.connection
+      .createQueryBuilder()
+      .select('result_group.import_date', 'import_date')
+      .select('member_tb.name', 'member_name')
+      .select('member_tb.surname', 'member_surname')
+      .addSelect('receipt_tb.code', 'receipt_code')
+      .addSelect('receipt_tb.num_order', 'receipt_num_order')
+      .addSelect('receipt_tb.name', 'receipt_name')
+      .addSelect('customer_tb.name', 'customer_name')
+      .addSelect('plant_family_main_tb.description', 'plant_family_main')
+      .addSelect('sources_work_main_type_tb.description', 'main_work_type')
+      .addSelect('sources_work_type_tb.description', 'work_type')
+      .addSelect('food_plant_tb.description', 'food')
+      .addSelect('result_group.total_import', 'total_import')
+
+      .from((subQuery) => {
+        return subQuery
+          .select('import.import_date', 'import_date')
+          .addSelect('import.member_made', 'member_made')
+          .addSelect('import.receipt_id', 'receipt_id')
+          .addSelect('import.main_work_type_id', 'main_work_type_id')
+          .addSelect('import.work_type_id', 'work_type_id')
+          .addSelect('import.food_plant_id', 'food_plant_id')
+          .addSelect('COUNT(*)', 'total_import')
+          .from(LogPlantImport, 'import')
+          .groupBy('import.import_date')
+          .addGroupBy('import.member_made')
+          .addGroupBy('import.receipt_id')
+          .addGroupBy('import.main_work_type_id')
+          .addGroupBy('import.work_type_id')
+          .addGroupBy('import.food_plant_id')
+          .leftJoin(
+            LogPlantRemove,
+            'remove',
+            'import.log_plant_import_id = remove.log_plant_import_id',
+          )
+          .where('import.import_date >= :date', { date: '2022-09-01' });
+      }, 'result_group')
+      .leftJoin(
+        Receipt,
+        'receipt_tb',
+        'receipt_tb.receipt_id = result_group.receipt_id',
+      )
+      .leftJoin(
+        Customer,
+        'customer_tb',
+        'customer_tb.customer_id = receipt_tb.customer_id',
+      )
+      .leftJoin(
+        PlantFamilyMain,
+        'plant_family_main_tb',
+        'plant_family_main_tb.id = receipt_tb.family_main_id',
+      )
+      .leftJoin(
+        SourcesWorkMainType,
+        'sources_work_main_type_tb',
+        'sources_work_main_type_tb.id = result_group.main_work_type_id',
+      )
+      .leftJoin(
+        SourcesWorkType,
+        'sources_work_type_tb',
+        'sources_work_type_tb.id = result_group.work_type_id',
+      )
+      .leftJoin(
+        FoodPlant,
+        'food_plant_tb',
+        'food_plant_tb.food_id = result_group.food_plant_id',
+      )
+      .leftJoin(
+        Member,
+        'member_tb',
+        'member_tb.member_id = result_group.member_made',
+      )
+      .orderBy('result_group.import_date', 'ASC')
+      .addOrderBy('receipt_tb.code', 'ASC')
+      .getRawMany();
+  }
 }
