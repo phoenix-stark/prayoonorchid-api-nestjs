@@ -7,7 +7,7 @@ import { ReceiptController } from './receipt.controller';
 import { ReceiptService } from './receipt.service';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Receipt])],
+  imports: [TypeOrmModule.forFeature([Receipt, Customer, PlantFamilyMain])],
   controllers: [ReceiptController],
   providers: [ReceiptService],
   exports: [ReceiptService],
