@@ -23,7 +23,7 @@ export class ReceiptService {
       )
       .select();
 
-    const receipts = await sql.getRawMany();
+    const receipts = await sql.getMany();
     const sqlStr = await sql.getSql();
     console.log('sqlStr:');
     console.log(sqlStr);
