@@ -13,7 +13,7 @@ export class ReceiptService {
   ) {}
 
   async getReceipts(input: ReceiptGetInput): Promise<any[]> {
-    const sql = this.receiptRepository
+    const sql = await this.receiptRepository
       .createQueryBuilder('receipt')
       .innerJoinAndMapOne(
         'receipt.family_main_id',
@@ -23,7 +23,7 @@ export class ReceiptService {
       )
       .select();
 
-    const receipts = await sql.getMany();
+    const receipts = await sql.getRawMany();
     const sqlStr = await sql.getSql();
     console.log('sqlStr:');
     console.log(sqlStr);
