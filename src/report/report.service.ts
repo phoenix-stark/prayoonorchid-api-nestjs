@@ -305,4 +305,58 @@ export class ReportService {
       .addOrderBy('receipt_tb.code', 'ASC')
       .getRawMany();
   }
+
+  async getReportPlantFail(): Promise<any> {
+    return await this.connection
+      .createQueryBuilder()
+      .select('member_tb.name', 'member_name')
+      .select('member_tb.surname', 'member_surname')
+      .addSelect('result_group.total_import', 'total_import')
+      .addSelect(
+        '(((result_group.remove_type_1 + result_group.remove_type_2) / result_group.total_import ) * 100)',
+        'persentage',
+      )
+      .from((subQuery) => {
+        return subQuery
+          .addSelect('import.member_made', 'member_made')
+          .addSelect('COUNT(*)', 'total_import')
+
+          .addSelect(
+            'SUM(case when remove.plant_remove_type_id = 1 then 1 else 0 end)',
+            'remove_type_1',
+          )
+          .addSelect(
+            'SUM(case when remove.plant_remove_type_id = 2 then 1 else 0 end)',
+            'remove_type_2',
+          )
+          .addSelect(
+            'SUM(case when remove.plant_remove_type_id = 3 then 1 else 0 end)',
+            'remove_type_3',
+          )
+          .addSelect(
+            'SUM(case when remove.plant_remove_type_id = 4 then 1 else 0 end)',
+            'remove_type_4',
+          )
+          .addSelect(
+            'SUM(case when remove.plant_remove_type_id = 5 then 1 else 0 end)',
+            'export',
+          )
+          .from(LogPlantImport, 'import')
+          .groupBy('import.member_made')
+          .leftJoin(
+            LogPlantRemove,
+            'remove',
+            'import.log_plant_import_id = remove.log_plant_import_id',
+          )
+          .where('import.import_date >= :date', { date: '2022-09-01' });
+      }, 'result_group')
+      .leftJoin(
+        Member,
+        'member_tb',
+        'member_tb.member_id = result_group.member_made',
+      )
+      .orderBy('member_tb.name', 'ASC')
+      .addOrderBy('member_tb.surname', 'ASC')
+      .getRawMany();
+  }
 }

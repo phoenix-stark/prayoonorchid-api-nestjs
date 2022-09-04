@@ -31,4 +31,10 @@ export class ReportController {
   async getReportBottle(): Promise<any[]> {
     return await this.reportService.getReportBottle();
   }
+
+  @Get('plant-fail')
+  @HttpCode(200)
+  async getReportPlantFail(): Promise<any[]> {
+    return await this.reportService.getReportPlantFail();
+  }
 }
