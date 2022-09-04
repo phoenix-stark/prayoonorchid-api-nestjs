@@ -15,14 +15,15 @@ export class ReceiptService {
   async getReceipts(input: ReceiptGetInput): Promise<any[]> {
     const receipts = await this.receiptRepository
       .createQueryBuilder('receipt')
-      .leftJoinAndSelect(
+      .innerJoinAndMapOne(
+        'receipt.family_main_id',
         PlantFamilyMain,
-        'plantfamilymain',
-        'receipt.family_main_id = plantfamilymain.id',
+        'plant_family_main',
+        'receipt.family_main_id = plant_family_main.id',
       )
       .select('receipt')
-      .addSelect(['plantfamilymain.description'])
-      .getMany();
+      .addSelect('plant_family_main')
+      .getRawMany();
     return receipts;
   }
 }
