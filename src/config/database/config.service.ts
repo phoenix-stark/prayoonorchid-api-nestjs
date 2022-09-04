@@ -37,4 +37,8 @@ export class DbConfigService {
   get logging(): boolean {
     return this.configService.get<boolean>('database.logging');
   }
+
+  get name(): string {
+    return this.configService.get<string>('database.name');
+  }
 }

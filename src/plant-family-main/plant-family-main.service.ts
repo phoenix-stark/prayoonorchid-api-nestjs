@@ -11,6 +11,6 @@ export class PlantFamilyMainService {
   ) {}
 
   async getReceipts(): Promise<any[]> {
-    return [];
+    return await this.plantFamilyMainRepository.find();
   }
 }
