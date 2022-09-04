@@ -14,8 +14,7 @@ export class ReceiptService {
   ) {}
 
   async getReceipts(input: ReceiptGetInput): Promise<any[]> {
-    // receipts = await this.receiptRepository.find();
-    const receipts = await createQueryBuilder('receipt').getMany();
+    const receipts = await this.receiptRepository.find();
     return receipts;
   }
 }
