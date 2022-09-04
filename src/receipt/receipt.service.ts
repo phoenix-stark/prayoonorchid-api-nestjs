@@ -21,13 +21,14 @@ export class ReceiptService {
         'plant_family_main',
         'receipt.family_main_id = plant_family_main.id',
       )
-      .select('receipt');
+      .select('receipt')
+      .getRawMany();
 
-    const receipts = await sql.getRawMany();
-    const sqlStr = await sql.getSql();
-    console.log('sqlStr:');
-    console.log(sqlStr);
+    // const receipts = sql.getRawMany();
+    // const sqlStr = await sql.getSql();
+    // console.log('sqlStr:');
+    // console.log(sqlStr);
 
-    return receipts;
+    return sql;
   }
 }
