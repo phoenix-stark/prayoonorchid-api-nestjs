@@ -19,4 +19,10 @@ export class ReportController {
   async getReportProduction(): Promise<any[]> {
     return await this.reportService.getReportProduction();
   }
+
+  @Get('stock')
+  @HttpCode(200)
+  async getReportStock(): Promise<any[]> {
+    return await this.reportService.getReportStock();
+  }
 }
