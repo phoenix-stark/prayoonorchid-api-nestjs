@@ -20,6 +20,7 @@ export class ReceiptService {
         'plantfamilymain',
         'receipt.family_main_id = plantfamilymain.id',
       )
+      .select(['plantfamilymain.description'])
       .getMany();
     return receipts;
   }
