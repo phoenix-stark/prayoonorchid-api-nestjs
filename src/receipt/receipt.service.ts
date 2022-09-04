@@ -11,10 +11,6 @@ export class ReceiptService {
   constructor(
     @InjectRepository(Receipt)
     private readonly receiptRepository: Repository<Receipt>,
-    @InjectRepository(Customer)
-    private readonly customerRepository: Repository<Customer>,
-    @InjectRepository(PlantFamilyMain)
-    private readonly plantFamilyMainRepository: Repository<PlantFamilyMain>,
   ) {}
 
   async getReceipts(input: ReceiptGetInput): Promise<any[]> {

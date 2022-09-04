@@ -35,8 +35,6 @@ import { PlantFamilyMainModule } from './plant-family-main/plant-family-main.mod
     AppConfigModule,
     ExcelModule,
     ReceiptModule,
-    CustomerModule,
-    PlantFamilyMainModule,
   ],
   controllers: [AppController],
   providers: [AppService],
