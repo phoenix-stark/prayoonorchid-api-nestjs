@@ -7,8 +7,6 @@ import { ExcelModule } from './excel/excel.module';
 import { AppConfigModule } from './config/app';
 import { DbConfigModule, DbConfigService } from './config/database';
 import { ReceiptModule } from './receipt/receipt.module';
-import { CustomerModule } from './customer/customer.module';
-import { PlantFamilyMainModule } from './plant-family-main/plant-family-main.module';
 
 @Module({
   imports: [

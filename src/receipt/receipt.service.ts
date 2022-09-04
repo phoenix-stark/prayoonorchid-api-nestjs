@@ -1,8 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Customer } from 'src/customer/entity/customer-entity.model';
-import { PlantFamilyMain } from 'src/plant-family-main/entity/plant-family-main-entity.model';
-import { createQueryBuilder, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 import { ReceiptGetInput } from './dto/receipt-get-input';
 import { Receipt } from './entity/receipt-entity.model';
 
@@ -14,8 +12,7 @@ export class ReceiptService {
   ) {}
 
   async getReceipts(input: ReceiptGetInput): Promise<any[]> {
-    // receipts = await this.receiptRepository.find();
-    const receipts = await createQueryBuilder('receipt').getMany();
+    const receipts = await this.receiptRepository.find();
     return receipts;
   }
 }
