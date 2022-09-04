@@ -21,7 +21,7 @@ export class ReceiptService {
         'plant_family_main',
         'receipt.family_main_id = plant_family_main.id',
       )
-      .select(['receipt', 'plant_family_main']);
+      .select(['plant_family_main']);
 
     const receipts = await sql.getRawMany();
     const sqlStr = await sql.getSql();
