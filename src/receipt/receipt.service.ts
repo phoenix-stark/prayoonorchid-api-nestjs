@@ -21,8 +21,7 @@ export class ReceiptService {
         'plant_family_main',
         'receipt.family_main_id = plant_family_main.id',
       )
-      .select('receipt')
-      .addSelect('plant_family_main')
+      .select()
       .getRawMany();
     return receipts;
   }
