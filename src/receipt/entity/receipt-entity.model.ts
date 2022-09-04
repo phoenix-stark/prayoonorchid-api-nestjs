@@ -35,8 +35,4 @@ export class Receipt {
 
   @Column()
   code: string;
-
-  @OneToOne(() => PlantFamilyMain)
-  @JoinColumn()
-  plantFamilyMain: PlantFamilyMain;
 }
