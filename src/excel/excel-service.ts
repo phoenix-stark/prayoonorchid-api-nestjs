@@ -903,10 +903,10 @@ export class ExcelService {
     for (let i = 0; i < result.length; i++) {
       const rowsDB = result[i];
       data.push({
-        code: rowsDB.code,
-        name: rowsDB.name,
-        family_name: rowsDB.family_main_id,
-        customer: rowsDB.customer_id,
+        code: rowsDB.receipt_code,
+        name: rowsDB.receipt_name,
+        family_name: rowsDB.plant_family_main_description,
+        customer: rowsDB.customer_name,
       });
     }
 
@@ -931,10 +931,10 @@ export class ExcelService {
 
     // Column style
     const colsStyle = [
-      { key: 'A', width: 5, align: 'left' },
-      { key: 'B', width: 20, align: 'left' },
-      { key: 'C', width: 20, align: 'left' },
-      { key: 'D', width: 20, align: 'left' },
+      { key: 'A', width: 20, align: 'left' },
+      { key: 'B', width: 30, align: 'left' },
+      { key: 'C', width: 40, align: 'left' },
+      { key: 'D', width: 40, align: 'left' },
     ];
 
     // Column Row Data
@@ -963,7 +963,7 @@ export class ExcelService {
     });
 
     // Header
-    ['A2', 'B2', 'C2', 'D2'].map((cell) => {
+    ['A1', 'B1', 'C1', 'D1'].map((cell) => {
       sheet.getCell(cell).style = {
         font: {
           bold: true,

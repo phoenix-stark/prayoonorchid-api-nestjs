@@ -7,6 +7,17 @@ import { ExcelModule } from './excel/excel.module';
 import { AppConfigModule } from './config/app';
 import { DbConfigModule, DbConfigService } from './config/database';
 import { ReceiptModule } from './receipt/receipt.module';
+import { PlantFamilyMain } from './plant-family-main/entity/plant-family-main-entity.model';
+import { PlantFamilyMainModule } from './plant-family-main/plant-family-main.module';
+import { CustomerModule } from './customer/customer.module';
+import { LogPlantImportModule } from './log_plant_import/log-plant-import.module';
+import { ReportModule } from './report/report.module';
+import { LogPlantRemoveModule } from './log_plant_remove/log-plant-remove.module';
+import { FoodPlantModule } from './food_plant/food-plant.module';
+import { SourcesWorkMainTypeModule } from './sources_work_main_type/sources-work-main-type.module';
+import { SourcesWorkType } from './sources_work_type/entity/sources-work-type-entity.model';
+import { MemberModule } from './member/member.module';
+import { SourcesWorkTypeModule } from './sources_work_type/sources-work-type.module';
 
 @Module({
   imports: [
@@ -33,6 +44,15 @@ import { ReceiptModule } from './receipt/receipt.module';
     AppConfigModule,
     ExcelModule,
     ReceiptModule,
+    PlantFamilyMainModule,
+    CustomerModule,
+    LogPlantImportModule,
+    ReportModule,
+    LogPlantRemoveModule,
+    FoodPlantModule,
+    SourcesWorkMainTypeModule,
+    SourcesWorkTypeModule,
+    MemberModule,
   ],
   controllers: [AppController],
   providers: [AppService],
