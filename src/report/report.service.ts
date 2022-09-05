@@ -10,19 +10,23 @@ import { Receipt } from 'src/receipt/entity/receipt-entity.model';
 import { SourcesPlantRemoveType } from 'src/sources_plant_remove_type/entity/sources-plant-remove-type-entity.model';
 import { SourcesWorkMainType } from 'src/sources_work_main_type/entity/sources-work-main-type-entity.model';
 import { SourcesWorkType } from 'src/sources_work_type/entity/sources-work-type-entity.model';
-import { Connection, Repository } from 'typeorm';
+import { Connection, MoreThan, Repository } from 'typeorm';
+import { ReportGetInput } from './dto/report-get.input';
+import { FilterObject } from './modal/filter';
 
 @Injectable()
 export class ReportService {
   constructor(
     @InjectConnection()
     private connection: Connection,
-    @InjectRepository(LogPlantImport)
-    private readonly logPlantImportRepository: Repository<LogPlantImport>,
   ) {}
-
-  async getReportProduction(): Promise<any> {
-    return await this.connection
+  async getReportProduction(input: ReportGetInput): Promise<any> {
+    const filter = this.getFilter(input.filter);
+    console.log(filter.filter[1]);
+    console.log(filter.filter[2]);
+    console.log(filter.filter[8]);
+    console.log(filter.filter[9]);
+    const query = await this.connection
       .createQueryBuilder()
       .select('result_group.import_date', 'import_date')
       .addSelect('member_tb.name', 'member_name')
@@ -46,7 +50,7 @@ export class ReportService {
       )
 
       .from((subQuery) => {
-        return subQuery
+        const sub = subQuery
           .select('import.import_date', 'import_date')
           .addSelect('import.member_made', 'member_made')
           .addSelect('import.receipt_id', 'receipt_id')
@@ -86,7 +90,85 @@ export class ReportService {
             'remove',
             'import.log_plant_import_id = remove.log_plant_import_id',
           )
-          .where('import.import_date >= :date', { date: '2022-09-01' });
+          .leftJoin(
+            Receipt,
+            'receipt_tb',
+            'receipt_tb.receipt_id = import.receipt_id',
+          )
+          .leftJoin(
+            SourcesWorkMainType,
+            'sources_work_main_type_tb',
+            'sources_work_main_type_tb.id = import.main_work_type_id',
+          )
+          .leftJoin(
+            FoodPlant,
+            'food_plant',
+            'food_plant.food_id = import.food_plant_id',
+          );
+        // Code
+        if (filter.filter[1].plant_code.description !== '') {
+          if (filter.filter[1].plant_code.is_match_all === true) {
+            sub.andWhere('receipt_tb.code  LIKE :code ', {
+              code: `${filter.filter[1].plant_code.description}`,
+            });
+          } else {
+            sub.andWhere('receipt_tb.code  LIKE :code ', {
+              code: `%${filter.filter[1].plant_code.description}%`,
+            });
+          }
+        } else {
+          sub.andWhere('receipt_tb.code  LIKE :code ', {
+            code: `%%`,
+          });
+        }
+
+        // Import Date
+        if (
+          filter.filter[8].import_start_date.description !== '' &&
+          filter.filter[9].import_end_date.description !== ''
+        ) {
+          sub.andWhere(
+            '( import.import_date >= :importStart AND import.import_date <= :importEnd ) ',
+            {
+              importStart: filter.filter[8].import_start_date.description,
+              importEnd: filter.filter[9].import_end_date.description,
+            },
+          );
+        }
+
+        // Main Work Type
+        if (filter.filter[7].main_task.description !== '') {
+          sub.andWhere('sources_work_main_type_tb.description = :mainTask ', {
+            mainTask: filter.filter[7].main_task.description,
+          });
+        }
+        // Work Type
+        if (filter.filter[3].work_type.id !== '') {
+          sub.andWhere('import.work_type_id = :workType ', {
+            workType: filter.filter[3].work_type.id,
+          });
+        }
+
+        // Food
+        if (filter.filter[4].food.description !== '') {
+          if (filter.filter[4].food.is_match_all === true) {
+            sub.andWhere('food_plant.description  LIKE :food ', {
+              food: `${filter.filter[4].food.description}`,
+            });
+          } else {
+            sub.andWhere('food_plant.description  LIKE :food ', {
+              food: `%${filter.filter[4].food.description}%`,
+            });
+          }
+        }
+
+        // Employee
+        if (filter.filter[6].employee.id !== '') {
+          sub.andWhere('import.member_made = :employee ', {
+            employee: filter.filter[6].employee.id,
+          });
+        }
+        return sub;
       }, 'result_group')
       .leftJoin(
         Member,
@@ -122,11 +204,77 @@ export class ReportService {
         FoodPlant,
         'food_plant_tb',
         'food_plant_tb.food_id = result_group.food_plant_id',
-      )
+      );
+
+    // Code
+    if (filter.filter[1].plant_code.description !== '') {
+      if (filter.filter[1].plant_code.is_match_all === true) {
+        query.andWhere('receipt_tb.code  LIKE :code ', {
+          code: `${filter.filter[1].plant_code.description}`,
+        });
+      } else {
+        query.andWhere('receipt_tb.code  LIKE :code ', {
+          code: `%${filter.filter[1].plant_code.description}%`,
+        });
+      }
+    } else {
+      query.andWhere('receipt_tb.code  LIKE :code ', {
+        code: `%%`,
+      });
+    }
+
+    // Receipt Name
+    if (filter.filter[0].plant_name.description !== '') {
+      if (filter.filter[0].plant_name.is_match_all === true) {
+        query.andWhere('receipt_tb.name  LIKE :food ', {
+          food: `${filter.filter[0].plant_name.description}`,
+        });
+      } else {
+        query.andWhere('receipt_tb.name  LIKE :food ', {
+          food: `%${filter.filter[0].plant_name.description}%`,
+        });
+      }
+    }
+
+    // Family main
+    if (filter.filter[2].family_main.description !== '') {
+      if (filter.filter[2].family_main.is_match_all === true) {
+        query.andWhere('plant_family_main_tb.description  LIKE :familyMain ', {
+          familyMain: `${filter.filter[2].family_main.description}`,
+        });
+      } else {
+        query.andWhere('plant_family_main_tb.description  LIKE :familyMain ', {
+          familyMain: `%${filter.filter[2].family_main.description}%`,
+        });
+      }
+    }
+
+    // Customer
+    if (filter.filter[5].customer.id !== '') {
+      if (filter.filter[5].customer.is_match_all === true) {
+        query.andWhere('customer_tb.customer_id  LIKE :customer ', {
+          customer: `${filter.filter[5].customer.id}`,
+        });
+      } else {
+        query.andWhere('customer_tb.customer_id  LIKE :customer ', {
+          customer: `%${filter.filter[5].customer.id}%`,
+        });
+      }
+    }
+
+    // Employee
+    if (filter.filter[6].employee.id !== '') {
+      query.andWhere('result_group.member_made = :employee ', {
+        employee: filter.filter[6].employee.id,
+      });
+    }
+
+    query
       .orderBy('result_group.import_date', 'ASC')
       .addOrderBy('member_tb.name', 'ASC')
-      .addOrderBy('member_tb.surname', 'ASC')
-      .getRawMany();
+      .addOrderBy('member_tb.surname', 'ASC');
+
+    return query.getRawMany();
   }
 
   async getReportStock(): Promise<any> {
@@ -455,4 +603,83 @@ export class ReportService {
       .addOrderBy('receipt_tb.code', 'ASC')
       .getRawMany();
   }
+
+  getFilter = (jsonStr: string) => {
+    const jsonObj = JSON.parse(jsonStr);
+    const reportFilter = {
+      filter: [
+        {
+          plant_name: {
+            id: jsonObj[0].value.data.id,
+            description: jsonObj[0].value.data.description,
+            is_match_all: jsonObj[0].value.is_match_all,
+          },
+        },
+        {
+          plant_code: {
+            id: jsonObj[1].value.data.id,
+            description: jsonObj[1].value.data.description,
+            is_match_all: jsonObj[1].value.is_match_all,
+          },
+        },
+        {
+          family_main: {
+            id: jsonObj[2].value.data.id,
+            description: jsonObj[2].value.data.description,
+            is_match_all: jsonObj[2].value.is_match_all,
+          },
+        },
+        {
+          work_type: {
+            id: jsonObj[3].value.data.id,
+            description: jsonObj[3].value.data.description,
+            is_match_all: jsonObj[3].value.is_match_all,
+          },
+        },
+        {
+          food: {
+            id: jsonObj[4].value.data.id,
+            description: jsonObj[4].value.data.description,
+            is_match_all: jsonObj[4].value.is_match_all,
+          },
+        },
+        {
+          customer: {
+            id: jsonObj[5].value.data.id,
+            description: jsonObj[5].value.data.description,
+            is_match_all: jsonObj[5].value.is_match_all,
+          },
+        },
+        {
+          employee: {
+            id: jsonObj[6].value.data.id,
+            description: jsonObj[6].value.data.description,
+            is_match_all: jsonObj[6].value.is_match_all,
+          },
+        },
+        {
+          main_task: {
+            id: jsonObj[7].value.data.id,
+            description: jsonObj[7].value.data.description,
+            is_match_all: jsonObj[7].value.is_match_all,
+          },
+        },
+        {
+          import_start_date: {
+            id: jsonObj[8].value.data.id,
+            description: jsonObj[8].value.data.description,
+            is_match_all: jsonObj[8].value.is_match_all,
+          },
+        },
+        {
+          import_end_date: {
+            id: jsonObj[9].value.data.id,
+            description: jsonObj[9].value.data.description,
+            is_match_all: jsonObj[9].value.is_match_all,
+          },
+        },
+      ],
+    };
+    return reportFilter as FilterObject;
+  };
 }

@@ -8,6 +8,7 @@ import {
   Put,
   Query,
 } from '@nestjs/common';
+import { ReportGetInput } from './dto/report-get.input';
 import { ReportService } from './report.service';
 
 @Controller('report')
@@ -16,8 +17,8 @@ export class ReportController {
 
   @Get('production')
   @HttpCode(200)
-  async getReportProduction(): Promise<any[]> {
-    return await this.reportService.getReportProduction();
+  async getReportProduction(@Body() input: ReportGetInput): Promise<any[]> {
+    return await this.reportService.getReportProduction(input);
   }
 
   @Get('stock')
