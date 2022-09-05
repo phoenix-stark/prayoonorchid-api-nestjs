@@ -20,6 +20,7 @@ import { MemberModule } from './member/member.module';
 import { SourcesWorkTypeModule } from './sources_work_type/sources-work-type.module';
 import { SourcesPlantRemoveType } from './sources_plant_remove_type/entity/sources-plant-remove-type-entity.model';
 import { SourcesPlantRemoveTypeModule } from './sources_plant_remove_type/sources-plant-remove-type.module';
+import { MomentService } from './utils/MomentService';
 
 @Module({
   imports: [
@@ -43,6 +44,7 @@ import { SourcesPlantRemoveTypeModule } from './sources_plant_remove_type/source
       inject: [DbConfigService],
     }),
     HttpModule,
+    MomentService,
     AppConfigModule,
     ExcelModule,
     ReceiptModule,

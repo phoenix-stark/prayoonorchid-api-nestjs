@@ -13,6 +13,7 @@ import { SourcesWorkType } from 'src/sources_work_type/entity/sources-work-type-
 import { Connection, MoreThan, Repository } from 'typeorm';
 import { ReportGetInput } from './dto/report-get.input';
 import { FilterObject } from './modal/filter';
+import { ReportBottleResponse } from './modal/report-bottle.response';
 
 @Injectable()
 export class ReportService {
@@ -519,13 +520,15 @@ export class ReportService {
     return query.getRawMany();
   }
 
-  async getReportBottle(input: ReportGetInput): Promise<any> {
+  async getReportBottle(
+    input: ReportGetInput,
+  ): Promise<ReportBottleResponse[]> {
     const filter = this.getFilter(input.filter);
     const query = await this.connection
       .createQueryBuilder()
       .select('result_group.import_date', 'import_date')
-      .select('member_tb.name', 'member_name')
-      .select('member_tb.surname', 'member_surname')
+      .addSelect('member_tb.name', 'member_name')
+      .addSelect('member_tb.surname', 'member_surname')
       .addSelect('receipt_tb.code', 'receipt_code')
       .addSelect('receipt_tb.num_order', 'receipt_num_order')
       .addSelect('receipt_tb.name', 'receipt_name')

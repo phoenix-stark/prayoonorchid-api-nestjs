@@ -1,20 +1,24 @@
 import { Injectable } from '@nestjs/common';
 import { Workbook } from 'exceljs';
 import { ReceiptService } from 'src/receipt/receipt.service';
+import { ReportService } from 'src/report/report.service';
+import { MomentService } from 'src/utils/MomentService';
 import * as tmp from 'tmp';
 import { ExcelExportReportStockInput } from './dto/excel-export-report-stock.input';
+import { ReportGetInput } from './dto/report-get.input';
 @Injectable()
 export class ExcelService {
-  constructor(private readonly receiptService: ReceiptService) {}
+  constructor(
+    private readonly receiptService: ReceiptService,
+    private readonly reportService: ReportService,
+    private momentWrapper: MomentService,
+  ) {}
 
-  async exportReportBottle(input: ExcelExportReportStockInput): Promise<any> {
+  async exportReportBottle(input: ReportGetInput): Promise<any> {
+    console.log('exportReportBottle:');
+    console.log(input);
     const book = new Workbook();
     const sheet = book.addWorksheet('Sheet1');
-
-    const params = {
-      data: input.date,
-    };
-    const result = [];
 
     const data = [];
     const rows = [];
@@ -32,19 +36,23 @@ export class ExcelService {
       import_number: 'จำนวนนำเข้า',
     });
     // Add Data Row
-    for (let i = 0; i < 2000; i++) {
+    const result = await this.reportService.getReportBottle(input);
+    for (let i = 0; i < result.length; i++) {
+      const rowsDB = result[i];
       data.push({
         no: i,
-        employee_name: 'ชื่อ-นามสกุลพนักงาน',
-        date_import: '26/03/2022',
-        plant_code: 'รหัสพันธุ์ไม้',
-        order_no: 2000,
-        customer_name: 'ชื่อคู่ค้า',
-        plant_family_main: 'สายพันธุ์หลัก',
-        main_work: 'ประเภทงานหลัก',
-        type_work: 'ประเภทงาน',
-        food: 'อาหารวุ้น',
-        import_number: 1000,
+        employee_name: `${rowsDB.member_name} ${rowsDB.member_surname}`,
+        date_import: this.momentWrapper
+          .momentDate(rowsDB.import_date)
+          .format('DD/MM/YYYY'),
+        plant_code: rowsDB.receipt_code,
+        order_no: rowsDB.receipt_num_order,
+        customer_name: rowsDB.customer_name,
+        plant_family_main: rowsDB.plant_family_main,
+        main_work: rowsDB.main_work_type,
+        type_work: rowsDB.work_type,
+        food: rowsDB.food,
+        import_number: rowsDB.total_import,
       });
     }
     data.forEach((doc) => {
@@ -53,7 +61,7 @@ export class ExcelService {
     sheet.addRows(rows);
 
     // Styles Data Row
-    for (let i = 1; i <= 2000; i++) {
+    for (let i = 0; i < result.length; i++) {
       [
         `A${i + 1}`,
         `B${i + 1}`,
