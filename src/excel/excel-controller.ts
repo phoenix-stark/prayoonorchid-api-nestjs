@@ -1,4 +1,5 @@
 import {
+  Body,
   Controller,
   Get,
   Header,
@@ -12,21 +13,27 @@ import {
 import { FileInterceptor } from '@nestjs/platform-express';
 import { Response } from 'express';
 import { readFileSync } from 'fs';
+import { MomentService } from 'src/utils/MomentService';
 import { Readable } from 'stream';
 import { ExcelExportReportStockInput } from './dto/excel-export-report-stock.input';
+import { ReportGetInput } from './dto/report-get.input';
 import { ExcelService } from './excel-service';
 
 @Controller('excel')
 export class ExcelController {
-  constructor(private readonly excelService: ExcelService) {}
+  constructor(
+    private readonly excelService: ExcelService,
+    private momentWrapper: MomentService,
+  ) {}
 
   @Get('report-bottle')
   @HttpCode(200)
   @Header('Content-Type', 'text/xlsx')
   async exportReportBottle(
-    @Query() input: ExcelExportReportStockInput,
+    @Query() input: ReportGetInput,
     @Res() res: Response,
   ) {
+    console.log(input);
     const result = await this.excelService.exportReportBottle(input);
     const buffer = readFileSync(result);
 

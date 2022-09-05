@@ -18,6 +18,9 @@ import { SourcesWorkMainTypeModule } from './sources_work_main_type/sources-work
 import { SourcesWorkType } from './sources_work_type/entity/sources-work-type-entity.model';
 import { MemberModule } from './member/member.module';
 import { SourcesWorkTypeModule } from './sources_work_type/sources-work-type.module';
+import { SourcesPlantRemoveType } from './sources_plant_remove_type/entity/sources-plant-remove-type-entity.model';
+import { SourcesPlantRemoveTypeModule } from './sources_plant_remove_type/sources-plant-remove-type.module';
+import { MomentService } from './utils/MomentService';
 
 @Module({
   imports: [
@@ -41,6 +44,7 @@ import { SourcesWorkTypeModule } from './sources_work_type/sources-work-type.mod
       inject: [DbConfigService],
     }),
     HttpModule,
+    MomentService,
     AppConfigModule,
     ExcelModule,
     ReceiptModule,
@@ -53,6 +57,7 @@ import { SourcesWorkTypeModule } from './sources_work_type/sources-work-type.mod
     SourcesWorkMainTypeModule,
     SourcesWorkTypeModule,
     MemberModule,
+    SourcesPlantRemoveTypeModule,
   ],
   controllers: [AppController],
   providers: [AppService],
