@@ -33,7 +33,6 @@ export class ExcelController {
     @Query() input: ReportGetInput,
     @Res() res: Response,
   ) {
-    console.log(input);
     const result = await this.excelService.exportReportBottle(input);
     const buffer = readFileSync(result);
 
@@ -97,7 +96,7 @@ export class ExcelController {
   @HttpCode(200)
   @Header('Content-Type', 'text/xlsx')
   async exportReportProduction(
-    @Query() input: ExcelExportReportStockInput,
+    @Query() input: ReportGetInput,
     @Res() res: Response,
   ) {
     const result = await this.excelService.exportReportProduction(input);

@@ -14,6 +14,7 @@ import { Connection, MoreThan, Repository } from 'typeorm';
 import { ReportGetInput } from './dto/report-get.input';
 import { FilterObject } from './modal/filter';
 import { ReportBottleResponse } from './modal/report-bottle.response';
+import { ReportProductionResponse } from './modal/report-production.response';
 
 @Injectable()
 export class ReportService {
@@ -21,7 +22,9 @@ export class ReportService {
     @InjectConnection()
     private connection: Connection,
   ) {}
-  async getReportProduction(input: ReportGetInput): Promise<any> {
+  async getReportProduction(
+    input: ReportGetInput,
+  ): Promise<ReportProductionResponse[]> {
     const filter = this.getFilter(input.filter);
     const query = await this.connection
       .createQueryBuilder()
