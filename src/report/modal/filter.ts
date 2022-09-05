@@ -72,5 +72,12 @@ export class FilterObject {
         is_match_all: boolean;
       };
     },
+    {
+      reason_remove_type: {
+        id: string;
+        description: string;
+        is_match_all: boolean;
+      };
+    },
   ];
 }

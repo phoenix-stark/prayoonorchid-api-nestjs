@@ -41,7 +41,7 @@ export class ReportController {
 
   @Get('remove-all')
   @HttpCode(200)
-  async getReportRemoveall(): Promise<any[]> {
-    return await this.reportService.getReportRemoveall();
+  async getReportRemoveall(@Body() input: ReportGetInput): Promise<any[]> {
+    return await this.reportService.getReportRemoveall(input);
   }
 }
