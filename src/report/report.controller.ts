@@ -35,8 +35,8 @@ export class ReportController {
 
   @Get('plant-fail')
   @HttpCode(200)
-  async getReportPlantFail(): Promise<any[]> {
-    return await this.reportService.getReportPlantFail();
+  async getReportPlantFail(@Body() input: ReportGetInput): Promise<any[]> {
+    return await this.reportService.getReportPlantFail(input);
   }
 
   @Get('remove-all')
