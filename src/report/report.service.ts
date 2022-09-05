@@ -269,6 +269,11 @@ export class ReportService {
       .orderBy('result_group.import_date', 'ASC')
       .addOrderBy('member_tb.name', 'ASC')
       .addOrderBy('member_tb.surname', 'ASC');
+    if (input.page && input.per_page) {
+      const start = this.getStartIndexPage(input.page, input.per_page);
+      query.offset(start);
+      query.limit(input.per_page);
+    }
 
     return query.getRawMany();
   }
@@ -506,6 +511,11 @@ export class ReportService {
     query
       .orderBy('result_group.import_date', 'ASC')
       .addOrderBy('receipt_tb.code', 'ASC');
+    if (input.page && input.per_page) {
+      const start = this.getStartIndexPage(input.page, input.per_page);
+      query.offset(start);
+      query.limit(input.per_page);
+    }
     return query.getRawMany();
   }
 
@@ -721,6 +731,11 @@ export class ReportService {
     query
       .orderBy('result_group.import_date', 'ASC')
       .addOrderBy('receipt_tb.code', 'ASC');
+    if (input.page && input.per_page) {
+      const start = this.getStartIndexPage(input.page, input.per_page);
+      query.offset(start);
+      query.limit(input.per_page);
+    }
     return query.getRawMany();
   }
 
@@ -917,10 +932,15 @@ export class ReportService {
     query
       .orderBy('member_tb.name', 'ASC')
       .addOrderBy('member_tb.surname', 'ASC');
+    if (input.page && input.per_page) {
+      const start = this.getStartIndexPage(input.page, input.per_page);
+      query.offset(start);
+      query.limit(input.per_page);
+    }
     return query.getRawMany();
   }
 
-  async getReportRemoveall(input: ReportGetInput): Promise<any> {
+  async getReportRemoveAll(input: ReportGetInput): Promise<any> {
     const filter = this.getFilter(input.filter);
     const query = await this.connection
       .createQueryBuilder()
@@ -1166,8 +1186,17 @@ export class ReportService {
     query
       .orderBy('result_group.remove_date', 'ASC')
       .addOrderBy('receipt_tb.code', 'ASC');
+    if (input.page && input.per_page) {
+      const start = this.getStartIndexPage(input.page, input.per_page);
+      query.offset(start);
+      query.limit(input.per_page);
+    }
     return query.getRawMany();
   }
+
+  getStartIndexPage = (page: number, limit_per_page: number) => {
+    return (page - 1) * limit_per_page;
+  };
 
   getFilter = (jsonStr: string) => {
     const jsonObj = JSON.parse(jsonStr);
@@ -1245,9 +1274,11 @@ export class ReportService {
         },
         {
           reason_remove_type: {
-            id: jsonObj[10].value.data.id,
-            description: jsonObj[10].value.data.description,
-            is_match_all: jsonObj[10].value.is_match_all,
+            id: jsonObj.length > 10 ? jsonObj[10].value.data.id : '',
+            description:
+              jsonObj.length > 10 ? jsonObj[10].value.data.description : '',
+            is_match_all:
+              jsonObj.length > 10 ? jsonObj[10].value.is_match_all : false,
           },
         },
       ],
