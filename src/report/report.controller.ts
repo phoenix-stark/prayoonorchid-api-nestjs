@@ -29,8 +29,8 @@ export class ReportController {
 
   @Get('bottle')
   @HttpCode(200)
-  async getReportBottle(): Promise<any[]> {
-    return await this.reportService.getReportBottle();
+  async getReportBottle(@Body() input: ReportGetInput): Promise<any[]> {
+    return await this.reportService.getReportBottle(input);
   }
 
   @Get('plant-fail')
