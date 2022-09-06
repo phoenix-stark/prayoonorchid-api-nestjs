@@ -27,31 +27,10 @@ export class ReportService {
   ) {}
   async getReportProduction(
     input: ReportGetInput,
-  ): Promise<ReportProductionResponse[]> {
+  ): Promise<ReportProductionResponse> {
     const filter = this.getFilter(input.filter);
     const query = await this.connection
       .createQueryBuilder()
-      .select('result_group.import_date', 'import_date')
-      .addSelect('member_tb.name', 'member_name')
-      .addSelect('member_tb.surname', 'member_surname')
-      .addSelect('receipt_tb.code', 'receipt_code')
-      .addSelect('receipt_tb.num_order', 'receipt_num_order')
-      .addSelect('customer_tb.name', 'customer_name')
-      .addSelect('plant_family_main_tb.description', 'plant_family_main')
-      .addSelect('sources_work_main_type_tb.description', 'main_work_type')
-      .addSelect('sources_work_type_tb.description', 'work_type')
-      .addSelect('food_plant_tb.description', 'food')
-      .addSelect('result_group.total_import', 'total_import')
-      .addSelect('result_group.remove_type_1', 'remove_type_1')
-      .addSelect('result_group.remove_type_2', 'remove_type_2')
-      .addSelect('result_group.remove_type_3', 'remove_type_3')
-      .addSelect('result_group.remove_type_4', 'remove_type_4')
-      .addSelect('result_group.export', 'export')
-      .addSelect(
-        '(result_group.total_import - ( result_group.remove_type_1 + result_group.remove_type_2 + result_group.remove_type_3 + result_group.remove_type_4 + result_group.export )  )',
-        'summary',
-      )
-
       .from((subQuery) => {
         const sub = subQuery
           .select('import.import_date', 'import_date')
@@ -272,27 +251,15 @@ export class ReportService {
       });
     }
 
+    const queryTotal = query;
+    const totalAll = await queryTotal.select('COUNT(*)', 'total').getRawOne();
+
     query
-      .orderBy('result_group.import_date', 'ASC')
-      .addOrderBy('member_tb.name', 'ASC')
-      .addOrderBy('member_tb.surname', 'ASC');
-    if (input.page && input.per_page) {
-      const start = this.getStartIndexPage(input.page, input.per_page);
-      query.offset(start);
-      query.limit(input.per_page);
-    }
-
-    return query.getRawMany();
-  }
-
-  async getReportStock(input: ReportGetInput): Promise<ReportStockResponse[]> {
-    const filter = this.getFilter(input.filter);
-    const query = await this.connection
-      .createQueryBuilder()
       .select('result_group.import_date', 'import_date')
+      .addSelect('member_tb.name', 'member_name')
+      .addSelect('member_tb.surname', 'member_surname')
       .addSelect('receipt_tb.code', 'receipt_code')
       .addSelect('receipt_tb.num_order', 'receipt_num_order')
-      .addSelect('receipt_tb.name', 'receipt_name')
       .addSelect('customer_tb.name', 'customer_name')
       .addSelect('plant_family_main_tb.description', 'plant_family_main')
       .addSelect('sources_work_main_type_tb.description', 'main_work_type')
@@ -307,8 +274,31 @@ export class ReportService {
       .addSelect(
         '(result_group.total_import - ( result_group.remove_type_1 + result_group.remove_type_2 + result_group.remove_type_3 + result_group.remove_type_4 + result_group.export )  )',
         'summary',
-      )
+      );
 
+    query
+      .orderBy('result_group.import_date', 'ASC')
+      .addOrderBy('member_tb.name', 'ASC')
+      .addOrderBy('member_tb.surname', 'ASC');
+    if (input.page && input.per_page) {
+      const start = this.getStartIndexPage(input.page, input.per_page);
+      query.offset(start);
+      query.limit(input.per_page);
+    }
+
+    const data = await query.getRawMany();
+
+    const result = {
+      total: totalAll.total,
+      data: data,
+    } as ReportProductionResponse;
+    return result;
+  }
+
+  async getReportStock(input: ReportGetInput): Promise<ReportStockResponse> {
+    const filter = this.getFilter(input.filter);
+    const query = await this.connection
+      .createQueryBuilder()
       .from((subQuery) => {
         const sub = subQuery
           .select('LEFT(import.import_date, 7)', 'import_date')
@@ -515,28 +505,11 @@ export class ReportService {
       }
     }
 
-    query
-      .orderBy('result_group.import_date', 'ASC')
-      .addOrderBy('receipt_tb.code', 'ASC');
-    if (input.page && input.per_page) {
-      const start = this.getStartIndexPage(input.page, input.per_page);
-      query.offset(start);
-      query.limit(input.per_page);
-    }
-    return query.getRawMany();
-  }
+    const queryTotal = query;
+    const totalAll = await queryTotal.select('COUNT(*)', 'total').getRawOne();
 
-  async getReportBottle(
-    input: ReportGetInput,
-  ): Promise<ReportBottleResponse[]> {
-    console.log('input');
-    console.log(input);
-    const filter = this.getFilter(input.filter);
-    const query = await this.connection
-      .createQueryBuilder()
+    query
       .select('result_group.import_date', 'import_date')
-      .addSelect('member_tb.name', 'member_name')
-      .addSelect('member_tb.surname', 'member_surname')
       .addSelect('receipt_tb.code', 'receipt_code')
       .addSelect('receipt_tb.num_order', 'receipt_num_order')
       .addSelect('receipt_tb.name', 'receipt_name')
@@ -546,7 +519,37 @@ export class ReportService {
       .addSelect('sources_work_type_tb.description', 'work_type')
       .addSelect('food_plant_tb.description', 'food')
       .addSelect('result_group.total_import', 'total_import')
+      .addSelect('result_group.remove_type_1', 'remove_type_1')
+      .addSelect('result_group.remove_type_2', 'remove_type_2')
+      .addSelect('result_group.remove_type_3', 'remove_type_3')
+      .addSelect('result_group.remove_type_4', 'remove_type_4')
+      .addSelect('result_group.export', 'export')
+      .addSelect(
+        '(result_group.total_import - ( result_group.remove_type_1 + result_group.remove_type_2 + result_group.remove_type_3 + result_group.remove_type_4 + result_group.export )  )',
+        'summary',
+      );
 
+    query
+      .orderBy('result_group.import_date', 'ASC')
+      .addOrderBy('receipt_tb.code', 'ASC');
+    if (input.page && input.per_page) {
+      const start = this.getStartIndexPage(input.page, input.per_page);
+      query.offset(start);
+      query.limit(input.per_page);
+    }
+
+    const data = await query.getRawMany();
+    const result = {
+      total: totalAll.total,
+      data: data,
+    } as ReportStockResponse;
+    return result;
+  }
+
+  async getReportBottle(input: ReportGetInput): Promise<ReportBottleResponse> {
+    const filter = this.getFilter(input.filter);
+    const query = await this.connection
+      .createQueryBuilder()
       .from((subQuery) => {
         const sub = subQuery
           .select('import.import_date', 'import_date')
@@ -739,6 +742,24 @@ export class ReportService {
         });
       }
     }
+
+    const queryTotal = query;
+    const totalAll = await queryTotal.select('COUNT(*)', 'total').getRawOne();
+
+    query
+      .select('result_group.import_date', 'import_date')
+      .addSelect('member_tb.name', 'member_name')
+      .addSelect('member_tb.surname', 'member_surname')
+      .addSelect('receipt_tb.code', 'receipt_code')
+      .addSelect('receipt_tb.num_order', 'receipt_num_order')
+      .addSelect('receipt_tb.name', 'receipt_name')
+      .addSelect('customer_tb.name', 'customer_name')
+      .addSelect('plant_family_main_tb.description', 'plant_family_main')
+      .addSelect('sources_work_main_type_tb.description', 'main_work_type')
+      .addSelect('sources_work_type_tb.description', 'work_type')
+      .addSelect('food_plant_tb.description', 'food')
+      .addSelect('result_group.total_import', 'total_import');
+
     query
       .orderBy('result_group.import_date', 'ASC')
       .addOrderBy('receipt_tb.code', 'ASC');
@@ -747,24 +768,22 @@ export class ReportService {
       query.offset(start);
       query.limit(input.per_page);
     }
-    return query.getRawMany();
+
+    const data = await query.getRawMany();
+
+    const result = {
+      total: totalAll.total,
+      data: data,
+    } as ReportBottleResponse;
+    return result;
   }
 
   async getReportPlantFail(
     input: ReportGetInput,
-  ): Promise<ReportPlantFailResponse[]> {
+  ): Promise<ReportPlantFailResponse> {
     const filter = this.getFilter(input.filter);
     const query = await this.connection
       .createQueryBuilder()
-      .select('member_tb.name', 'member_name')
-      .addSelect('member_tb.surname', 'member_surname')
-      .addSelect('result_group.total_import', 'total_import')
-      .addSelect('result_group.remove_type_1', 'remove_type_1')
-      .addSelect('result_group.remove_type_2', 'remove_type_2')
-      .addSelect(
-        '(((result_group.remove_type_1 + result_group.remove_type_2) / result_group.total_import ) * 100)',
-        'persentage',
-      )
       .from((subQuery) => {
         const sub = subQuery
           .addSelect('import.member_made', 'member_made')
@@ -952,31 +971,36 @@ export class ReportService {
       query.offset(start);
       query.limit(input.per_page);
     }
-    return query.getRawMany();
+
+    const queryTotal = query;
+    const totalAll = await queryTotal.select('COUNT(*)', 'total').getRawOne();
+
+    query
+      .select('member_tb.name', 'member_name')
+      .addSelect('member_tb.surname', 'member_surname')
+      .addSelect('result_group.total_import', 'total_import')
+      .addSelect('result_group.remove_type_1', 'remove_type_1')
+      .addSelect('result_group.remove_type_2', 'remove_type_2')
+      .addSelect(
+        '(((result_group.remove_type_1 + result_group.remove_type_2) / result_group.total_import ) * 100)',
+        'persentage',
+      );
+
+    const data = await query.getRawMany();
+
+    const result = {
+      total: totalAll.total,
+      data: data,
+    } as ReportPlantFailResponse;
+    return result;
   }
 
   async getReportRemoveAll(
     input: ReportGetInput,
-  ): Promise<ReportRemoveAllResponse[]> {
+  ): Promise<ReportRemoveAllResponse> {
     const filter = this.getFilter(input.filter);
     const query = await this.connection
       .createQueryBuilder()
-      .select('member_tb.name', 'member_name')
-      .addSelect('member_tb.surname', 'member_surname')
-      .addSelect('result_group.import_date', 'import_date')
-      .addSelect('result_group.remove_date', 'remove_date')
-      .addSelect('create_member_tb.name', 'create_member_name')
-      .addSelect('create_member_tb.surname', 'create_member_surname')
-      .addSelect('receipt_tb.code', 'receipt_code')
-      .addSelect('receipt_tb.num_order', 'receipt_num_order')
-      .addSelect('receipt_tb.name', 'receipt_name')
-      .addSelect('customer_tb.name', 'customer_name')
-      .addSelect('plant_family_main_tb.description', 'plant_family_main')
-      .addSelect('sources_work_main_type_tb.description', 'main_work_type')
-      .addSelect('sources_work_type_tb.description', 'work_type')
-      .addSelect('sources_plant_remove_type_tb.description', 'description')
-      .addSelect('result_group.total', 'total')
-
       .from((subQuery) => {
         const sub = subQuery
           .select('import.import_date', 'import_date')
@@ -1197,6 +1221,26 @@ export class ReportService {
       });
     }
 
+    const queryTotal = query;
+    const totalAll = await queryTotal.select('COUNT(*)', 'total').getRawOne();
+
+    query
+      .select('member_tb.name', 'member_name')
+      .addSelect('member_tb.surname', 'member_surname')
+      .addSelect('result_group.import_date', 'import_date')
+      .addSelect('result_group.remove_date', 'remove_date')
+      .addSelect('create_member_tb.name', 'create_member_name')
+      .addSelect('create_member_tb.surname', 'create_member_surname')
+      .addSelect('receipt_tb.code', 'receipt_code')
+      .addSelect('receipt_tb.num_order', 'receipt_num_order')
+      .addSelect('receipt_tb.name', 'receipt_name')
+      .addSelect('customer_tb.name', 'customer_name')
+      .addSelect('plant_family_main_tb.description', 'plant_family_main')
+      .addSelect('sources_work_main_type_tb.description', 'main_work_type')
+      .addSelect('sources_work_type_tb.description', 'work_type')
+      .addSelect('sources_plant_remove_type_tb.description', 'description')
+      .addSelect('result_group.total', 'total');
+
     query
       .orderBy('result_group.remove_date', 'ASC')
       .addOrderBy('receipt_tb.code', 'ASC');
@@ -1205,7 +1249,13 @@ export class ReportService {
       query.offset(start);
       query.limit(input.per_page);
     }
-    return query.getRawMany();
+    const data = await query.getRawMany();
+
+    const result = {
+      total: totalAll.total,
+      data: data,
+    } as ReportRemoveAllResponse;
+    return result;
   }
 
   getStartIndexPage = (page: number, limit_per_page: number) => {

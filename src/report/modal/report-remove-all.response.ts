@@ -1,7 +1,11 @@
 import { IsNotEmpty, IsNumber } from 'class-validator';
 
 export class ReportRemoveAllResponse {
-  receipt_num_order: number;
+  total: number;
+  data: ReportRemoveAllData[];
+}
+
+export class ReportRemoveAllData {
   receipt_code: string;
   receipt_name: string;
   customer_name: string;

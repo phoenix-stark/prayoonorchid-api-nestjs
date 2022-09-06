@@ -1,6 +1,11 @@
 import { IsNotEmpty, IsNumber } from 'class-validator';
 
 export class ReportPlantFailResponse {
+  total: number;
+  data: ReportPlantFailData[];
+}
+
+export class ReportPlantFailData {
   member_name: string;
   member_surname: string;
   total_import: number;

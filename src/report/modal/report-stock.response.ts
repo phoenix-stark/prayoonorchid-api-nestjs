@@ -1,6 +1,11 @@
 import { IsNotEmpty, IsNumber } from 'class-validator';
 
 export class ReportStockResponse {
+  total: number;
+  data: ReportStockData[];
+}
+
+export class ReportStockData {
   receipt_num_order: string;
   receipt_code: string;
   receipt_name: string;

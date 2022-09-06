@@ -35,8 +35,8 @@ export class ExcelService {
     });
     // Add Data Row
     const result = await this.reportService.getReportBottle(input);
-    for (let i = 0; i < result.length; i++) {
-      const rowsDB = result[i];
+    for (let i = 0; i < result.data.length; i++) {
+      const rowsDB = result.data[i];
       data.push({
         no: i,
         employee_name: `${rowsDB.member_name} ${rowsDB.member_surname}`,
@@ -59,7 +59,7 @@ export class ExcelService {
     sheet.addRows(rows);
 
     // Styles Data Row
-    for (let i = 0; i < result.length + 1; i++) {
+    for (let i = 0; i < result.data.length + 1; i++) {
       [
         `A${i + 1}`,
         `B${i + 1}`,
@@ -193,8 +193,8 @@ export class ExcelService {
     });
     // Add Data Row
     const result = await this.reportService.getReportRemoveAll(input);
-    for (let i = 0; i < result.length; i++) {
-      const rowsDB = result[i];
+    for (let i = 0; i < result.data.length; i++) {
+      const rowsDB = result.data[i];
       data.push({
         no: i,
         date_export: this.momentWrapper
@@ -222,7 +222,7 @@ export class ExcelService {
     sheet.addRows(rows);
 
     // Styles Data Row
-    for (let i = 1; i <= 2000; i++) {
+    for (let i = 1; i <= result.data.length + 1; i++) {
       [
         `A${i + 1}`,
         `B${i + 1}`,
@@ -382,8 +382,8 @@ export class ExcelService {
     });
     // Add Data Row
     const result = await this.reportService.getReportStock(input);
-    for (let i = 0; i < result.length; i++) {
-      const rowsDB = result[i];
+    for (let i = 0; i < result.data.length; i++) {
+      const rowsDB = result.data[i];
       data.push({
         no: i,
         date_import: this.momentWrapper
@@ -413,7 +413,7 @@ export class ExcelService {
     sheet.addRows(rows);
 
     // Styles Data Row
-    for (let i = 2; i <= result.length + 1; i++) {
+    for (let i = 2; i <= result.data.length + 1; i++) {
       [
         `A${i + 1}`,
         `B${i + 1}`,
@@ -585,8 +585,8 @@ export class ExcelService {
 
     // Add Data Row
     const result = await this.reportService.getReportProduction(input);
-    for (let i = 0; i < result.length; i++) {
-      const rowsDB = result[i];
+    for (let i = 0; i < result.data.length; i++) {
+      const rowsDB = result.data[i];
       data.push({
         no: i,
         employee_name: `${rowsDB.member_name} ${rowsDB.member_surname}`,
@@ -616,7 +616,7 @@ export class ExcelService {
     sheet.addRows(rows);
 
     // Styles Data Row
-    for (let i = 2; i <= result.length + 1; i++) {
+    for (let i = 2; i <= result.data.length + 1; i++) {
       [
         `A${i + 1}`,
         `B${i + 1}`,
@@ -775,8 +775,8 @@ export class ExcelService {
       percentage: '% ขึ้นราเทียบกับจำนวนทำ',
     });
     const result = await this.reportService.getReportPlantFail(input);
-    for (let i = 0; i < result.length; i++) {
-      const rowsDB = result[i];
+    for (let i = 0; i < result.data.length; i++) {
+      const rowsDB = result.data[i];
       data.push({
         no: i,
         employee_name: `${rowsDB.member_name} ${rowsDB.member_surname}`,
@@ -793,7 +793,7 @@ export class ExcelService {
     sheet.addRows(rows);
 
     // Styles Data Row
-    for (let i = 2; i <= result.length + 1; i++) {
+    for (let i = 2; i <= result.data.length + 1; i++) {
       [
         `A${i + 1}`,
         `B${i + 1}`,
