@@ -1,6 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { Workbook } from 'exceljs';
+import moment from 'moment-timezone';
 import { ReceiptService } from 'src/receipt/receipt.service';
+import { FilterObject } from 'src/report/modal/filter';
 import { ReportService } from 'src/report/report.service';
 import { MomentService } from 'src/utils/MomentService';
 import * as tmp from 'tmp';
@@ -17,6 +19,24 @@ export class ExcelService {
   async exportReportBottle(input: ReportGetInput): Promise<any> {
     const book = new Workbook();
     const sheet = book.addWorksheet('Sheet1');
+
+    const filter = this.getFilter(input.filter);
+    sheet.mergeCells('A1:K1');
+    sheet.getCell('A1').value = `วันที่นำออกเริ่มต้น: ${this.momentWrapper
+      .momentDate(filter.filter[8].import_start_date.description)
+      .format('DD/MM/YYYY')}, วันที่นำออกสิ้นสุด: ${this.momentWrapper
+      .momentDate(filter.filter[9].import_end_date.description)
+      .format('DD/MM/YYYY')}, รหัสพันธุ์ไม้: ${
+      filter.filter[1].plant_code.description
+    } ชื่อพันธุ์ไม้: ${
+      filter.filter[0].plant_name.description
+    }  สายพันธุ์หลัก: ${
+      filter.filter[2].family_main.description
+    } ประเภทงานหลัก: ${filter.filter[7].main_task.description} ชื่อคู่ค้า: ${
+      filter.filter[5].customer.description
+    } อาหารวุ้น: ${filter.filter[4].food.description} ชื่อ-นามสกุลพนักงาน: ${
+      filter.filter[6].employee.description
+    }`;
 
     const data = [];
     const rows = [];
@@ -59,7 +79,7 @@ export class ExcelService {
     sheet.addRows(rows);
 
     // Styles Data Row
-    for (let i = 0; i < result.data.length + 1; i++) {
+    for (let i = 2; i < result.data.length + 1; i++) {
       [
         `A${i + 1}`,
         `B${i + 1}`,
@@ -125,7 +145,7 @@ export class ExcelService {
     });
 
     // Header
-    ['A1', 'B1', 'C1', 'D1', 'E1', 'F1', 'G1', 'H1', 'I1', 'J1', 'K1'].map(
+    ['A2', 'B2', 'C2', 'D2', 'E2', 'F2', 'G2', 'H2', 'I2', 'J2', 'K2'].map(
       (cell) => {
         sheet.getCell(cell).style = {
           font: {
@@ -143,6 +163,8 @@ export class ExcelService {
         };
       },
     );
+
+    sheet.getCell('A1').alignment = { horizontal: 'left' };
 
     // Write Excel
     const file = new Promise((resolve, reject) => {
@@ -172,7 +194,23 @@ export class ExcelService {
   async exportReportRemoveAll(input: ReportGetInput): Promise<any> {
     const book = new Workbook();
     const sheet = book.addWorksheet('Sheet1');
-
+    const filter = this.getFilter(input.filter);
+    sheet.mergeCells('A1:N1');
+    sheet.getCell('A1').value = `วันที่นำออกเริ่มต้น: ${this.momentWrapper
+      .momentDate(filter.filter[8].import_start_date.description)
+      .format('DD/MM/YYYY')}, วันที่นำออกสิ้นสุด: ${this.momentWrapper
+      .momentDate(filter.filter[9].import_end_date.description)
+      .format('DD/MM/YYYY')}, รหัสพันธุ์ไม้: ${
+      filter.filter[1].plant_code.description
+    } ชื่อพันธุ์ไม้: ${
+      filter.filter[0].plant_name.description
+    }  สายพันธุ์หลัก: ${
+      filter.filter[2].family_main.description
+    } ประเภทงานหลัก: ${filter.filter[7].main_task.description} ชื่อคู่ค้า: ${
+      filter.filter[5].customer.description
+    } อาหารวุ้น: ${filter.filter[4].food.description} ชื่อ-นามสกุลพนักงาน: ${
+      filter.filter[6].employee.description
+    } สาเหตุการนำออก ${filter.filter[10].reason_remove_type.description}`;
     const data = [];
     const rows = [];
     data.push({
@@ -222,7 +260,7 @@ export class ExcelService {
     sheet.addRows(rows);
 
     // Styles Data Row
-    for (let i = 1; i <= result.data.length + 1; i++) {
+    for (let i = 2; i <= result.data.length + 1; i++) {
       [
         `A${i + 1}`,
         `B${i + 1}`,
@@ -295,20 +333,20 @@ export class ExcelService {
 
     // Header
     [
-      'A1',
-      'B1',
-      'C1',
-      'D1',
-      'E1',
-      'F1',
-      'G1',
-      'H1',
-      'I1',
-      'J1',
-      'K1',
-      'L1',
-      'M1',
-      'N1',
+      'A2',
+      'B2',
+      'C2',
+      'D2',
+      'E2',
+      'F2',
+      'G2',
+      'H2',
+      'I2',
+      'J2',
+      'K2',
+      'L2',
+      'M2',
+      'N2',
     ].map((cell) => {
       sheet.getCell(cell).style = {
         font: {
@@ -325,6 +363,7 @@ export class ExcelService {
         },
       };
     });
+    sheet.getCell('A1').alignment = { horizontal: 'left' };
 
     // Write Excel
     const file = new Promise((resolve, reject) => {
@@ -354,10 +393,24 @@ export class ExcelService {
   async exportReportStock(input: ReportGetInput): Promise<any> {
     const book = new Workbook();
     const sheet = book.addWorksheet('Sheet1');
+    const filter = this.getFilter(input.filter);
 
     sheet.mergeCells('A1:Q1');
-    sheet.getCell('A1').value =
-      ' วันที่นำเข้าเริ่มต้น: 01/01/2021, วันที่นำเข้าสิ้นสุด: 02/10/2021 รหัสพันธุ์ไม้: POF-%, ชื่อพันธุ์ไม้: - สายพันธุ์หลัก: -, ประเภทงานหลัก: - ชื่อคู่ค้า: - อาหารวุ้น: -				';
+    sheet.getCell('A1').value = `วันที่นำเข้าเริ่มต้น: ${this.momentWrapper
+      .momentDate(filter.filter[8].import_start_date.description)
+      .format('DD/MM/YYYY')}, วันที่นำเข้าสิ้นสุด: ${this.momentWrapper
+      .momentDate(filter.filter[9].import_end_date.description)
+      .format('DD/MM/YYYY')}, รหัสพันธุ์ไม้: ${
+      filter.filter[1].plant_code.description
+    } ชื่อพันธุ์ไม้: ${
+      filter.filter[0].plant_name.description
+    }  สายพันธุ์หลัก: ${
+      filter.filter[2].family_main.description
+    } ประเภทงานหลัก: ${filter.filter[7].main_task.description} ชื่อคู่ค้า: ${
+      filter.filter[5].customer.description
+    } อาหารวุ้น: ${filter.filter[4].food.description} ชื่อ-นามสกุลพนักงาน: ${
+      filter.filter[6].employee.description
+    }`;
 
     const data = [];
     const rows = [];
@@ -556,10 +609,23 @@ export class ExcelService {
   async exportReportProduction(input: ReportGetInput): Promise<any> {
     const book = new Workbook();
     const sheet = book.addWorksheet('Sheet1');
-
+    const filter = this.getFilter(input.filter);
     sheet.mergeCells('A1:Q1');
-    sheet.getCell('A1').value =
-      'วันที่นำเข้าเริ่มต้น: 01/01/2021, วันที่นำเข้าสิ้นสุด: 02/10/2021, รหัสพันธุ์ไม้: TBH-% ชื่อพันธุ์ไม้: - สายพันธุ์หลัก: - ประเภทงานหลัก: - ชื่อคู่ค้า: - อาหารวุ้น: - ชื่อ-นามสกุลพนักงาน: -													';
+    sheet.getCell('A1').value = `วันที่นำเข้าเริ่มต้น: ${this.momentWrapper
+      .momentDate(filter.filter[8].import_start_date.description)
+      .format('DD/MM/YYYY')}, วันที่นำเข้าสิ้นสุด: ${this.momentWrapper
+      .momentDate(filter.filter[9].import_end_date.description)
+      .format('DD/MM/YYYY')}, รหัสพันธุ์ไม้: ${
+      filter.filter[1].plant_code.description
+    } ชื่อพันธุ์ไม้: ${
+      filter.filter[0].plant_name.description
+    }  สายพันธุ์หลัก: ${
+      filter.filter[2].family_main.description
+    } ประเภทงานหลัก: ${filter.filter[7].main_task.description} ชื่อคู่ค้า: ${
+      filter.filter[5].customer.description
+    } อาหารวุ้น: ${filter.filter[4].food.description} ชื่อ-นามสกุลพนักงาน: ${
+      filter.filter[6].employee.description
+    }`;
 
     const data = [];
     const rows = [];
@@ -759,10 +825,23 @@ export class ExcelService {
   async exportReportFail(input: ReportGetInput): Promise<any> {
     const book = new Workbook();
     const sheet = book.addWorksheet('Sheet1');
-
+    const filter = this.getFilter(input.filter);
     sheet.mergeCells('A1:F1');
-    sheet.getCell('A1').value =
-      'วันที่นำออกเริ่มต้น: 01/05/2022, วันที่นำออกสิ้นสุด: 05/07/2022, ชื่อ - นามสกุลพนักงาน: -';
+    sheet.getCell('A1').value = `วันที่นำออกเริ่มต้น: ${this.momentWrapper
+      .momentDate(filter.filter[8].import_start_date.description)
+      .format('DD/MM/YYYY')}, วันที่นำออกสิ้นสุด: ${this.momentWrapper
+      .momentDate(filter.filter[9].import_end_date.description)
+      .format('DD/MM/YYYY')}, รหัสพันธุ์ไม้: ${
+      filter.filter[1].plant_code.description
+    } ชื่อพันธุ์ไม้: ${
+      filter.filter[0].plant_name.description
+    }  สายพันธุ์หลัก: ${
+      filter.filter[2].family_main.description
+    } ประเภทงานหลัก: ${filter.filter[7].main_task.description} ชื่อคู่ค้า: ${
+      filter.filter[5].customer.description
+    } อาหารวุ้น: ${filter.filter[4].food.description} ชื่อ-นามสกุลพนักงาน: ${
+      filter.filter[6].employee.description
+    }`;
 
     const data = [];
     const rows = [];
@@ -1012,4 +1091,91 @@ export class ExcelService {
     });
     return file;
   }
+  getFilter = (jsonStr: string) => {
+    const jsonObj = JSON.parse(jsonStr);
+    const reportFilter = {
+      filter: [
+        {
+          plant_name: {
+            id: jsonObj[0].value.data.id,
+            description: jsonObj[0].value.data.description,
+            is_match_all: jsonObj[0].value.is_match_all,
+          },
+        },
+        {
+          plant_code: {
+            id: jsonObj[1].value.data.id,
+            description: jsonObj[1].value.data.description,
+            is_match_all: jsonObj[1].value.is_match_all,
+          },
+        },
+        {
+          family_main: {
+            id: jsonObj[2].value.data.id,
+            description: jsonObj[2].value.data.description,
+            is_match_all: jsonObj[2].value.is_match_all,
+          },
+        },
+        {
+          work_type: {
+            id: jsonObj[3].value.data.id,
+            description: jsonObj[3].value.data.description,
+            is_match_all: jsonObj[3].value.is_match_all,
+          },
+        },
+        {
+          food: {
+            id: jsonObj[4].value.data.id,
+            description: jsonObj[4].value.data.description,
+            is_match_all: jsonObj[4].value.is_match_all,
+          },
+        },
+        {
+          customer: {
+            id: jsonObj[5].value.data.id,
+            description: jsonObj[5].value.data.description,
+            is_match_all: jsonObj[5].value.is_match_all,
+          },
+        },
+        {
+          employee: {
+            id: jsonObj[6].value.data.id,
+            description: jsonObj[6].value.data.description,
+            is_match_all: jsonObj[6].value.is_match_all,
+          },
+        },
+        {
+          main_task: {
+            id: jsonObj[7].value.data.id,
+            description: jsonObj[7].value.data.description,
+            is_match_all: jsonObj[7].value.is_match_all,
+          },
+        },
+        {
+          import_start_date: {
+            id: jsonObj[8].value.data.id,
+            description: jsonObj[8].value.data.description,
+            is_match_all: jsonObj[8].value.is_match_all,
+          },
+        },
+        {
+          import_end_date: {
+            id: jsonObj[9].value.data.id,
+            description: jsonObj[9].value.data.description,
+            is_match_all: jsonObj[9].value.is_match_all,
+          },
+        },
+        {
+          reason_remove_type: {
+            id: jsonObj.length > 10 ? jsonObj[10].value.data.id : '',
+            description:
+              jsonObj.length > 10 ? jsonObj[10].value.data.description : '',
+            is_match_all:
+              jsonObj.length > 10 ? jsonObj[10].value.is_match_all : false,
+          },
+        },
+      ],
+    };
+    return reportFilter as FilterObject;
+  };
 }
