@@ -15,33 +15,33 @@ import { ReportService } from './report.service';
 export class ReportController {
   constructor(private readonly reportService: ReportService) {}
 
-  @Get('production')
+  @Post('production')
   @HttpCode(200)
-  async getReportProduction(@Body() input: ReportGetInput): Promise<any[]> {
+  async getReportProduction(@Body() input: ReportGetInput): Promise<any> {
     return await this.reportService.getReportProduction(input);
   }
 
-  @Get('stock')
+  @Post('stock')
   @HttpCode(200)
-  async getReportStock(@Body() input: ReportGetInput): Promise<any[]> {
+  async getReportStock(@Body() input: ReportGetInput): Promise<any> {
     return await this.reportService.getReportStock(input);
   }
 
-  @Get('bottle')
+  @Post('bottle')
   @HttpCode(200)
-  async getReportBottle(@Body() input: ReportGetInput): Promise<any[]> {
+  async getReportBottle(@Body() input: ReportGetInput): Promise<any> {
     return await this.reportService.getReportBottle(input);
   }
 
-  @Get('plant-fail')
+  @Post('plant-fail')
   @HttpCode(200)
-  async getReportPlantFail(@Body() input: ReportGetInput): Promise<any[]> {
+  async getReportPlantFail(@Body() input: ReportGetInput): Promise<any> {
     return await this.reportService.getReportPlantFail(input);
   }
 
-  @Get('remove-all')
+  @Post('remove-all')
   @HttpCode(200)
-  async getReportRemoveAll(@Body() input: ReportGetInput): Promise<any[]> {
+  async getReportRemoveAll(@Body() input: ReportGetInput): Promise<any> {
     return await this.reportService.getReportRemoveAll(input);
   }
 }
