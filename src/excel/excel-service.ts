@@ -58,7 +58,7 @@ export class ExcelService {
     for (let i = 0; i < result.data.length; i++) {
       const rowsDB = result.data[i];
       data.push({
-        no: i,
+        no: i + 1,
         employee_name: `${rowsDB.member_name} ${rowsDB.member_surname}`,
         date_import: this.momentWrapper
           .momentDate(rowsDB.import_date)
@@ -234,7 +234,7 @@ export class ExcelService {
     for (let i = 0; i < result.data.length; i++) {
       const rowsDB = result.data[i];
       data.push({
-        no: i,
+        no: i + 1,
         date_export: this.momentWrapper
           .momentDate(rowsDB.remove_date)
           .format('DD/MM/YYYY'),
@@ -438,7 +438,7 @@ export class ExcelService {
     for (let i = 0; i < result.data.length; i++) {
       const rowsDB = result.data[i];
       data.push({
-        no: i,
+        no: i + 1,
         date_import: this.momentWrapper
           .momentDate(rowsDB.import_date)
           .format('MMM-YY'),
@@ -654,7 +654,7 @@ export class ExcelService {
     for (let i = 0; i < result.data.length; i++) {
       const rowsDB = result.data[i];
       data.push({
-        no: i,
+        no: i + 1,
         employee_name: `${rowsDB.member_name} ${rowsDB.member_surname}`,
         date_import: this.momentWrapper
           .momentDate(rowsDB.import_date)
@@ -857,7 +857,7 @@ export class ExcelService {
     for (let i = 0; i < result.data.length; i++) {
       const rowsDB = result.data[i];
       data.push({
-        no: i,
+        no: i + 1,
         employee_name: `${rowsDB.member_name} ${rowsDB.member_surname}`,
         total_break: rowsDB.remove_type_1,
         total_mold: rowsDB.remove_type_2,
