@@ -14,7 +14,10 @@ import { Connection, MoreThan, Repository } from 'typeorm';
 import { ReportGetInput } from './dto/report-get.input';
 import { FilterObject } from './modal/filter';
 import { ReportBottleResponse } from './modal/report-bottle.response';
+import { ReportPlantFailResponse } from './modal/report-plant-fail.response';
 import { ReportProductionResponse } from './modal/report-production.response';
+import { ReportRemoveAllResponse } from './modal/report-remove-all.response';
+import { ReportStockResponse } from './modal/report-stock.response';
 
 @Injectable()
 export class ReportService {
@@ -282,7 +285,7 @@ export class ReportService {
     return query.getRawMany();
   }
 
-  async getReportStock(input: ReportGetInput): Promise<any> {
+  async getReportStock(input: ReportGetInput): Promise<ReportStockResponse[]> {
     const filter = this.getFilter(input.filter);
     const query = await this.connection
       .createQueryBuilder()
@@ -526,6 +529,8 @@ export class ReportService {
   async getReportBottle(
     input: ReportGetInput,
   ): Promise<ReportBottleResponse[]> {
+    console.log('input');
+    console.log(input);
     const filter = this.getFilter(input.filter);
     const query = await this.connection
       .createQueryBuilder()
@@ -745,13 +750,17 @@ export class ReportService {
     return query.getRawMany();
   }
 
-  async getReportPlantFail(input: ReportGetInput): Promise<any> {
+  async getReportPlantFail(
+    input: ReportGetInput,
+  ): Promise<ReportPlantFailResponse[]> {
     const filter = this.getFilter(input.filter);
     const query = await this.connection
       .createQueryBuilder()
       .select('member_tb.name', 'member_name')
-      .select('member_tb.surname', 'member_surname')
+      .addSelect('member_tb.surname', 'member_surname')
       .addSelect('result_group.total_import', 'total_import')
+      .addSelect('result_group.remove_type_1', 'remove_type_1')
+      .addSelect('result_group.remove_type_2', 'remove_type_2')
       .addSelect(
         '(((result_group.remove_type_1 + result_group.remove_type_2) / result_group.total_import ) * 100)',
         'persentage',
@@ -946,12 +955,14 @@ export class ReportService {
     return query.getRawMany();
   }
 
-  async getReportRemoveAll(input: ReportGetInput): Promise<any> {
+  async getReportRemoveAll(
+    input: ReportGetInput,
+  ): Promise<ReportRemoveAllResponse[]> {
     const filter = this.getFilter(input.filter);
     const query = await this.connection
       .createQueryBuilder()
       .select('member_tb.name', 'member_name')
-      .select('member_tb.surname', 'member_surname')
+      .addSelect('member_tb.surname', 'member_surname')
       .addSelect('result_group.import_date', 'import_date')
       .addSelect('result_group.remove_date', 'remove_date')
       .addSelect('create_member_tb.name', 'create_member_name')
@@ -963,10 +974,7 @@ export class ReportService {
       .addSelect('plant_family_main_tb.description', 'plant_family_main')
       .addSelect('sources_work_main_type_tb.description', 'main_work_type')
       .addSelect('sources_work_type_tb.description', 'work_type')
-      .addSelect(
-        'sources_plant_remove_type_tb.description',
-        'sources_plant_remove_type',
-      )
+      .addSelect('sources_plant_remove_type_tb.description', 'description')
       .addSelect('result_group.total', 'total')
 
       .from((subQuery) => {

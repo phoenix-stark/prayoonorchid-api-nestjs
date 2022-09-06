@@ -59,7 +59,7 @@ export class ExcelService {
     sheet.addRows(rows);
 
     // Styles Data Row
-    for (let i = 0; i < result.length; i++) {
+    for (let i = 0; i < result.length + 1; i++) {
       [
         `A${i + 1}`,
         `B${i + 1}`,
@@ -169,16 +169,10 @@ export class ExcelService {
     return file;
   }
 
-  async exportReportRemoveAll(
-    input: ExcelExportReportStockInput,
-  ): Promise<any> {
+  async exportReportRemoveAll(input: ReportGetInput): Promise<any> {
     const book = new Workbook();
     const sheet = book.addWorksheet('Sheet1');
 
-    const params = {
-      data: input.date,
-    };
-    const result = [];
     const data = [];
     const rows = [];
     data.push({
@@ -198,22 +192,28 @@ export class ExcelService {
       employee_export: 'ผู้ใช้งานที่ยิงออก',
     });
     // Add Data Row
-    for (let i = 0; i < 2000; i++) {
+    const result = await this.reportService.getReportRemoveAll(input);
+    for (let i = 0; i < result.length; i++) {
+      const rowsDB = result[i];
       data.push({
         no: i,
-        date_export: '30/5/2022',
-        date_import: '3/12/2022',
-        plant_code: 'รหัสพันธุ์ไม้',
-        plant_name: 'ชื่อพันธุ์ไม้',
-        plant_family_main: 'สายพันธุ์หลัก',
-        customer_name: 'ชื่อคู่ค้า',
-        send_to: 'ส่งให้กับ',
-        employee_name: 'ชื่อ - นามสกุล พนักงาน',
-        main_work: 'ประเภทงานหลัก',
-        type_work: 'ประเภทงาน',
-        export_number: 10000,
-        export_type: 'ประเภทนำออก',
-        employee_export: 'ผู้ใช้งานที่ยิงออก',
+        date_export: this.momentWrapper
+          .momentDate(rowsDB.remove_date)
+          .format('DD/MM/YYYY'),
+        date_import: this.momentWrapper
+          .momentDate(rowsDB.import_date)
+          .format('DD/MM/YYYY'),
+        plant_code: rowsDB.receipt_code,
+        plant_name: rowsDB.receipt_name,
+        plant_family_main: rowsDB.plant_family_main,
+        customer_name: rowsDB.customer_name,
+        send_to: '',
+        employee_name: `${rowsDB.member_name} ${rowsDB.member_surname}`,
+        main_work: rowsDB.main_work_type,
+        type_work: rowsDB.work_type,
+        export_number: rowsDB.total,
+        export_type: rowsDB.description,
+        employee_export: `${rowsDB.create_member_name} ${rowsDB.create_member_surname}`,
       });
     }
     data.forEach((doc) => {
@@ -351,16 +351,11 @@ export class ExcelService {
     return file;
   }
 
-  async exportReportStock(input: ExcelExportReportStockInput): Promise<any> {
+  async exportReportStock(input: ReportGetInput): Promise<any> {
     const book = new Workbook();
     const sheet = book.addWorksheet('Sheet1');
 
-    const params = {
-      data: input.date,
-    };
-    const result = [];
-
-    sheet.mergeCells('A1:P1');
+    sheet.mergeCells('A1:Q1');
     sheet.getCell('A1').value =
       ' วันที่นำเข้าเริ่มต้น: 01/01/2021, วันที่นำเข้าสิ้นสุด: 02/10/2021 รหัสพันธุ์ไม้: POF-%, ชื่อพันธุ์ไม้: - สายพันธุ์หลัก: -, ประเภทงานหลัก: - ชื่อคู่ค้า: - อาหารวุ้น: -				';
 
@@ -377,32 +372,38 @@ export class ExcelService {
       type_work: 'ประเภทงาน',
       food: 'อาหารวุ้น',
       import_number: 'จำนวนนำเข้า',
-      export_number_n: 'N',
       export_number_f: 'F',
       export_number_b: 'B',
+      export_number_n: 'N',
+      export_number_c: 'C',
       export_number_d: 'D',
       total_bottle: 'จำนวนคงเหลือขวด',
       total_plant: 'จำนวนคงเหลือต้น',
     });
     // Add Data Row
-    for (let i = 0; i < 2000; i++) {
+    const result = await this.reportService.getReportStock(input);
+    for (let i = 0; i < result.length; i++) {
+      const rowsDB = result[i];
       data.push({
         no: i,
-        date_import: 'Jan-22',
-        plant_code: 'รหัสพันธุ์ไม้',
-        customer_name: 'ชื่อคู่ค้า',
-        plant_family_main: 'สายพันธุ์หลัก',
-        plant_name: 'ชื่อพันธุ์ไม้',
-        main_work: 'ประเภทงานหลัก',
-        type_work: 'ประเภทงาน',
-        food: 'อาหารวุ้น',
-        import_number: 'จำนวนนำเข้า',
-        export_number_n: 1000,
-        export_number_f: 2000,
-        export_number_b: 3000,
-        export_number_d: 4000,
-        total_bottle: 1000,
-        total_plant: 1000,
+        date_import: this.momentWrapper
+          .momentDate(rowsDB.import_date)
+          .format('MMM-YY'),
+        plant_code: rowsDB.receipt_code,
+        customer_name: rowsDB.customer_name,
+        plant_family_main: rowsDB.plant_family_main,
+        plant_name: rowsDB.receipt_name,
+        main_work: rowsDB.main_work_type,
+        type_work: rowsDB.work_type,
+        food: rowsDB.food,
+        import_number: rowsDB.total_import,
+        export_number_f: rowsDB.remove_type_1,
+        export_number_b: rowsDB.remove_type_2,
+        export_number_n: rowsDB.remove_type_3,
+        export_number_c: rowsDB.remove_type_4,
+        export_number_d: rowsDB.export,
+        total_bottle: rowsDB.summary,
+        total_plant: 0,
       });
     }
 
@@ -412,7 +413,7 @@ export class ExcelService {
     sheet.addRows(rows);
 
     // Styles Data Row
-    for (let i = 2; i <= 2000 + 1; i++) {
+    for (let i = 2; i <= result.length + 1; i++) {
       [
         `A${i + 1}`,
         `B${i + 1}`,
@@ -430,6 +431,7 @@ export class ExcelService {
         `N${i + 1}`,
         `O${i + 1}`,
         `P${i + 1}`,
+        `Q${i + 1}`,
       ].map((cell) => {
         sheet.getCell(cell).style = {
           border: {
@@ -460,6 +462,7 @@ export class ExcelService {
       { key: 'N', width: 10, align: 'center' },
       { key: 'O', width: 15, align: 'center' },
       { key: 'P', width: 20, align: 'center' },
+      { key: 'Q', width: 20, align: 'center' },
     ];
 
     // Column Row Data
@@ -505,6 +508,7 @@ export class ExcelService {
       'N2',
       'O2',
       'P2',
+      'Q2',
     ].map((cell) => {
       sheet.getCell(cell).style = {
         font: {
@@ -579,8 +583,8 @@ export class ExcelService {
       total_bottle: 'จำนวนคงเหลือ',
     });
 
-    const result = await this.reportService.getReportProduction(input);
     // Add Data Row
+    const result = await this.reportService.getReportProduction(input);
     for (let i = 0; i < result.length; i++) {
       const rowsDB = result[i];
       data.push({
@@ -612,7 +616,7 @@ export class ExcelService {
     sheet.addRows(rows);
 
     // Styles Data Row
-    for (let i = 2; i <= 2000 + 1; i++) {
+    for (let i = 2; i <= result.length + 1; i++) {
       [
         `A${i + 1}`,
         `B${i + 1}`,
@@ -752,14 +756,9 @@ export class ExcelService {
     return file;
   }
 
-  async exportReportFail(input: ExcelExportReportStockInput): Promise<any> {
+  async exportReportFail(input: ReportGetInput): Promise<any> {
     const book = new Workbook();
     const sheet = book.addWorksheet('Sheet1');
-
-    const params = {
-      data: input.date,
-    };
-    const result = [];
 
     sheet.mergeCells('A1:F1');
     sheet.getCell('A1').value =
@@ -775,15 +774,16 @@ export class ExcelService {
       total_made: 'จำนวนทำทั้งหมด',
       percentage: '% ขึ้นราเทียบกับจำนวนทำ',
     });
-    // Add Data Row
-    for (let i = 0; i < 2000; i++) {
+    const result = await this.reportService.getReportPlantFail(input);
+    for (let i = 0; i < result.length; i++) {
+      const rowsDB = result[i];
       data.push({
         no: i,
-        employee_name: 'ชื่อ-นามสกุลพนักงาน',
-        total_break: 1000,
-        total_mold: 2000,
-        total_made: 3000,
-        percentage: 40.33,
+        employee_name: `${rowsDB.member_name} ${rowsDB.member_surname}`,
+        total_break: rowsDB.remove_type_1,
+        total_mold: rowsDB.remove_type_2,
+        total_made: rowsDB.total_import,
+        percentage: rowsDB.persentage,
       });
     }
 
@@ -793,7 +793,7 @@ export class ExcelService {
     sheet.addRows(rows);
 
     // Styles Data Row
-    for (let i = 2; i <= 2000 + 1; i++) {
+    for (let i = 2; i <= result.length + 1; i++) {
       [
         `A${i + 1}`,
         `B${i + 1}`,
