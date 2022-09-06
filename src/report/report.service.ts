@@ -13,10 +13,19 @@ import { SourcesWorkType } from 'src/sources_work_type/entity/sources-work-type-
 import { Connection, MoreThan, Repository } from 'typeorm';
 import { ReportGetInput } from './dto/report-get.input';
 import { FilterObject } from './modal/filter';
-import { ReportBottleResponse } from './modal/report-bottle.response';
-import { ReportPlantFailResponse } from './modal/report-plant-fail.response';
+import {
+  ReportBottleData,
+  ReportBottleResponse,
+} from './modal/report-bottle.response';
+import {
+  ReportPlantFailData,
+  ReportPlantFailResponse,
+} from './modal/report-plant-fail.response';
 import { ReportProductionResponse } from './modal/report-production.response';
-import { ReportRemoveAllResponse } from './modal/report-remove-all.response';
+import {
+  ReportRemoveAllData,
+  ReportRemoveAllResponse,
+} from './modal/report-remove-all.response';
 import { ReportStockResponse } from './modal/report-stock.response';
 
 @Injectable()
@@ -761,7 +770,9 @@ export class ReportService {
       .addSelect('result_group.total_import', 'total_import');
 
     query
-      .orderBy('result_group.import_date', 'ASC')
+      .orderBy('member_tb.name', 'ASC')
+      .addOrderBy('member_tb.surname', 'ASC')
+      .addOrderBy('result_group.import_date', 'ASC')
       .addOrderBy('receipt_tb.code', 'ASC');
     if (input.page && input.per_page) {
       const start = this.getStartIndexPage(input.page, input.per_page);
@@ -770,7 +781,6 @@ export class ReportService {
     }
 
     const data = await query.getRawMany();
-
     const result = {
       total: totalAll.total,
       data: data,
@@ -987,6 +997,29 @@ export class ReportService {
       );
 
     const data = await query.getRawMany();
+    const summary: ReportPlantFailData[] = [];
+    // let sum_total_import = 0;
+    // let sum_total_remove_type_1 = 0;
+    // let sum_total_remove_type_2 = 0;
+    // let sum_total_persentage = 0;
+    // for (let i = 0; i < data.length; i++) {
+    //   summary.push(data[i]);
+    //   sum_total_remove_type_1 += parseInt(data[i].remove_type_1);
+    //   sum_total_remove_type_2 += parseInt(data[i].remove_type_1);
+    //   sum_total_import += parseInt(data[i].total_import);
+    // }
+    // if (sum_total_import > 0) {
+    //   sum_total_persentage = (sum_total_remove_type_1 / sum_total_import) * 100;
+    // }
+    // const summaryTotal = {
+    //   member_name: 'รวมทั้งหมด',
+    //   member_surname: '',
+    //   total_import: sum_total_import,
+    //   remove_type_1: sum_total_remove_type_1,
+    //   remove_type_2: sum_total_remove_type_2,
+    //   persentage: sum_total_persentage,
+    // } as ReportPlantFailData;
+    // summary.unshift(summaryTotal);
 
     const result = {
       total: totalAll.total,
