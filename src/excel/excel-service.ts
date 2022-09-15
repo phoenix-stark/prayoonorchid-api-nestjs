@@ -70,7 +70,7 @@ export class ExcelService {
         main_work: rowsDB.main_work_type,
         type_work: rowsDB.work_type,
         food: rowsDB.food,
-        import_number: rowsDB.total_import,
+        import_number: parseInt(rowsDB.total_import.toString()),
       });
     }
     data.forEach((doc) => {
@@ -249,7 +249,7 @@ export class ExcelService {
         employee_name: `${rowsDB.member_name} ${rowsDB.member_surname}`,
         main_work: rowsDB.main_work_type,
         type_work: rowsDB.work_type,
-        export_number: rowsDB.total,
+        export_number: parseInt(rowsDB.total.toString()),
         export_type: rowsDB.description,
         employee_export: `${rowsDB.create_member_name} ${rowsDB.create_member_surname}`,
       });
@@ -449,13 +449,13 @@ export class ExcelService {
         main_work: rowsDB.main_work_type,
         type_work: rowsDB.work_type,
         food: rowsDB.food,
-        import_number: rowsDB.total_import,
-        export_number_f: rowsDB.remove_type_1,
-        export_number_b: rowsDB.remove_type_2,
-        export_number_n: rowsDB.remove_type_3,
-        export_number_c: rowsDB.remove_type_4,
-        export_number_d: rowsDB.export,
-        total_bottle: rowsDB.summary,
+        import_number: parseInt(rowsDB.total_import.toString()),
+        export_number_f: parseInt(rowsDB.remove_type_1.toString()),
+        export_number_b: parseInt(rowsDB.remove_type_2.toString()),
+        export_number_n: parseInt(rowsDB.remove_type_3.toString()),
+        export_number_c: parseInt(rowsDB.remove_type_4.toString()),
+        export_number_d: parseInt(rowsDB.export.toString()),
+        total_bottle: parseInt(rowsDB.summary.toString()),
         total_plant: 0,
       });
     }
@@ -508,7 +508,7 @@ export class ExcelService {
       { key: 'G', width: 15, align: 'left' },
       { key: 'H', width: 15, align: 'left' },
       { key: 'I', width: 10, align: 'left' },
-      { key: 'J', width: 15, align: 'left' },
+      { key: 'J', width: 15, align: 'center' },
       { key: 'K', width: 10, align: 'center' },
       { key: 'L', width: 10, align: 'center' },
       { key: 'M', width: 10, align: 'center' },
@@ -666,13 +666,13 @@ export class ExcelService {
         main_work: rowsDB.main_work_type,
         type_work: rowsDB.work_type,
         food: rowsDB.food,
-        import_number: rowsDB.total_import,
-        export_number_f: rowsDB.remove_type_1,
-        export_number_b: rowsDB.remove_type_2,
-        export_number_n: rowsDB.remove_type_3,
-        export_number_c: rowsDB.remove_type_4,
-        export_number_d: rowsDB.export,
-        total_bottle: rowsDB.summary,
+        import_number: parseInt(rowsDB.total_import.toString()),
+        export_number_f: parseInt(rowsDB.remove_type_1.toString()),
+        export_number_b: parseInt(rowsDB.remove_type_2.toString()),
+        export_number_n: parseInt(rowsDB.remove_type_3.toString()),
+        export_number_c: parseInt(rowsDB.remove_type_4.toString()),
+        export_number_d: parseInt(rowsDB.export.toString()),
+        total_bottle: parseInt(rowsDB.summary.toString()),
       });
     }
 
@@ -859,10 +859,10 @@ export class ExcelService {
       data.push({
         no: i + 1,
         employee_name: `${rowsDB.member_name} ${rowsDB.member_surname}`,
-        total_break: rowsDB.remove_type_1,
-        total_mold: rowsDB.remove_type_2,
-        total_made: rowsDB.total_import,
-        percentage: rowsDB.persentage,
+        total_break: parseInt(rowsDB.remove_type_1.toString()),
+        total_mold: parseInt(rowsDB.remove_type_2.toString()),
+        total_made: parseInt(rowsDB.total_import.toString()),
+        percentage: parseFloat(rowsDB.persentage.toString()),
       });
     }
 
