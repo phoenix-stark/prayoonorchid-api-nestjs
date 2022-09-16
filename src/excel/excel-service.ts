@@ -242,10 +242,10 @@ export class ExcelService {
         no: i + 1,
         date_export: this.momentWrapper
           .momentDate(rowsDB.remove_date)
-          .format('DD/MM/YYYY'),
+          .format('YYYY-MM-DD'),
         date_import: this.momentWrapper
           .momentDate(rowsDB.import_date)
-          .format('DD/MM/YYYY'),
+          .format('YYYY-MM-DD'),
         plant_code: rowsDB.receipt_code,
         plant_name: rowsDB.receipt_name,
         plant_family_main: rowsDB.plant_family_main,
