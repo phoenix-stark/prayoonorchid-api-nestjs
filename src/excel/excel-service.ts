@@ -656,9 +656,11 @@ export class ExcelService {
       data.push({
         no: i + 1,
         employee_name: `${rowsDB.member_name} ${rowsDB.member_surname}`,
-        date_import: this.momentWrapper
-          .momentDate(rowsDB.import_date)
-          .format('DD/MM/YYYY'),
+        date_import: this.formatDateToExcel(
+          this.momentWrapper
+            .momentDate(rowsDB.import_date)
+            .format('YYYY-MM-DD'),
+        ),
         plant_code: rowsDB.receipt_code,
         order_no: rowsDB.receipt_num_order,
         customer_name: rowsDB.customer_name,
@@ -1091,6 +1093,7 @@ export class ExcelService {
     });
     return file;
   }
+
   getFilter = (jsonStr: string) => {
     const jsonObj = JSON.parse(jsonStr);
     const reportFilter = {
@@ -1178,4 +1181,12 @@ export class ExcelService {
     };
     return reportFilter as FilterObject;
   };
+
+  formatDateToExcel(date: string): Date {
+    return new Date(
+      this.momentWrapper
+        .momentDateFromFormat(date, 'YYYY-MM-DD')
+        .format('YYYY-MM-DD'),
+    );
+  }
 }
