@@ -60,9 +60,12 @@ export class ExcelService {
       data.push({
         no: i + 1,
         employee_name: `${rowsDB.member_name} ${rowsDB.member_surname}`,
-        date_import: this.momentWrapper
-          .momentDate(rowsDB.import_date)
-          .format('DD/MM/YYYY'),
+        date_import: this.formatDateToExcel(
+          this.momentWrapper
+            .momentDate(rowsDB.import_date)
+            .format('YYYY-MM-DD'),
+          'YYYY-MM-DD',
+        ),
         plant_code: rowsDB.receipt_code,
         order_no: rowsDB.receipt_num_order,
         customer_name: rowsDB.customer_name,
@@ -101,6 +104,8 @@ export class ExcelService {
             right: { style: 'thin' },
           },
         };
+
+        sheet.getCell(`C${i + 1}`).numFmt = 'dd/mm/yyyy';
       });
     }
 
@@ -285,6 +290,9 @@ export class ExcelService {
             right: { style: 'thin' },
           },
         };
+
+        sheet.getCell(`B${i + 1}`).numFmt = 'dd/mm/yyyy';
+        sheet.getCell(`C${i + 1}`).numFmt = 'dd/mm/yyyy';
       });
     }
 
@@ -439,9 +447,12 @@ export class ExcelService {
       const rowsDB = result.data[i];
       data.push({
         no: i + 1,
-        date_import: this.momentWrapper
-          .momentDate(rowsDB.import_date)
-          .format('MMM-YY'),
+        date_import: this.formatDateToExcel(
+          this.momentWrapper
+            .momentDate(rowsDB.import_date)
+            .format('YYYY-MM-DD'),
+          'YYYY-MM-DD',
+        ),
         plant_code: rowsDB.receipt_code,
         customer_name: rowsDB.customer_name,
         plant_family_main: rowsDB.plant_family_main,
@@ -494,6 +505,7 @@ export class ExcelService {
             right: { style: 'thin' },
           },
         };
+        sheet.getCell(`B${i + 1}`).numFmt = 'mm-yyyy';
       });
     }
 
@@ -656,9 +668,12 @@ export class ExcelService {
       data.push({
         no: i + 1,
         employee_name: `${rowsDB.member_name} ${rowsDB.member_surname}`,
-        date_import: this.momentWrapper
-          .momentDate(rowsDB.import_date)
-          .format('DD/MM/YYYY'),
+        date_import: this.formatDateToExcel(
+          this.momentWrapper
+            .momentDate(rowsDB.import_date)
+            .format('YYYY-MM-DD'),
+          'YYYY-MM-DD',
+        ),
         plant_code: rowsDB.receipt_code,
         order_no: rowsDB.receipt_num_order,
         customer_name: rowsDB.customer_name,
@@ -710,6 +725,7 @@ export class ExcelService {
             right: { style: 'thin' },
           },
         };
+        sheet.getCell(`C${i + 1}`).numFmt = 'dd/mm/yyyy';
       });
     }
 
@@ -1091,6 +1107,7 @@ export class ExcelService {
     });
     return file;
   }
+
   getFilter = (jsonStr: string) => {
     const jsonObj = JSON.parse(jsonStr);
     const reportFilter = {
@@ -1178,4 +1195,10 @@ export class ExcelService {
     };
     return reportFilter as FilterObject;
   };
+
+  formatDateToExcel(date: string, format: string): Date {
+    return new Date(
+      this.momentWrapper.momentDateFromFormat(date, format).format(format),
+    );
+  }
 }
