@@ -240,12 +240,18 @@ export class ExcelService {
       const rowsDB = result.data[i];
       data.push({
         no: i + 1,
-        date_export: this.momentWrapper
-          .momentDate(rowsDB.remove_date)
-          .format('YYYY-MM-DD'),
-        date_import: this.momentWrapper
-          .momentDate(rowsDB.import_date)
-          .format('YYYY-MM-DD'),
+        date_export: this.formatDateToExcel(
+          this.momentWrapper
+            .momentDate(rowsDB.remove_date)
+            .format('YYYY-MM-DD'),
+          'YYYY-MM-DD',
+        ),
+        date_import: this.formatDateToExcel(
+          this.momentWrapper
+            .momentDate(rowsDB.import_date)
+            .format('YYYY-MM-DD'),
+          'YYYY-MM-DD',
+        ),
         plant_code: rowsDB.receipt_code,
         plant_name: rowsDB.receipt_name,
         plant_family_main: rowsDB.plant_family_main,
