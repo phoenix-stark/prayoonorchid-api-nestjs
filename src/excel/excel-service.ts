@@ -870,8 +870,8 @@ export class ExcelService {
     data.push({
       no: 'No.',
       employee_name: 'ชื่อ-นามสกุลพนักงาน',
-      total_break: 'จำนวนแตกหัก',
       total_mold: 'จำนวนขึ้นรา',
+      total_break: 'จำนวนแตกหัก',
       total_made: 'จำนวนทำทั้งหมด',
       percentage: '% ขึ้นราเทียบกับจำนวนทำ',
     });
@@ -881,8 +881,8 @@ export class ExcelService {
       data.push({
         no: i + 1,
         employee_name: `${rowsDB.member_name} ${rowsDB.member_surname}`,
-        total_break: parseInt(rowsDB.remove_type_1.toString()),
         total_mold: parseInt(rowsDB.remove_type_2.toString()),
+        total_break: parseInt(rowsDB.remove_type_1.toString()),
         total_made: parseInt(rowsDB.total_import.toString()),
         percentage: parseFloat(rowsDB.persentage.toString()),
       });
