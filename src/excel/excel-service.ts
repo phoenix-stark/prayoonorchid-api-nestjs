@@ -884,7 +884,7 @@ export class ExcelService {
         total_break: parseInt(rowsDB.remove_type_1.toString()),
         total_mold: parseInt(rowsDB.remove_type_2.toString()),
         total_made: parseInt(rowsDB.total_import.toString()),
-        percentage: parseFloat(rowsDB.persentage.toString()),
+        percentage: parseFloat(rowsDB.persentage.toString()).toFixed(2),
       });
     }
 
