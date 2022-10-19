@@ -973,6 +973,10 @@ export class ReportService {
         employee: filter.filter[6].employee.id,
       });
     }
+
+    const queryTotal = query;
+    const totalAll = await queryTotal.select('COUNT(*)', 'total').getRawOne();
+
     query
       .orderBy('member_tb.name', 'ASC')
       .addOrderBy('member_tb.surname', 'ASC');
@@ -981,9 +985,6 @@ export class ReportService {
       query.offset(start);
       query.limit(input.per_page);
     }
-
-    const queryTotal = query;
-    const totalAll = await queryTotal.select('COUNT(*)', 'total').getRawOne();
 
     query
       .select('member_tb.name', 'member_name')
