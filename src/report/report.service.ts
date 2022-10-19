@@ -976,18 +976,6 @@ export class ReportService {
 
     const queryTotal = query;
     const totalAll = await queryTotal.select('COUNT(*)', 'total').getRawOne();
-    const totalAllImport = await queryTotal
-      .select('COUNT(total_import)', 'total_all_total_import')
-      .getRawOne();
-    const totalAllRemoveType1 = await queryTotal
-      .select('COUNT(remove_type_1)', 'total_all_remove_type_1')
-      .getRawOne();
-    const totalAllRemoveType2 = await queryTotal
-      .select('COUNT(remove_type_2)', 'total_all_remove_type_2')
-      .getRawOne();
-    const totalAllPercentage =
-      parseFloat(totalAllRemoveType1) +
-      (parseFloat(totalAllRemoveType2) / parseFloat(totalAllImport)) * 100;
 
     query
       .orderBy('member_tb.name', 'ASC')
@@ -1036,11 +1024,6 @@ export class ReportService {
 
     const result = {
       total: totalAll.total,
-      summary: {
-        remove_type_1: totalAllRemoveType1,
-        remove_type_2: totalAllRemoveType2,
-        percentage: totalAllPercentage,
-      },
       data: data,
     } as ReportPlantFailResponse;
     return result;
