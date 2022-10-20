@@ -39,6 +39,12 @@ export class ReportController {
     return await this.reportService.getReportPlantFail(input);
   }
 
+  @Post('plant-fail-all')
+  @HttpCode(200)
+  async getReportPlantFailAll(@Body() input: ReportGetInput): Promise<any> {
+    return await this.reportService.getReportPlantFailAll(input);
+  }
+
   @Post('remove-all')
   @HttpCode(200)
   async getReportRemoveAll(@Body() input: ReportGetInput): Promise<any> {
