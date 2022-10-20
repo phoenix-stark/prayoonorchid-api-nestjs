@@ -1029,6 +1029,228 @@ export class ReportService {
     return result;
   }
 
+  async getReportPlantFailAll(input: ReportGetInput): Promise<any> {
+    const filter = this.getFilter(input.filter);
+    const query = await this.connection
+      .createQueryBuilder()
+      .from((subQuery) => {
+        const sub = subQuery
+          .addSelect('import.member_made', 'member_made')
+          .addSelect('COUNT(*)', 'total_import')
+
+          .addSelect(
+            'SUM(case when remove.plant_remove_type_id = 1 then 1 else 0 end)',
+            'remove_type_1',
+          )
+          .addSelect(
+            'SUM(case when remove.plant_remove_type_id = 2 then 1 else 0 end)',
+            'remove_type_2',
+          )
+          .addSelect(
+            'SUM(case when remove.plant_remove_type_id = 3 then 1 else 0 end)',
+            'remove_type_3',
+          )
+          .addSelect(
+            'SUM(case when remove.plant_remove_type_id = 4 then 1 else 0 end)',
+            'remove_type_4',
+          )
+          .addSelect(
+            'SUM(case when remove.plant_remove_type_id = 5 then 1 else 0 end)',
+            'export',
+          )
+          .from(LogPlantImport, 'import')
+          .groupBy('import.member_made')
+          .leftJoin(
+            LogPlantRemove,
+            'remove',
+            'import.log_plant_import_id = remove.log_plant_import_id',
+          )
+          .leftJoin(
+            Receipt,
+            'receipt_tb',
+            'receipt_tb.receipt_id = import.receipt_id',
+          )
+          .leftJoin(
+            SourcesWorkMainType,
+            'sources_work_main_type_tb',
+            'sources_work_main_type_tb.id = import.main_work_type_id',
+          )
+          .leftJoin(
+            FoodPlant,
+            'food_plant',
+            'food_plant.food_id = import.food_plant_id',
+          )
+          .leftJoin(
+            PlantFamilyMain,
+            'plant_family_main_tb',
+            'plant_family_main_tb.id = receipt_tb.family_main_id',
+          )
+          .leftJoin(
+            Customer,
+            'customer_tb',
+            'customer_tb.customer_id = receipt_tb.customer_id',
+          );
+        // Code
+        if (filter.filter[1].plant_code.description !== '') {
+          if (filter.filter[1].plant_code.is_match_all === true) {
+            sub.andWhere('receipt_tb.code  LIKE :code ', {
+              code: `${filter.filter[1].plant_code.description}`,
+            });
+          } else {
+            sub.andWhere('receipt_tb.code  LIKE :code ', {
+              code: `%${filter.filter[1].plant_code.description}%`,
+            });
+          }
+        } else {
+          sub.andWhere('receipt_tb.code  LIKE :code ', {
+            code: `%%`,
+          });
+        }
+
+        // Import Date
+        if (
+          filter.filter[8].import_start_date.description !== '' &&
+          filter.filter[9].import_end_date.description !== ''
+        ) {
+          sub.andWhere(
+            '( import.import_date >= :importStart AND import.import_date <= :importEnd ) ',
+            {
+              importStart: filter.filter[8].import_start_date.description,
+              importEnd: filter.filter[9].import_end_date.description,
+            },
+          );
+        }
+
+        // Receipt Name
+        if (filter.filter[0].plant_name.description !== '') {
+          if (filter.filter[0].plant_name.is_match_all === true) {
+            query.andWhere('receipt_tb.name  LIKE :food ', {
+              food: `${filter.filter[0].plant_name.description}`,
+            });
+          } else {
+            query.andWhere('receipt_tb.name  LIKE :food ', {
+              food: `%${filter.filter[0].plant_name.description}%`,
+            });
+          }
+        }
+
+        // Family main
+        if (filter.filter[2].family_main.description !== '') {
+          if (filter.filter[2].family_main.is_match_all === true) {
+            query.andWhere(
+              'plant_family_main_tb.description  LIKE :familyMain ',
+              {
+                familyMain: `${filter.filter[2].family_main.description}`,
+              },
+            );
+          } else {
+            query.andWhere(
+              'plant_family_main_tb.description  LIKE :familyMain ',
+              {
+                familyMain: `%${filter.filter[2].family_main.description}%`,
+              },
+            );
+          }
+        }
+
+        // Main Work Type
+        if (filter.filter[7].main_task.description !== '') {
+          sub.andWhere('sources_work_main_type_tb.description = :mainTask ', {
+            mainTask: filter.filter[7].main_task.description,
+          });
+        }
+        // Work Type
+        if (filter.filter[3].work_type.id !== '') {
+          sub.andWhere('import.work_type_id = :workType ', {
+            workType: filter.filter[3].work_type.id,
+          });
+        }
+
+        // Food
+        if (filter.filter[4].food.description !== '') {
+          if (filter.filter[4].food.is_match_all === true) {
+            sub.andWhere('food_plant.description  LIKE :food ', {
+              food: `${filter.filter[4].food.description}`,
+            });
+          } else {
+            sub.andWhere('food_plant.description  LIKE :food ', {
+              food: `%${filter.filter[4].food.description}%`,
+            });
+          }
+        }
+
+        // Customer
+        if (filter.filter[5].customer.id !== '') {
+          if (filter.filter[5].customer.is_match_all === true) {
+            sub.andWhere('customer_tb.customer_id  LIKE :customer ', {
+              customer: `${filter.filter[5].customer.id}`,
+            });
+          } else {
+            sub.andWhere('customer_tb.customer_id  LIKE :customer ', {
+              customer: `%${filter.filter[5].customer.id}%`,
+            });
+          }
+        }
+
+        // Employee
+        if (filter.filter[6].employee.id !== '') {
+          sub.andWhere('import.member_made = :employee ', {
+            employee: filter.filter[6].employee.id,
+          });
+        }
+        return sub;
+      }, 'result_group')
+      .leftJoin(
+        Member,
+        'member_tb',
+        'member_tb.member_id = result_group.member_made',
+      );
+
+    // Employee
+    if (filter.filter[6].employee.id !== '') {
+      query.andWhere('result_group.member_made = :employee ', {
+        employee: filter.filter[6].employee.id,
+      });
+    }
+
+    query
+      .select('member_tb.name', 'member_name')
+      .addSelect('member_tb.surname', 'member_surname')
+      .addSelect('result_group.total_import', 'total_import')
+      .addSelect('result_group.remove_type_1', 'remove_type_1')
+      .addSelect('result_group.remove_type_2', 'remove_type_2')
+      .addSelect(
+        '(((result_group.remove_type_1 + result_group.remove_type_2) / result_group.total_import ) * 100)',
+        'persentage',
+      );
+
+    const data = await query.getRawMany();
+    const summary: ReportPlantFailData[] = [];
+    let sum_total_import = 0;
+    let sum_total_remove_type_1 = 0;
+    let sum_total_remove_type_2 = 0;
+    let sum_total_persentage = 0;
+    for (let i = 0; i < data.length; i++) {
+      sum_total_remove_type_1 += parseInt(data[i].remove_type_1);
+      sum_total_remove_type_2 += parseInt(data[i].remove_type_1);
+      sum_total_import += parseInt(data[i].total_import);
+    }
+    if (sum_total_import > 0) {
+      sum_total_persentage = (sum_total_remove_type_1 / sum_total_import) * 100;
+    }
+    const summaryTotal = {
+      member_name: 'รวมทั้งหมด',
+      member_surname: '',
+      total_import: sum_total_import,
+      remove_type_1: sum_total_remove_type_1,
+      remove_type_2: sum_total_remove_type_2,
+      persentage: sum_total_persentage,
+    } as ReportPlantFailData;
+
+    const result = summaryTotal;
+    return result;
+  }
+
   async getReportRemoveAll(
     input: ReportGetInput,
   ): Promise<ReportRemoveAllResponse> {
