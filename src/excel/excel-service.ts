@@ -876,6 +876,19 @@ export class ExcelService {
       percentage: '% ขึ้นราเทียบกับจำนวนทำ',
     });
     const result = await this.reportService.getReportPlantFail(input);
+    const resultAll = await this.reportService.getReportPlantFailAll(input);
+    if (resultAll) {
+      data.push({
+        no: 0,
+        employee_name: `${resultAll.member_name}`,
+        total_break: parseInt(resultAll.remove_type_1.toString()),
+        total_mold: parseInt(resultAll.remove_type_2.toString()),
+        total_made: parseInt(resultAll.total_import.toString()),
+        percentage: parseFloat(
+          parseFloat(resultAll.persentage.toString()).toFixed(2),
+        ),
+      });
+    }
     for (let i = 0; i < result.data.length; i++) {
       const rowsDB = result.data[i];
       data.push({
@@ -884,7 +897,9 @@ export class ExcelService {
         total_break: parseInt(rowsDB.remove_type_1.toString()),
         total_mold: parseInt(rowsDB.remove_type_2.toString()),
         total_made: parseInt(rowsDB.total_import.toString()),
-        percentage: parseFloat(rowsDB.persentage.toString()).toFixed(2),
+        percentage: parseFloat(
+          parseFloat(rowsDB.persentage.toString()).toFixed(2),
+        ),
       });
     }
 
