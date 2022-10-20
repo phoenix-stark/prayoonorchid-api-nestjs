@@ -884,7 +884,9 @@ export class ExcelService {
         total_break: parseInt(resultAll.remove_type_1.toString()),
         total_mold: parseInt(resultAll.remove_type_2.toString()),
         total_made: parseInt(resultAll.total_import.toString()),
-        percentage: parseFloat(resultAll.persentage.toString()).toFixed(2),
+        percentage: parseFloat(
+          parseFloat(resultAll.persentage.toString()).toFixed(2),
+        ),
       });
     }
     for (let i = 0; i < result.data.length; i++) {
@@ -895,7 +897,9 @@ export class ExcelService {
         total_break: parseInt(rowsDB.remove_type_1.toString()),
         total_mold: parseInt(rowsDB.remove_type_2.toString()),
         total_made: parseInt(rowsDB.total_import.toString()),
-        percentage: parseFloat(rowsDB.persentage.toString()).toFixed(2),
+        percentage: parseFloat(
+          parseFloat(rowsDB.persentage.toString()).toFixed(2),
+        ),
       });
     }
 
