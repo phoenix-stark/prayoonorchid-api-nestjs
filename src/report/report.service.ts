@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectConnection, InjectRepository } from '@nestjs/typeorm';
+import moment from 'moment-timezone';
 import { Customer } from 'src/customer/entity/customer-entity.model';
 import { FoodPlant } from 'src/food_plant/entity/food-plant-entity.model';
 import { LogPlantImport } from 'src/log_plant_import/entity/log-plant-import-entity.model';
@@ -880,6 +881,14 @@ export class ReportService {
               importEnd: filter.filter[9].import_end_date.description,
             },
           );
+        } else {
+          sub.andWhere(
+            '( import.import_date >= :importStart AND import.import_date <= :importEnd ) ',
+            {
+              importStart: moment().format('YYYY-MM-DD'),
+              importEnd: moment().format('YYYY-MM-DD'),
+            },
+          );
         }
 
         // Receipt Name
@@ -1117,6 +1126,14 @@ export class ReportService {
             {
               importStart: filter.filter[8].import_start_date.description,
               importEnd: filter.filter[9].import_end_date.description,
+            },
+          );
+        } else {
+          sub.andWhere(
+            '( import.import_date >= :importStart AND import.import_date <= :importEnd ) ',
+            {
+              importStart: moment().format('YYYY-MM-DD'),
+              importEnd: moment().format('YYYY-MM-DD'),
             },
           );
         }
