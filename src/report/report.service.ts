@@ -974,8 +974,8 @@ export class ReportService {
       });
     }
 
-    const queryTotal = query;
-    const totalAll = await queryTotal.select('COUNT(*)', 'total').getRawOne();
+    // const queryTotal = query;
+    // const totalAll = await queryTotal.select('COUNT(*)', 'total').getRawOne();
 
     query
       .orderBy('member_tb.name', 'ASC')
@@ -1023,7 +1023,7 @@ export class ReportService {
     // summary.unshift(summaryTotal);
 
     const result = {
-      total: totalAll.total,
+      total: 0,
       data: data,
     } as ReportPlantFailResponse;
     return result;
