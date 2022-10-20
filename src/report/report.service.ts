@@ -1232,7 +1232,7 @@ export class ReportService {
     let sum_total_persentage = 0;
     for (let i = 0; i < data.length; i++) {
       sum_total_remove_type_1 += parseInt(data[i].remove_type_1);
-      sum_total_remove_type_2 += parseInt(data[i].remove_type_1);
+      sum_total_remove_type_2 += parseInt(data[i].remove_type_2);
       sum_total_import += parseInt(data[i].total_import);
     }
     if (sum_total_import > 0) {
