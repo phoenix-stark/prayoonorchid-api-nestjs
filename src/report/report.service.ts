@@ -1245,6 +1245,7 @@ export class ReportService {
       remove_type_1: sum_total_remove_type_1,
       remove_type_2: sum_total_remove_type_2,
       persentage: sum_total_persentage,
+      total: data.length,
     } as ReportPlantFailData;
 
     const result = summaryTotal;
