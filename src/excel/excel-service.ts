@@ -909,7 +909,7 @@ export class ExcelService {
     sheet.addRows(rows);
 
     // Styles Data Row
-    for (let i = 2; i <= result.data.length + 1; i++) {
+    for (let i = 2; i <= result.data.length + 2; i++) {
       [
         `A${i + 1}`,
         `B${i + 1}`,
