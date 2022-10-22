@@ -881,8 +881,8 @@ export class ExcelService {
       data.push({
         no: 0,
         employee_name: `${resultAll.member_name}`,
-        total_break: parseInt(resultAll.remove_type_1.toString()),
-        total_mold: parseInt(resultAll.remove_type_2.toString()),
+        total_break: parseInt(resultAll.remove_type_2.toString()),
+        total_mold: parseInt(resultAll.remove_type_1.toString()),
         total_made: parseInt(resultAll.total_import.toString()),
         percentage: parseFloat(
           parseFloat(resultAll.persentage.toString()).toFixed(2),
@@ -894,8 +894,8 @@ export class ExcelService {
       data.push({
         no: i + 1,
         employee_name: `${rowsDB.member_name} ${rowsDB.member_surname}`,
-        total_break: parseInt(rowsDB.remove_type_1.toString()),
-        total_mold: parseInt(rowsDB.remove_type_2.toString()),
+        total_break: parseInt(rowsDB.remove_type_2.toString()),
+        total_mold: parseInt(rowsDB.remove_type_1.toString()),
         total_made: parseInt(rowsDB.total_import.toString()),
         percentage: parseFloat(
           parseFloat(rowsDB.persentage.toString()).toFixed(2),
