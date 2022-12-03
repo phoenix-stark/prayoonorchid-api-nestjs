@@ -14,6 +14,7 @@ import { SourcesWorkType } from 'src/sources_work_type/entity/sources-work-type-
 import { Connection, MoreThan, Repository } from 'typeorm';
 import { ReportGetInput } from './dto/report-get.input';
 import { FilterObject } from './modal/filter';
+import { FilterMultipleObject } from './modal/filterMultiple';
 import {
   ReportBottleData,
   ReportBottleResponse,
