@@ -903,7 +903,7 @@ export class ExcelService {
     });
 
     // Add Data Row
-    const result = await this.reportService.getReportProduction(input);
+    const result = await this.reportService.getReportProductionMultiple(input);
     for (let i = 0; i < result.data.length; i++) {
       const rowsDB = result.data[i];
       data.push({
