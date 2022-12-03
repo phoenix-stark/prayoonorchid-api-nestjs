@@ -92,6 +92,28 @@ export class ExcelController {
     stream.pipe(res);
   }
 
+  @Get('report-stock-multiple')
+  @HttpCode(200)
+  @Header('Content-Type', 'text/xlsx')
+  async exportReportStockMultiple(
+    @Query() input: ReportGetInput,
+    @Res() res: Response,
+  ) {
+    const result = await this.excelService.exportReportStockMultiple(input);
+    const buffer = readFileSync(result);
+
+    const stream = new Readable();
+    stream.push(buffer);
+    stream.push(null);
+
+    res.set({
+      'Content-Type':
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      'Content-Length': buffer.length,
+    });
+    stream.pipe(res);
+  }
+
   @Get('report-production')
   @HttpCode(200)
   @Header('Content-Type', 'text/xlsx')
