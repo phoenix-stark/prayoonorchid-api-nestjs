@@ -412,12 +412,9 @@ export class ReportService {
           if (strId !== '') {
             strId = strId.substring(0, strId.length - 1);
             console.log('STRID:|' + strId + '|');
-            sub.andWhere(
-              'sources_work_main_type_tb.description IN (:mainTask)',
-              {
-                mainTask: strId,
-              },
-            );
+            sub.andWhere('sources_work_main_type_tb.id IN (:mainTask)', {
+              mainTask: strId,
+            });
           }
         }
         // Work Type
