@@ -35,6 +35,12 @@ export class ReportController {
     return await this.reportService.getReportStock(input);
   }
 
+  @Post('stock-multiple')
+  @HttpCode(200)
+  async getReportStockMultiple(@Body() input: ReportGetInput): Promise<any> {
+    return await this.reportService.getReportStockMultiple(input);
+  }
+
   @Post('bottle')
   @HttpCode(200)
   async getReportBottle(@Body() input: ReportGetInput): Promise<any> {
