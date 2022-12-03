@@ -404,14 +404,14 @@ export class ReportService {
         // Main Work Type Multiple **
         if (filter.filter[10].main_task_multiple) {
           const itemMainTask = filter.filter[10].main_task_multiple;
-          let strId = '';
+          const strId = [];
           for (let b = 0; b < itemMainTask.description.length; b++) {
             const id = itemMainTask.description[b].id;
-            strId += id + ',';
+            strId.push(id);
           }
-          if (strId !== '') {
-            strId = strId.substring(0, strId.length - 1);
+          if (strId.length > 0) {
             console.log('STRID:|' + strId + '|');
+            console.log(strId);
             sub.andWhere('sources_work_main_type_tb.id IN (:mainTask)', {
               mainTask: strId,
             });
