@@ -1,6 +1,6 @@
 import { IsNotEmpty, IsNumber } from 'class-validator';
 
-export class FilterObject {
+export class FilterMultipleObject {
   filter: [
     {
       plant_name: {
@@ -67,13 +67,6 @@ export class FilterObject {
     },
     {
       import_end_date: {
-        id: string;
-        description: string;
-        is_match_all: boolean;
-      };
-    },
-    {
-      reason_remove_type?: {
         id: string;
         description: string;
         is_match_all: boolean;

@@ -401,10 +401,23 @@ export class ReportService {
         }
 
         // Main Work Type Multiple **
-        if (filter.filter[11].main_task_multiple) {
-          sub.andWhere('sources_work_main_type_tb.description = :mainTask ', {
-            mainTask: filter.filter[7].main_task.description,
-          });
+        if (filter.filter[10].main_task_multiple) {
+          const itemMainTask = filter.filter[10].main_task_multiple;
+          let strId = '';
+          for (let b = 0; b < itemMainTask.description.length; b++) {
+            const id = itemMainTask.description[b].id;
+            strId += id + ',';
+          }
+          if (strId !== '') {
+            strId = strId.substring(0, strId.length - 1);
+            console.log('STRID:|' + strId + '|');
+            sub.andWhere(
+              'sources_work_main_type_tb.description IN (:mainTask)',
+              {
+                mainTask: strId,
+              },
+            );
+          }
         }
         // Work Type
         if (filter.filter[3].work_type.id !== '') {
@@ -1981,6 +1994,6 @@ export class ReportService {
         },
       ],
     };
-    return reportFilter as FilterObject;
+    return reportFilter as FilterMultipleObject;
   };
 }
