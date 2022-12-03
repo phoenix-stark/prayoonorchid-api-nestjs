@@ -79,5 +79,12 @@ export class FilterObject {
         is_match_all: boolean;
       };
     },
+    {
+      main_task_multiple: {
+        id: string;
+        description: any[];
+        is_match_all: boolean;
+      };
+    },
   ];
 }

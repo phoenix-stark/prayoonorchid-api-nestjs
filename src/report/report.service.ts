@@ -309,6 +309,8 @@ export class ReportService {
     input: ReportGetInput,
   ): Promise<ReportProductionResponse> {
     const filter = this.getFilterMultiple(input.filter);
+    console.log('after filter');
+    console.log(filter);
     const query = await this.connection
       .createQueryBuilder()
       .from((subQuery) => {
@@ -398,8 +400,8 @@ export class ReportService {
           );
         }
 
-        // Main Work Type
-        if (filter.filter[7].main_task.description !== '') {
+        // Main Work Type Multiple **
+        if (filter.filter[11].main_task_multiple) {
           sub.andWhere('sources_work_main_type_tb.description = :mainTask ', {
             mainTask: filter.filter[7].main_task.description,
           });
