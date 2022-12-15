@@ -11,6 +11,7 @@ async function bootstrap() {
     credentials: true,
   };
   app.enableCors(options);
-  await app.listen(3000);
+  const server = await app.listen(3000);
+  server.setTimeout(1800000); // 600,000=> 10Min, 1200,000=>20Min, 1800,000=>30Min
 }
 bootstrap();
