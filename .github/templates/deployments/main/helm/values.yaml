@@ -1,0 +1,91 @@
+---
+# Number of pod replicas
+#   Can be changed if you know what you do.
+replicaCount: 1
+
+# Image
+#   Array of specification of docker image
+#   Repository is docker image location which you need to run.
+#   pullPolicy can be Alway or IfNotPresent
+image:
+  repository: 317583874524.dkr.ecr.ap-southeast-1.amazonaws.com/CHANGE_ME
+  tag: main
+  pullPolicy: Always
+
+# Project name
+#   String of your project name
+nameOverride: prod-CHANGE_ME
+fullnameOverride: prod-CHANGE_ME
+
+# Environment References
+#   List name of resources which you want to reference.
+#   To refer to a configMap or secret resource outside pod.
+#
+envFrom: {}
+  #  configMaps:
+  #    - CHANGE_ME
+  #  secrets:
+  #    - CHANGE_ME
+
+# configMap
+#   Array of key, value.
+#   Enable to create configMap.
+#   The resource name will be same as your project name.
+#   Baware of value type is always be string.
+configMaps:
+  create: false
+  data:
+    ENV: ""
+
+# secret
+#   Array of key, value.
+#   Enable to create secret in base64 encoded.
+#   The resource name will be same as your project name.
+#   Baware of value type is always be string.
+secrets:
+  create: false
+  data:
+    USER: ""
+    PASS: ""
+
+# Container Port(s)
+#   List of ports that your container exposed in dockerfile.
+containerPorts:
+  - 3000
+
+# Resources Allocation
+#   Specify requests for allocation resources and limits for maximum of resources usage
+resources: {}
+#  requests:
+#    cpu: 50m
+#    memory: 100Mi
+#  limits:
+#    cpu: 50m
+#    memory: 100Mi
+
+# Service
+#   Act as load balancer in front of your pod.
+#   To forward traffic into your pod.
+services:
+  - type: ClusterIP
+    ports:
+      - name: http
+        protocol: TCP
+        port: 80
+        targetPort: 3000
+
+# Ingress Resource
+#   Enable to create ingress as your project name.
+ingress:
+  enabled: true
+  annotations:
+    kubernetes.io/ingress.class: nginx
+  rules:
+    - host: "CHANGE_ME.phoenix-stark.com"
+      http:
+        paths:
+          - path: /
+            backend:
+              service:
+                port:
+                  number: 80
