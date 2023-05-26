@@ -16,6 +16,8 @@ import { LogImportUpdateInput } from './dto/log-import-update.input';
 import { LogImportUpdateAllInput } from './dto/log-import-update-all.input';
 import { LogImportDeleteInput } from './dto/log-import-delete.input';
 import { LogPlantRemoveNow } from 'src/log_plant_remove/entity/log-plant-remove-now-entity.model';
+import { LogImportDeleteRangeBarcodeInput } from './dto/log-import-delete-range-barcode.input';
+import { LogImportDeleteByReceiptIdInput } from './dto/log-import-delete-by-receipt-id.input';
 
 @Injectable()
 export class LogPlantImportService {
@@ -92,12 +94,12 @@ export class LogPlantImportService {
         // FOOD
         let foodEntity = await this.foodPlantRepository.findOne({
           where: {
-            description: input.food_id,
+            description: input.food_description,
           },
         });
         if (!foodEntity) {
           const foodNewEntity = new FoodPlant();
-          foodNewEntity.description = input.food_id;
+          foodNewEntity.description = input.food_description;
           foodNewEntity.create_by = memberWithBarcodeEntity.member_id;
           foodNewEntity.create_at = this.momentWrapper
             .moment()
@@ -108,12 +110,15 @@ export class LogPlantImportService {
         //WORK TYPE
         let workTypeEntity = await this.sourcesWorkTypeRepository.findOne({
           where: {
-            description: input.work_type_id,
+            description: input.work_type_description,
           },
         });
+        console.log('workTypeEntity: ' + input.work_type_description);
+        console.log(workTypeEntity);
         if (!workTypeEntity) {
+          console.log('workTypeEntity no data: ');
           const workTypeNewEntity = new SourcesWorkType();
-          workTypeNewEntity.description = input.work_type_id;
+          workTypeNewEntity.description = input.work_type_description;
           workTypeEntity = await this.sourcesWorkTypeRepository.save(
             workTypeNewEntity,
           );
@@ -121,7 +126,8 @@ export class LogPlantImportService {
 
         // TIME PER DAY
         let timePerDay = input.time_per_day;
-        if (timePerDay === '0') {
+        if (timePerDay == '0') {
+          console.log('Zeto time per day');
           const logPlantImportNowTimePerDayRepository =
             await this.logPlantImportNowRepository.findOne({
               where: {
@@ -131,9 +137,12 @@ export class LogPlantImportService {
                 time_per_day: 'DESC',
               },
             });
+          console.log('logPlantImportNowTimePerDayRepository');
+          console.log(logPlantImportNowTimePerDayRepository);
           if (!logPlantImportNowTimePerDayRepository) {
             timePerDay = '1';
           } else {
+            console.log(logPlantImportNowTimePerDayRepository.time_per_day);
             timePerDay = `${
               logPlantImportNowTimePerDayRepository.time_per_day + 1
             }`;
@@ -177,6 +186,8 @@ export class LogPlantImportService {
         const newLogPlant = await this.logPlantImportRepository.save(logEntity);
 
         logEntity.log_plant_import_id = newLogPlant.log_plant_import_id;
+        console.log('logEntity:');
+        console.log(logEntity);
         await this.logPlantImportNowRepository.save(logEntity);
         const memberMadeEntity = await this.memberRepository.findOne({
           where: {
@@ -401,6 +412,84 @@ export class LogPlantImportService {
 
     return {
       data: {},
+    };
+  }
+
+  async deleteBarcodeByReceiptId(
+    input: LogImportDeleteByReceiptIdInput,
+  ): Promise<any> {
+    await this.logPlantImportRepository
+      .createQueryBuilder()
+      .where('receipt_id = :receipt_id', {
+        receipt_id: input.receipt_id,
+      })
+      .delete()
+      .execute();
+    await this.logPlantImportNowRepository
+      .createQueryBuilder()
+      .where('receipt_id = :receipt_id', {
+        receipt_id: input.receipt_id,
+      })
+      .delete()
+      .execute();
+    return {
+      code: 200,
+    };
+  }
+
+  async deleteBarcodeRangeBarcode(
+    input: LogImportDeleteRangeBarcodeInput,
+  ): Promise<any> {
+    // Check Member
+    let memberEntity = null;
+    const logTokenEntity = await this.logTokenRepository.findOne({
+      where: {
+        token: input.token,
+      },
+    });
+    if (!logTokenEntity) {
+      return {
+        code: 400,
+        message: 'Username นี้ ถูก Block',
+      };
+    } else {
+      memberEntity = await this.memberRepository.findOne({
+        where: {
+          member_id: logTokenEntity.member_id,
+        },
+      });
+      if (!memberEntity || memberEntity.is_block === '1') {
+        return {
+          code: 400,
+          message: 'Username นี้ ถูก Block',
+        };
+      }
+    }
+
+    await this.logPlantImportNowRepository
+      .createQueryBuilder()
+      .where('barcode >= :barcode_start', {
+        barcode_start: input.barcode_start,
+      })
+      .andWhere('barcode <= :barcode_end', {
+        barcode_end: input.barcode_end,
+      })
+      .delete()
+      .execute();
+
+    await this.logPlantImportRepository
+      .createQueryBuilder()
+      .where('barcode >= :barcode_start', {
+        barcode_start: input.barcode_start,
+      })
+      .andWhere('barcode <= :barcode_end', {
+        barcode_end: input.barcode_end,
+      })
+      .delete()
+      .execute();
+
+    return {
+      code: 200,
     };
   }
 }

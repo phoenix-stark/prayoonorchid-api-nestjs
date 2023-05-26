@@ -29,7 +29,7 @@ export class MemberWithBarcodeController {
   @Delete()
   @HttpCode(200)
   async deleteMember(
-    @Query() input: MemberWithBarcodeDeleteInput,
+    @Body() input: MemberWithBarcodeDeleteInput,
   ): Promise<any> {
     return await this.memberWithBarcodeService.deleteMember(input);
   }

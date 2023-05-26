@@ -13,6 +13,8 @@ import { LogRemoveCreateInput } from './dto/log-remove-create.input';
 import { LogRemoveDeleteInput } from './dto/log-remove-delete.input';
 import { LogRemoveUpdateInput } from './dto/log-remove-update.input';
 import { LogRemoveUpdateAllInput } from './dto/log-remove-update-all.input';
+import { LogRemoveDeleteRangeBarcodeInput } from './dto/log-remove-delete-range-barcode.input';
+import { LogRemoveDeleteByReceiptIdInput } from './dto/log-remove-delete-by-receipt-id.input';
 
 @Controller('log-plant-remove')
 export class LogPlantRemoveController {
@@ -40,5 +42,21 @@ export class LogPlantRemoveController {
   @HttpCode(200)
   async deleteBarcode(@Body() input: LogRemoveDeleteInput): Promise<any> {
     return await this.logPlantRemoveService.deleteBarcode(input);
+  }
+
+  @Delete('range-barcode')
+  @HttpCode(200)
+  async deleteBarcodeRangeBarcode(
+    @Body() input: LogRemoveDeleteRangeBarcodeInput,
+  ): Promise<any> {
+    return await this.logPlantRemoveService.deleteBarcodeRangeBarcode(input);
+  }
+
+  @Delete('receipt')
+  @HttpCode(200)
+  async deleteBarcodeByReceiptId(
+    @Body() input: LogRemoveDeleteByReceiptIdInput,
+  ): Promise<any> {
+    return await this.logPlantRemoveService.deleteBarcodeByReceiptId(input);
   }
 }

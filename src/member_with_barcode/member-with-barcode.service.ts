@@ -38,7 +38,9 @@ export class MemberWithBarcodeService {
   }
 
   async deleteMember(input: MemberWithBarcodeDeleteInput): Promise<any> {
-    await this.memberWithBarcodeRepository
+    console.log(input);
+
+    const r = await this.memberWithBarcodeRepository
       .createQueryBuilder()
       .where('member_id = :member_id', { member_id: input.member_id })
       .andWhere('barcode_start = :barcode_start', {
@@ -47,7 +49,8 @@ export class MemberWithBarcodeService {
       .andWhere('barcode_end = :barcode_end', {
         barcode_end: input.barcode_end,
       })
-      .delete();
+      .delete()
+      .execute();
     return {
       code: 200,
     };

@@ -13,6 +13,8 @@ import { LogRemoveUpdateInput } from './dto/log-remove-update.input';
 import { MemberWithBarcodeGetByBarcodeInput } from 'src/member_with_barcode/dto/member-with-barcode-get-by-barcode.input';
 import { MemberWithBarcodeService } from 'src/member_with_barcode/member-with-barcode.service';
 import { LogRemoveUpdateAllInput } from './dto/log-remove-update-all.input';
+import { LogRemoveDeleteRangeBarcodeInput } from './dto/log-remove-delete-range-barcode.input';
+import { LogRemoveDeleteByReceiptIdInput } from './dto/log-remove-delete-by-receipt-id.input';
 
 @Injectable()
 export class LogPlantRemoveService {
@@ -71,7 +73,7 @@ export class LogPlantRemoveService {
     } else {
       // TIME PER DAY
       let timePerDay = input.time_per_day;
-      if (timePerDay === '0') {
+      if (timePerDay == '0') {
         const logPlantRemoveNowTimePerDayRepository =
           await this.logPlantRemoveNowRepository.findOne({
             where: {
@@ -129,7 +131,7 @@ export class LogPlantRemoveService {
         data: {
           log_plant_id: newLogPlant.log_plant_import_id,
           time_per_day: timePerDay,
-          isNew: isNew,
+          is_new: isNew,
         },
       };
     }
@@ -330,6 +332,28 @@ export class LogPlantRemoveService {
     };
   }
 
+  async deleteBarcodeByReceiptId(
+    input: LogRemoveDeleteByReceiptIdInput,
+  ): Promise<any> {
+    await this.logPlantRemoveRepository
+      .createQueryBuilder()
+      .where('receipt_id = :receipt_id', {
+        receipt_id: input.receipt_id,
+      })
+      .delete()
+      .execute();
+    await this.logPlantRemoveNowRepository
+      .createQueryBuilder()
+      .where('receipt_id = :receipt_id', {
+        receipt_id: input.receipt_id,
+      })
+      .delete()
+      .execute();
+    return {
+      code: 200,
+    };
+  }
+
   async deleteBarcode(input: LogRemoveDeleteInput): Promise<any> {
     // Check Member
     let memberEntity = null;
@@ -372,6 +396,61 @@ export class LogPlantRemoveService {
     await this.logPlantRemoveRepository.remove(logPlantRemoveEntity);
     return {
       data: {},
+    };
+  }
+
+  async deleteBarcodeRangeBarcode(
+    input: LogRemoveDeleteRangeBarcodeInput,
+  ): Promise<any> {
+    // Check Member
+    let memberEntity = null;
+    const logTokenEntity = await this.logTokenRepository.findOne({
+      where: {
+        token: input.token,
+      },
+    });
+    if (!logTokenEntity) {
+      return {
+        code: 400,
+        message: 'Username นี้ ถูก Block',
+      };
+    } else {
+      memberEntity = await this.memberRepository.findOne({
+        where: {
+          member_id: logTokenEntity.member_id,
+        },
+      });
+      if (!memberEntity || memberEntity.is_block === '1') {
+        return {
+          code: 400,
+          message: 'Username นี้ ถูก Block',
+        };
+      }
+    }
+
+    await this.logPlantRemoveRepository
+      .createQueryBuilder()
+      .where('barcode >= :barcode_start', {
+        barcode_start: input.barcode_start,
+      })
+      .andWhere('barcode <= :barcode_end', {
+        barcode_end: input.barcode_end,
+      })
+      .delete()
+      .execute();
+
+    await this.logPlantRemoveNowRepository
+      .createQueryBuilder()
+      .where('barcode >= :barcode_start', {
+        barcode_start: input.barcode_start,
+      })
+      .andWhere('barcode <= :barcode_end', {
+        barcode_end: input.barcode_end,
+      })
+      .delete()
+      .execute();
+    return {
+      code: 200,
     };
   }
 }

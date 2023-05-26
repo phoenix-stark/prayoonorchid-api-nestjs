@@ -5,14 +5,19 @@ import { PlantFamilyMain } from 'src/plant-family-main/entity/plant-family-main-
 import { Repository } from 'typeorm';
 import { ReceiptGetInput } from './dto/receipt-get-input';
 import { Receipt } from './entity/receipt-entity.model';
+import { ReceiptDeleteInput } from './dto/receipt-delete-input';
+import { LogToken } from 'src/log_token/entity/log-token-entity.model';
+import { Member } from 'src/member/entity/member-entity.model';
 
 @Injectable()
 export class ReceiptService {
   constructor(
     @InjectRepository(Receipt)
     private readonly receiptRepository: Repository<Receipt>,
-    @InjectRepository(PlantFamilyMain)
-    private readonly plantFamilyMainRepository: Repository<PlantFamilyMain>,
+    @InjectRepository(Member)
+    private readonly memberRepository: Repository<Member>,
+    @InjectRepository(LogToken)
+    private readonly logTokenRepository: Repository<LogToken>,
   ) {}
 
   async getReceipts(input: ReceiptGetInput): Promise<any[]> {
@@ -40,5 +45,45 @@ export class ReceiptService {
     console.log(sqlStr);
 
     return receipts;
+  }
+
+  async deleteReceipt(input: ReceiptDeleteInput): Promise<any> {
+    // Check Member
+    let memberEntity = null;
+    const logTokenEntity = await this.logTokenRepository.findOne({
+      where: {
+        token: input.token,
+      },
+    });
+    if (!logTokenEntity) {
+      return {
+        code: 400,
+        message: 'Username นี้ ถูก Block',
+      };
+    } else {
+      memberEntity = await this.memberRepository.findOne({
+        where: {
+          member_id: logTokenEntity.member_id,
+        },
+      });
+      if (!memberEntity || memberEntity.is_block === '1') {
+        return {
+          code: 400,
+          message: 'Username นี้ ถูก Block',
+        };
+      }
+    }
+
+    // ss
+    await this.receiptRepository
+      .createQueryBuilder()
+      .where('receipt_id = :receipt_id', { receipt_id: input.receipt_id })
+      .delete()
+      .execute();
+    return {
+      data: {
+        code: 200,
+      },
+    };
   }
 }
