@@ -24,7 +24,7 @@ export class TasksService {
       .where('create_at <= :currentDate', {
         currentDate: this.momentWrapper
           .moment()
-          .add(-90, 'days')
+          .add(-30, 'days')
           .format('YYYY-MM-DD'),
       })
       .getMany();
@@ -33,13 +33,13 @@ export class TasksService {
       .where('create_at <= :currentDate', {
         currentDate: this.momentWrapper
           .moment()
-          .add(-90, 'days')
+          .add(-30, 'days')
           .format('YYYY-MM-DD'),
       })
       .getMany();
     console.log(
       'DATE: ' +
-        this.momentWrapper.moment().add(-90, 'days').format('YYYY-MM-DD'),
+        this.momentWrapper.moment().add(-30, 'days').format('YYYY-MM-DD'),
     );
     console.log('logImportNow: ' + logImportNow.length);
     console.log('logRemovetNow: ' + logRemovetNow.length);
