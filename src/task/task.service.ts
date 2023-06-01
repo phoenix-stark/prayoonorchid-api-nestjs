@@ -16,7 +16,7 @@ export class TasksService {
     private momentWrapper: MomentService,
   ) {}
 
-  @Cron('0 0 * * * *')
+  @Cron('0 1 * * * *')
   async handleCron() {
     console.log('Called when 00:00');
     const logImportNow = await this.logPlantImportNowRepository
@@ -27,7 +27,8 @@ export class TasksService {
           .add(-30, 'days')
           .format('YYYY-MM-DD'),
       })
-      .getMany();
+      .delete()
+      .execute();
     const logRemovetNow = await this.logPlantRemoveNowRepository
       .createQueryBuilder()
       .where('create_at <= :currentDate', {
@@ -36,12 +37,11 @@ export class TasksService {
           .add(-30, 'days')
           .format('YYYY-MM-DD'),
       })
-      .getMany();
+      .delete()
+      .execute();
     console.log(
       'DATE: ' +
         this.momentWrapper.moment().add(-30, 'days').format('YYYY-MM-DD'),
     );
-    console.log('logImportNow: ' + logImportNow.length);
-    console.log('logRemovetNow: ' + logRemovetNow.length);
   }
 }
