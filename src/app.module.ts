@@ -21,6 +21,10 @@ import { SourcesWorkTypeModule } from './sources_work_type/sources-work-type.mod
 import { SourcesPlantRemoveType } from './sources_plant_remove_type/entity/sources-plant-remove-type-entity.model';
 import { SourcesPlantRemoveTypeModule } from './sources_plant_remove_type/sources-plant-remove-type.module';
 import { MomentService } from './utils/MomentService';
+import { MemberWithBarcodeModule } from './member_with_barcode/member-with-barcode.module';
+import { LogTokenModule } from './log_token/log-token.module';
+import { ScheduleModule } from '@nestjs/schedule';
+import { TasksModule } from './task/task.module';
 
 @Module({
   imports: [
@@ -58,6 +62,10 @@ import { MomentService } from './utils/MomentService';
     SourcesWorkTypeModule,
     MemberModule,
     SourcesPlantRemoveTypeModule,
+    MemberWithBarcodeModule,
+    LogTokenModule,
+    ScheduleModule.forRoot(),
+    TasksModule,
   ],
   controllers: [AppController],
   providers: [AppService],
