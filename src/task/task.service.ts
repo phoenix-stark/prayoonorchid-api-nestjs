@@ -16,19 +16,9 @@ export class TasksService {
     private momentWrapper: MomentService,
   ) {}
 
-  @Cron('0 1 * * * *')
+  @Cron('0 1 * * *')
   async handleCron() {
-    console.log('Called when 00:00');
-    const logImportNow = await this.logPlantImportNowRepository
-      .createQueryBuilder()
-      .where('create_at <= :currentDate', {
-        currentDate: this.momentWrapper
-          .moment()
-          .add(-30, 'days')
-          .format('YYYY-MM-DD'),
-      })
-      .delete()
-      .execute();
+    console.log('Called when 01:00');
     const logRemovetNow = await this.logPlantRemoveNowRepository
       .createQueryBuilder()
       .where('create_at <= :currentDate', {
@@ -37,8 +27,36 @@ export class TasksService {
           .add(-30, 'days')
           .format('YYYY-MM-DD'),
       })
-      .delete()
-      .execute();
+      .getMany();
+    const total = logRemovetNow.length;
+    console.log('DATA: ' + total);
+    for (let i = 0; i < logRemovetNow.length; i++) {
+      const barcode = logRemovetNow[i].barcode;
+      const create_at = logRemovetNow[i].create_at;
+      console.log(
+        i +
+          ' / ' +
+          total +
+          ' : CREATE : ' +
+          create_at +
+          ', BARCODE : ' +
+          barcode,
+      );
+      await this.logPlantImportNowRepository
+        .createQueryBuilder()
+        .where('barcode = :barcode', {
+          barcode: barcode,
+        })
+        .delete()
+        .execute();
+      await this.logPlantRemoveNowRepository
+        .createQueryBuilder()
+        .where('barcode = :barcode', {
+          barcode: barcode,
+        })
+        .delete()
+        .execute();
+    }
     console.log(
       'DATE: ' +
         this.momentWrapper.moment().add(-30, 'days').format('YYYY-MM-DD'),
