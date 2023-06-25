@@ -27,6 +27,7 @@ export class TasksService {
           .add(-30, 'days')
           .format('YYYY-MM-DD'),
       })
+      .andWhere('plant_remove_type_id IS NOT NULL')
       .getMany();
     const total = logRemovetNow.length;
     console.log('DATA: ' + total);
