@@ -82,7 +82,7 @@ export class LogPlantImportService {
       const logPlantImportNowEntity =
         await this.logPlantImportNowRepository.findOne({
           where: {
-            barcode: `${input.barcode}`,
+            barcode: `${input.barcode.toString().trim()}`,
           },
         });
       if (logPlantImportNowEntity) {
@@ -171,7 +171,7 @@ export class LogPlantImportService {
 
         // INSERT
         const logEntity = new LogPlantImportNow();
-        logEntity.barcode = `${input.barcode}`;
+        logEntity.barcode = `${input.barcode.toString().trim()}`;
         logEntity.create_at = this.momentWrapper
           .moment()
           .format('YYYY-MM-DD HH:mm:ss');
