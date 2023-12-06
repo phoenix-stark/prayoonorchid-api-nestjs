@@ -62,7 +62,7 @@ export class LogPlantRemoveService {
 
     const logPlantImport = await this.logPlantImportNowRepository.findOne({
       where: {
-        barcode: `${input.barcode}`,
+        barcode: `${input.barcode.toString()}`,
       },
     });
     if (!logPlantImport) {
