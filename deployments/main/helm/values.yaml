@@ -55,13 +55,13 @@ containerPorts:
 
 # Resources Allocation
 #   Specify requests for allocation resources and limits for maximum of resources usage
-resources: {}
-#  requests:
-#    cpu: 50m
-#    memory: 100Mi
-#  limits:
-#    cpu: 50m
-#    memory: 100Mi
+resources:
+  requests:
+    cpu: 100m
+    memory: 250Mi
+  limits:
+    cpu: 250m
+    memory: 500Mi
 
 # Service
 #   Act as load balancer in front of your pod.
