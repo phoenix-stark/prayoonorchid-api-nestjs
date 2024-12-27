@@ -7,7 +7,6 @@ import { ExcelModule } from './excel/excel.module';
 import { AppConfigModule } from './config/app';
 import { DbConfigModule, DbConfigService } from './config/database';
 import { ReceiptModule } from './receipt/receipt.module';
-import { PlantFamilyMain } from './plant-family-main/entity/plant-family-main-entity.model';
 import { PlantFamilyMainModule } from './plant-family-main/plant-family-main.module';
 import { CustomerModule } from './customer/customer.module';
 import { LogPlantImportModule } from './log_plant_import/log-plant-import.module';
@@ -15,16 +14,15 @@ import { ReportModule } from './report/report.module';
 import { LogPlantRemoveModule } from './log_plant_remove/log-plant-remove.module';
 import { FoodPlantModule } from './food_plant/food-plant.module';
 import { SourcesWorkMainTypeModule } from './sources_work_main_type/sources-work-main-type.module';
-import { SourcesWorkType } from './sources_work_type/entity/sources-work-type-entity.model';
 import { MemberModule } from './member/member.module';
 import { SourcesWorkTypeModule } from './sources_work_type/sources-work-type.module';
-import { SourcesPlantRemoveType } from './sources_plant_remove_type/entity/sources-plant-remove-type-entity.model';
 import { SourcesPlantRemoveTypeModule } from './sources_plant_remove_type/sources-plant-remove-type.module';
 import { MomentService } from './utils/MomentService';
 import { MemberWithBarcodeModule } from './member_with_barcode/member-with-barcode.module';
 import { LogTokenModule } from './log_token/log-token.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { TasksModule } from './task/task.module';
+import { SourcesGrantModule } from './sources_grant/sources-grant.module';
 
 @Module({
   imports: [
@@ -66,6 +64,7 @@ import { TasksModule } from './task/task.module';
     LogTokenModule,
     ScheduleModule.forRoot(),
     TasksModule,
+    SourcesGrantModule,
   ],
   controllers: [AppController],
   providers: [AppService],
