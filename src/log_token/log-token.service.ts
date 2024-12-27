@@ -33,6 +33,9 @@ export class LogTokenService {
         token: input.token,
       },
     });
+    if (!logTokenEntity || !input || !input.token) {
+      return null;
+    }
     return logTokenEntity;
   }
 

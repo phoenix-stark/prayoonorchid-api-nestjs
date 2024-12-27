@@ -8,6 +8,7 @@ import { Receipt } from './entity/receipt-entity.model';
 import { ReceiptDeleteInput } from './dto/receipt-delete-input';
 import { LogToken } from 'src/log_token/entity/log-token-entity.model';
 import { Member } from 'src/member/entity/member-entity.model';
+import { ReceiptGetTotalByCustomerIdInput } from './dto/receipt-get-total-by-customer-id';
 
 @Injectable()
 export class ReceiptService {
@@ -85,5 +86,17 @@ export class ReceiptService {
         code: 200,
       },
     };
+  }
+
+  async getReceiptTotalByCustomer(
+    input: ReceiptGetTotalByCustomerIdInput,
+  ): Promise<any> {
+    const results = await this.receiptRepository.find({
+      where: {
+        customer_id: input.customer_id,
+      },
+    });
+
+    return results.length;
   }
 }
