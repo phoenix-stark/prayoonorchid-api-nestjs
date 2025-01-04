@@ -13,7 +13,7 @@ import { LogPlantImportModule } from './log_plant_import/log-plant-import.module
 import { ReportModule } from './report/report.module';
 import { LogPlantRemoveModule } from './log_plant_remove/log-plant-remove.module';
 import { FoodPlantModule } from './food-plant/food-plant.module';
-import { SourcesWorkMainTypeModule } from './sources_work_main_type/sources-work-main-type.module';
+import { SourcesWorkMainTypeModule } from './sources-work-main-type/sources-work-main-type.module';
 import { MemberModule } from './member/member.module';
 import { SourcesWorkTypeModule } from './sources_work_type/sources-work-type.module';
 import { SourcesPlantRemoveTypeModule } from './sources_plant_remove_type/sources-plant-remove-type.module';

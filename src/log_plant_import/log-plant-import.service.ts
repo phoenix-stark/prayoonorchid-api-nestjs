@@ -19,6 +19,7 @@ import { LogPlantRemoveNow } from 'src/log_plant_remove/entity/log-plant-remove-
 import { LogImportDeleteRangeBarcodeInput } from './dto/log-import-delete-range-barcode.input';
 import { LogImportDeleteByReceiptIdInput } from './dto/log-import-delete-by-receipt-id.input';
 import { LogImportGetTotalByFoodIdInput } from './dto/log-import-get-total-by-foodid.input';
+import { LogImportGetTotalByWorkMainTypeIdInput } from './dto/log-import-get-total-by-workmaintypeid.input';
 
 @Injectable()
 export class LogPlantImportService {
@@ -500,6 +501,18 @@ export class LogPlantImportService {
     const results = await this.logPlantImportRepository.find({
       where: {
         food_plant_id: input.food_id,
+      },
+    });
+
+    return results.length;
+  }
+
+  async getLogPlantImportTotalByWorkMainType(
+    input: LogImportGetTotalByWorkMainTypeIdInput,
+  ): Promise<any> {
+    const results = await this.logPlantImportRepository.find({
+      where: {
+        main_work_type_id: input.main_work_type_id,
       },
     });
 
