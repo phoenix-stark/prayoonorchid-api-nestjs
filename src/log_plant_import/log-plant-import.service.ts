@@ -7,7 +7,7 @@ import { LogImportCreateInput } from './dto/log-import-create.input';
 import { MomentService } from 'src/utils/MomentService';
 import { MemberWithBarcodeService } from 'src/member_with_barcode/member-with-barcode.service';
 import { MemberWithBarcodeGetByBarcodeInput } from 'src/member_with_barcode/dto/member-with-barcode-get-by-barcode.input';
-import { FoodPlant } from 'src/food_plant/entity/food-plant-entity.model';
+import { FoodPlant } from 'src/food-plant/entity/food-plant-entity.model';
 import { SourcesWorkType } from 'src/sources_work_type/entity/sources-work-type-entity.model';
 import { Member } from 'src/member/entity/member-entity.model';
 import { LogToken } from 'src/log_token/entity/log-token-entity.model';

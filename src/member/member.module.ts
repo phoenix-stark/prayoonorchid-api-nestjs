@@ -4,7 +4,7 @@ import { Member } from './entity/member-entity.model';
 import { LogTokenModule } from 'src/log_token/log-token.module';
 import { MemberController } from './member.controller';
 import { MemberService } from './member.service';
-import { SourcesGrantModule } from 'src/sources_grant/sources-grant.module';
+import { SourcesGrantModule } from 'src/sources-grant/sources-grant.module';
 import { MomentService } from 'src/utils/MomentService';
 
 @Module({

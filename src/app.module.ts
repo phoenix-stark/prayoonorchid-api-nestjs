@@ -12,7 +12,7 @@ import { CustomerModule } from './customer/customer.module';
 import { LogPlantImportModule } from './log_plant_import/log-plant-import.module';
 import { ReportModule } from './report/report.module';
 import { LogPlantRemoveModule } from './log_plant_remove/log-plant-remove.module';
-import { FoodPlantModule } from './food_plant/food-plant.module';
+import { FoodPlantModule } from './food-plant/food-plant.module';
 import { SourcesWorkMainTypeModule } from './sources_work_main_type/sources-work-main-type.module';
 import { MemberModule } from './member/member.module';
 import { SourcesWorkTypeModule } from './sources_work_type/sources-work-type.module';
@@ -22,7 +22,7 @@ import { MemberWithBarcodeModule } from './member_with_barcode/member-with-barco
 import { LogTokenModule } from './log_token/log-token.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { TasksModule } from './task/task.module';
-import { SourcesGrantModule } from './sources_grant/sources-grant.module';
+import { SourcesGrantModule } from './sources-grant/sources-grant.module';
 import { PlantFamilySecondaryModule } from './plant-family-secondary/plant-family-secondary.module';
 
 @Module({
