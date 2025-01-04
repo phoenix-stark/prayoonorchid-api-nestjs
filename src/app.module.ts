@@ -23,6 +23,7 @@ import { LogTokenModule } from './log_token/log-token.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { TasksModule } from './task/task.module';
 import { SourcesGrantModule } from './sources_grant/sources-grant.module';
+import { PlantFamilySecondaryModule } from './plant-family-secondary/plant-family-secondary.module';
 
 @Module({
   imports: [
@@ -65,6 +66,7 @@ import { SourcesGrantModule } from './sources_grant/sources-grant.module';
     ScheduleModule.forRoot(),
     TasksModule,
     SourcesGrantModule,
+    PlantFamilySecondaryModule,
   ],
   controllers: [AppController],
   providers: [AppService],
