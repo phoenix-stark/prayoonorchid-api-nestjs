@@ -8,7 +8,7 @@ import { LogPlantRemove } from 'src/log_plant_remove/entity/log-plant-remove-ent
 import { Member } from 'src/member/entity/member-entity.model';
 import { PlantFamilyMain } from 'src/plant-family-main/entity/plant-family-main-entity.model';
 import { Receipt } from 'src/receipt/entity/receipt-entity.model';
-import { SourcesPlantRemoveType } from 'src/sources_plant_remove_type/entity/sources-plant-remove-type-entity.model';
+import { SourcesPlantRemoveType } from 'src/sources-plant-remove-type/entity/sources-plant-remove-type-entity.model';
 import { SourcesWorkMainType } from 'src/sources-work-main-type/entity/sources-work-main-type-entity.model';
 import { SourcesWorkType } from 'src/sources-work-type/entity/sources-work-type-entity.model';
 import { Connection, MoreThan, Repository } from 'typeorm';
