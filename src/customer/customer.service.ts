@@ -12,7 +12,7 @@ import { MomentService } from 'src/utils/MomentService';
 import { LogTokenService } from 'src/log_token/log-token.service';
 import { LogTokenGetInput } from 'src/log_token/dto/log-token-get.input';
 import { ReceiptService } from 'src/receipt/receipt.service';
-import { ReceiptGetTotalByCustomerIdInput } from 'src/receipt/dto/receipt-get-total-by-customer-id';
+import { ReceiptGetTotalByCustomerIdInput } from 'src/receipt/dto/receipt-get-total-by-customer-id-input';
 
 @Injectable()
 export class CustomerService {

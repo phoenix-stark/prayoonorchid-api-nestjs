@@ -8,7 +8,8 @@ import { Receipt } from './entity/receipt-entity.model';
 import { ReceiptDeleteInput } from './dto/receipt-delete-input';
 import { LogToken } from 'src/log_token/entity/log-token-entity.model';
 import { Member } from 'src/member/entity/member-entity.model';
-import { ReceiptGetTotalByCustomerIdInput } from './dto/receipt-get-total-by-customer-id';
+import { ReceiptGetTotalByCustomerIdInput } from './dto/receipt-get-total-by-customer-id-input';
+import { ReceiptGetTotalByPlantFamilyMainIdInput } from './dto/receipt-get-total-by-plant-family-main-id-input';
 
 @Injectable()
 export class ReceiptService {
@@ -94,6 +95,18 @@ export class ReceiptService {
     const results = await this.receiptRepository.find({
       where: {
         customer_id: input.customer_id,
+      },
+    });
+
+    return results.length;
+  }
+
+  async getReceiptTotalByPlantFamilyMain(
+    input: ReceiptGetTotalByPlantFamilyMainIdInput,
+  ): Promise<any> {
+    const results = await this.receiptRepository.find({
+      where: {
+        family_main_id: input.family_main_id,
       },
     });
 
