@@ -6,7 +6,7 @@ import { LogPlantImport } from 'src/log_plant_import/entity/log-plant-import-ent
 import { LogPlantRemove } from 'src/log_plant_remove/entity/log-plant-remove-entity.model';
 import { MemberModule } from 'src/member/member.module';
 import { SourcesWorkMainType } from 'src/sources-work-main-type/entity/sources-work-main-type-entity.model';
-import { SourcesWorkType } from 'src/sources_work_type/entity/sources-work-type-entity.model';
+import { SourcesWorkType } from 'src/sources-work-type/entity/sources-work-type-entity.model';
 import { ReportController } from './report.controller';
 import { ReportService } from './report.service';
 

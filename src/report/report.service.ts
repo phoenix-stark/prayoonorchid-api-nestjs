@@ -10,7 +10,7 @@ import { PlantFamilyMain } from 'src/plant-family-main/entity/plant-family-main-
 import { Receipt } from 'src/receipt/entity/receipt-entity.model';
 import { SourcesPlantRemoveType } from 'src/sources_plant_remove_type/entity/sources-plant-remove-type-entity.model';
 import { SourcesWorkMainType } from 'src/sources-work-main-type/entity/sources-work-main-type-entity.model';
-import { SourcesWorkType } from 'src/sources_work_type/entity/sources-work-type-entity.model';
+import { SourcesWorkType } from 'src/sources-work-type/entity/sources-work-type-entity.model';
 import { Connection, MoreThan, Repository } from 'typeorm';
 import { ReportGetInput } from './dto/report-get.input';
 import { FilterObject } from './modal/filter';

@@ -5,7 +5,7 @@ import { LogPlantImportService } from './log-plant-import.service';
 import { LogPlantImportNow } from './entity/log-plant-import-now-entity.model';
 import { Member } from 'src/member/entity/member-entity.model';
 import { FoodPlant } from 'src/food-plant/entity/food-plant-entity.model';
-import { SourcesWorkType } from 'src/sources_work_type/entity/sources-work-type-entity.model';
+import { SourcesWorkType } from 'src/sources-work-type/entity/sources-work-type-entity.model';
 import { LogToken } from 'src/log_token/entity/log-token-entity.model';
 import { MemberWithBarcodeService } from 'src/member_with_barcode/member-with-barcode.service';
 import { MomentService } from 'src/utils/MomentService';

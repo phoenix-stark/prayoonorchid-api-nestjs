@@ -8,7 +8,7 @@ import { MomentService } from 'src/utils/MomentService';
 import { MemberWithBarcodeService } from 'src/member_with_barcode/member-with-barcode.service';
 import { MemberWithBarcodeGetByBarcodeInput } from 'src/member_with_barcode/dto/member-with-barcode-get-by-barcode.input';
 import { FoodPlant } from 'src/food-plant/entity/food-plant-entity.model';
-import { SourcesWorkType } from 'src/sources_work_type/entity/sources-work-type-entity.model';
+import { SourcesWorkType } from 'src/sources-work-type/entity/sources-work-type-entity.model';
 import { Member } from 'src/member/entity/member-entity.model';
 import { LogToken } from 'src/log_token/entity/log-token-entity.model';
 import { Receipt } from 'src/receipt/entity/receipt-entity.model';
@@ -20,6 +20,7 @@ import { LogImportDeleteRangeBarcodeInput } from './dto/log-import-delete-range-
 import { LogImportDeleteByReceiptIdInput } from './dto/log-import-delete-by-receipt-id.input';
 import { LogImportGetTotalByFoodIdInput } from './dto/log-import-get-total-by-foodid.input';
 import { LogImportGetTotalByWorkMainTypeIdInput } from './dto/log-import-get-total-by-workmaintypeid.input';
+import { LogImportGetTotalByWorkTypeIdInput } from './dto/log-import-get-total-by-worktypeid.input';
 
 @Injectable()
 export class LogPlantImportService {
@@ -513,6 +514,18 @@ export class LogPlantImportService {
     const results = await this.logPlantImportRepository.find({
       where: {
         main_work_type_id: input.main_work_type_id,
+      },
+    });
+
+    return results.length;
+  }
+
+  async getLogPlantImportTotalByWorkType(
+    input: LogImportGetTotalByWorkTypeIdInput,
+  ): Promise<any> {
+    const results = await this.logPlantImportRepository.find({
+      where: {
+        work_type_id: input.work_type_id,
       },
     });
 

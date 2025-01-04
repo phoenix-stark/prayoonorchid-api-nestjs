@@ -15,7 +15,7 @@ import { LogPlantRemoveModule } from './log_plant_remove/log-plant-remove.module
 import { FoodPlantModule } from './food-plant/food-plant.module';
 import { SourcesWorkMainTypeModule } from './sources-work-main-type/sources-work-main-type.module';
 import { MemberModule } from './member/member.module';
-import { SourcesWorkTypeModule } from './sources_work_type/sources-work-type.module';
+import { SourcesWorkTypeModule } from './sources-work-type/sources-work-type.module';
 import { SourcesPlantRemoveTypeModule } from './sources_plant_remove_type/sources-plant-remove-type.module';
 import { MomentService } from './utils/MomentService';
 import { MemberWithBarcodeModule } from './member_with_barcode/member-with-barcode.module';
