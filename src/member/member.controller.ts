@@ -16,7 +16,7 @@ import { MemberUpdateInput } from './dto/member-update.input';
 import { MemberUpdateBlockInput } from './dto/member-update-block.input';
 import { MemberGetAllInput } from './dto/member-get-all';
 import { MemberGetByIdInput } from './dto/member-get-by-id.input';
-import { MemberSearchInput } from './dto/member-search';
+import { MemberSearchInput } from './dto/member-search.input';
 
 @Controller('member')
 export class MemberController {

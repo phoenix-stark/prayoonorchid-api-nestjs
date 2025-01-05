@@ -17,7 +17,7 @@ import { MemberUpdateInput } from './dto/member-update.input';
 import { MemberUpdateBlockInput } from './dto/member-update-block.input';
 import { MemberGetByIdInput } from './dto/member-get-by-id.input';
 import { MemberGetAllInput } from './dto/member-get-all';
-import { MemberSearchInput } from './dto/member-search';
+import { MemberSearchInput } from './dto/member-search.input';
 
 @Injectable()
 export class MemberService {

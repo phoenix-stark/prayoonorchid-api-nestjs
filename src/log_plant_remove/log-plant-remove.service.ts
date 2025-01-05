@@ -1,64 +1,59 @@
-import { Injectable } from '@nestjs/common';
+import {
+  forwardRef,
+  HttpException,
+  HttpStatus,
+  Inject,
+  Injectable,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { LogPlantRemove } from './entity/log-plant-remove-entity.model';
 import { LogRemoveCreateInput } from './dto/log-remove-create.input';
-import { LogToken } from 'src/log_token/entity/log-token-entity.model';
-import { Member } from 'src/member/entity/member-entity.model';
 import { MomentService } from 'src/utils/MomentService';
 import { LogPlantImportNow } from 'src/log_plant_import/entity/log-plant-import-now-entity.model';
 import { LogPlantRemoveNow } from './entity/log-plant-remove-now-entity.model';
 import { LogRemoveDeleteInput } from './dto/log-remove-delete.input';
 import { LogRemoveUpdateInput } from './dto/log-remove-update.input';
-import { MemberWithBarcodeGetByBarcodeInput } from 'src/member_with_barcode/dto/member-with-barcode-get-by-barcode.input';
-import { MemberWithBarcodeService } from 'src/member_with_barcode/member-with-barcode.service';
 import { LogRemoveUpdateAllInput } from './dto/log-remove-update-all.input';
 import { LogRemoveDeleteRangeBarcodeInput } from './dto/log-remove-delete-range-barcode.input';
 import { LogRemoveDeleteByReceiptIdInput } from './dto/log-remove-delete-by-receipt-id.input';
+import { MemberWithBarcodeGetByBarcodeInput } from 'src/member-with-barcode/dto/member-with-barcode-get-by-barcode.input';
+import { MemberWithBarcodeService } from 'src/member-with-barcode/member-with-barcode.service';
+import { LogTokenService } from 'src/log_token/log-token.service';
+import { LogTokenGetInput } from 'src/log_token/dto/log-token-get.input';
 
 @Injectable()
 export class LogPlantRemoveService {
   constructor(
+    @Inject(forwardRef(() => LogTokenService))
+    private readonly logTokenService: LogTokenService,
+    @Inject(forwardRef(() => MemberWithBarcodeService))
+    private readonly memberWithBarcodeService: MemberWithBarcodeService,
     @InjectRepository(LogPlantRemove)
     private readonly logPlantRemoveRepository: Repository<LogPlantRemove>,
     @InjectRepository(LogPlantRemoveNow)
     private readonly logPlantRemoveNowRepository: Repository<LogPlantRemoveNow>,
     @InjectRepository(LogPlantImportNow)
     private readonly logPlantImportNowRepository: Repository<LogPlantImportNow>,
-    @InjectRepository(Member)
-    private readonly memberRepository: Repository<Member>,
-    @InjectRepository(LogToken)
-    private readonly logTokenRepository: Repository<LogToken>,
-    private memberWithBarcodeService: MemberWithBarcodeService,
     private momentWrapper: MomentService,
   ) {}
 
   async insertBarcode(input: LogRemoveCreateInput): Promise<any> {
     // Check Member
-    let memberEntity = null;
-    const logTokenEntity = await this.logTokenRepository.findOne({
-      where: {
-        token: input.token,
-      },
-    });
+    const logTokenEntity = await this.logTokenService.getLogToken({
+      token: input.token,
+    } as LogTokenGetInput);
+
     if (!logTokenEntity) {
-      return {
-        code: 400,
-        message: 'Username นี้ ถูก Block',
-      };
-    } else {
-      memberEntity = await this.memberRepository.findOne({
-        where: {
-          member_id: logTokenEntity.member_id,
-        },
-      });
-      if (!memberEntity || memberEntity.is_block === '1') {
-        return {
+      throw new HttpException(
+        {
           code: 400,
           message: 'Username นี้ ถูก Block',
-        };
-      }
+        },
+        HttpStatus.BAD_REQUEST,
+      );
     }
+    const createBy = logTokenEntity.member_id;
 
     const logPlantImport = await this.logPlantImportNowRepository.findOne({
       where: {
@@ -114,7 +109,7 @@ export class LogPlantRemoveService {
       logEntity.create_at = this.momentWrapper
         .moment()
         .format('YYYY-MM-DD HH:mm:ss');
-      logEntity.create_by = memberEntity.member_id;
+      logEntity.create_by = createBy;
 
       logEntity.plant_remove_type_id = input.plant_remove_type_id;
       logEntity.receipt_id = input.reciept_id;
@@ -143,30 +138,20 @@ export class LogPlantRemoveService {
 
   async updateBarcode(input: LogRemoveUpdateInput): Promise<any> {
     // Check Member
-    let memberEntity = null;
-    const logTokenEntity = await this.logTokenRepository.findOne({
-      where: {
-        token: input.token,
-      },
-    });
+    const logTokenEntity = await this.logTokenService.getLogToken({
+      token: input.token,
+    } as LogTokenGetInput);
+
     if (!logTokenEntity) {
-      return {
-        code: 400,
-        message: 'Username นี้ ถูก Block',
-      };
-    } else {
-      memberEntity = await this.memberRepository.findOne({
-        where: {
-          member_id: logTokenEntity.member_id,
-        },
-      });
-      if (!memberEntity || memberEntity.is_block === '1') {
-        return {
+      throw new HttpException(
+        {
           code: 400,
           message: 'Username นี้ ถูก Block',
-        };
-      }
+        },
+        HttpStatus.BAD_REQUEST,
+      );
     }
+    const createBy = logTokenEntity.member_id;
 
     // Check Barcode
     const memberWithBarcodeEntity =
@@ -228,7 +213,7 @@ export class LogPlantRemoveService {
       logPlantRemoveNow.remove_date = input.remove_date;
       logPlantRemoveNow.plant_remove_type_id = input.plant_remove_type_id;
       logPlantRemoveNow.receipt_id = logPlantImport.receipt_id;
-      logPlantRemoveNow.create_by = memberEntity.member_id;
+      logPlantRemoveNow.create_by = createBy;
       logPlantRemoveNow.remark = input.remark;
       logPlantRemoveNow.time_per_day = parseInt(timePerDay);
       await this.logPlantRemoveRepository.save(logPlantRemoveNow);
@@ -242,11 +227,11 @@ export class LogPlantRemoveService {
         logPlantRemoveNow.remove_date = null;
         logPlantRemoveNow.plant_remove_type_id = null;
         logPlantRemoveNow.remark = '';
-        logPlantRemoveNow.create_by = memberEntity.member_id;
+        logPlantRemoveNow.create_by = createBy;
       } else {
         logPlantRemoveNow.remove_date = input.remove_date;
         logPlantRemoveNow.plant_remove_type_id = input.plant_remove_type_id;
-        logPlantRemoveNow.create_by = memberEntity.member_id;
+        logPlantRemoveNow.create_by = createBy;
         logPlantRemoveNow.remark = input.remark;
       }
 
@@ -263,30 +248,20 @@ export class LogPlantRemoveService {
 
   async updateBarcodeAll(input: LogRemoveUpdateAllInput): Promise<any> {
     // Check Member
-    let memberEntity = null;
-    const logTokenEntity = await this.logTokenRepository.findOne({
-      where: {
-        token: input.token,
-      },
-    });
+    const logTokenEntity = await this.logTokenService.getLogToken({
+      token: input.token,
+    } as LogTokenGetInput);
+
     if (!logTokenEntity) {
-      return {
-        code: 400,
-        message: 'Username นี้ ถูก Block',
-      };
-    } else {
-      memberEntity = await this.memberRepository.findOne({
-        where: {
-          member_id: logTokenEntity.member_id,
-        },
-      });
-      if (!memberEntity || memberEntity.is_block === '1') {
-        return {
+      throw new HttpException(
+        {
           code: 400,
           message: 'Username นี้ ถูก Block',
-        };
-      }
+        },
+        HttpStatus.BAD_REQUEST,
+      );
     }
+    const createBy = logTokenEntity.member_id;
 
     for (let i = 0; i < input.barcodes.length; i++) {
       const barcode = input.barcodes[i];
@@ -306,7 +281,7 @@ export class LogPlantRemoveService {
         if (logPlantRemoveNow) {
           logPlantRemoveNow.remove_date = input.remove_date;
           logPlantRemoveNow.plant_remove_type_id = input.plant_remove_type_id;
-          logPlantRemoveNow.create_by = memberEntity.member_id;
+          logPlantRemoveNow.create_by = createBy;
           logPlantRemoveNow.remark = input.remark;
           await this.logPlantRemoveNowRepository.save(logPlantRemoveNow);
         }
@@ -319,7 +294,7 @@ export class LogPlantRemoveService {
         if (logPlantRemove) {
           logPlantRemove.remove_date = input.remove_date;
           logPlantRemove.plant_remove_type_id = input.plant_remove_type_id;
-          logPlantRemove.create_by = memberEntity.member_id;
+          logPlantRemove.create_by = createBy;
           logPlantRemove.remark = input.remark;
           await this.logPlantRemoveRepository.save(logPlantRemove);
         }
@@ -356,29 +331,18 @@ export class LogPlantRemoveService {
 
   async deleteBarcode(input: LogRemoveDeleteInput): Promise<any> {
     // Check Member
-    let memberEntity = null;
-    const logTokenEntity = await this.logTokenRepository.findOne({
-      where: {
-        token: input.token,
-      },
-    });
+    const logTokenEntity = await this.logTokenService.getLogToken({
+      token: input.token,
+    } as LogTokenGetInput);
+
     if (!logTokenEntity) {
-      return {
-        code: 400,
-        message: 'Username นี้ ถูก Block',
-      };
-    } else {
-      memberEntity = await this.memberRepository.findOne({
-        where: {
-          member_id: logTokenEntity.member_id,
-        },
-      });
-      if (!memberEntity || memberEntity.is_block === '1') {
-        return {
+      throw new HttpException(
+        {
           code: 400,
           message: 'Username นี้ ถูก Block',
-        };
-      }
+        },
+        HttpStatus.BAD_REQUEST,
+      );
     }
 
     const logPlantRemoveNowEntity =
@@ -403,29 +367,18 @@ export class LogPlantRemoveService {
     input: LogRemoveDeleteRangeBarcodeInput,
   ): Promise<any> {
     // Check Member
-    let memberEntity = null;
-    const logTokenEntity = await this.logTokenRepository.findOne({
-      where: {
-        token: input.token,
-      },
-    });
+    const logTokenEntity = await this.logTokenService.getLogToken({
+      token: input.token,
+    } as LogTokenGetInput);
+
     if (!logTokenEntity) {
-      return {
-        code: 400,
-        message: 'Username นี้ ถูก Block',
-      };
-    } else {
-      memberEntity = await this.memberRepository.findOne({
-        where: {
-          member_id: logTokenEntity.member_id,
-        },
-      });
-      if (!memberEntity || memberEntity.is_block === '1') {
-        return {
+      throw new HttpException(
+        {
           code: 400,
           message: 'Username นี้ ถูก Block',
-        };
-      }
+        },
+        HttpStatus.BAD_REQUEST,
+      );
     }
 
     await this.logPlantRemoveRepository

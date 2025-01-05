@@ -18,12 +18,12 @@ import { MemberModule } from './member/member.module';
 import { SourcesWorkTypeModule } from './sources-work-type/sources-work-type.module';
 import { SourcesPlantRemoveTypeModule } from './sources-plant-remove-type/sources-plant-remove-type.module';
 import { MomentService } from './utils/MomentService';
-import { MemberWithBarcodeModule } from './member_with_barcode/member-with-barcode.module';
 import { LogTokenModule } from './log_token/log-token.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { TasksModule } from './task/task.module';
 import { SourcesGrantModule } from './sources-grant/sources-grant.module';
 import { PlantFamilySecondaryModule } from './plant-family-secondary/plant-family-secondary.module';
+import { MemberWithBarcodeModule } from './member-with-barcode/member-with-barcode.module';
 
 @Module({
   imports: [
