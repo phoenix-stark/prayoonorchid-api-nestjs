@@ -1,7 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { Cron } from '@nestjs/schedule';
 import { InjectRepository } from '@nestjs/typeorm';
-import { LogPlantImportNow } from 'src/log_plant_import/entity/log-plant-import-now-entity.model';
+import { LogPlantImportNow } from 'src/log-plant-import/entity/log-plant-import-now-entity.model';
 import { LogPlantRemoveNow } from 'src/log_plant_remove/entity/log-plant-remove-now-entity.model';
 import { MomentService } from 'src/utils/MomentService';
 import { Repository } from 'typeorm';

@@ -1,4 +1,10 @@
-import { Injectable } from '@nestjs/common';
+import {
+  forwardRef,
+  HttpException,
+  HttpStatus,
+  Inject,
+  Injectable,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { LogPlantImport } from './entity/log-plant-import-entity.model';
@@ -8,7 +14,6 @@ import { MomentService } from 'src/utils/MomentService';
 import { FoodPlant } from 'src/food-plant/entity/food-plant-entity.model';
 import { SourcesWorkType } from 'src/sources-work-type/entity/sources-work-type-entity.model';
 import { Member } from 'src/member/entity/member-entity.model';
-import { LogToken } from 'src/log_token/entity/log-token-entity.model';
 import { Receipt } from 'src/receipt/entity/receipt-entity.model';
 import { LogImportUpdateInput } from './dto/log-import-update.input';
 import { LogImportUpdateAllInput } from './dto/log-import-update-all.input';
@@ -21,10 +26,14 @@ import { LogImportGetTotalByWorkMainTypeIdInput } from './dto/log-import-get-tot
 import { LogImportGetTotalByWorkTypeIdInput } from './dto/log-import-get-total-by-worktypeid.input';
 import { MemberWithBarcodeGetByBarcodeInput } from 'src/member-with-barcode/dto/member-with-barcode-get-by-barcode.input';
 import { MemberWithBarcodeService } from 'src/member-with-barcode/member-with-barcode.service';
+import { LogTokenService } from 'src/log-token/log-token.service';
+import { LogTokenGetInput } from 'src/log-token/dto/log-token-get.input';
 
 @Injectable()
 export class LogPlantImportService {
   constructor(
+    @Inject(forwardRef(() => LogTokenService))
+    private readonly logTokenService: LogTokenService,
     @InjectRepository(Receipt)
     private readonly receiptRepository: Repository<Receipt>,
     @InjectRepository(LogPlantImport)
@@ -39,8 +48,6 @@ export class LogPlantImportService {
     private readonly sourcesWorkTypeRepository: Repository<SourcesWorkType>,
     @InjectRepository(Member)
     private readonly memberRepository: Repository<Member>,
-    @InjectRepository(LogToken)
-    private readonly logTokenRepository: Repository<LogToken>,
     private memberWithBarcodeService: MemberWithBarcodeService,
     private momentWrapper: MomentService,
   ) {}
@@ -51,30 +58,20 @@ export class LogPlantImportService {
 
   async insertBarcode(input: LogImportCreateInput): Promise<any> {
     // Check Member
-    let memberEntity = null;
-    const logTokenEntity = await this.logTokenRepository.findOne({
-      where: {
-        token: input.token,
-      },
-    });
+    const logTokenEntity = await this.logTokenService.getLogToken({
+      token: input.token,
+    } as LogTokenGetInput);
+
     if (!logTokenEntity) {
-      return {
-        code: 400,
-        message: 'Username นี้ ถูก Block',
-      };
-    } else {
-      memberEntity = await this.memberRepository.findOne({
-        where: {
-          member_id: logTokenEntity.member_id,
-        },
-      });
-      if (!memberEntity || memberEntity.is_block === '1') {
-        return {
+      throw new HttpException(
+        {
           code: 400,
           message: 'Username นี้ ถูก Block',
-        };
-      }
+        },
+        HttpStatus.BAD_REQUEST,
+      );
     }
+    const createBy = logTokenEntity.member_id;
 
     // Check Barcode
     const memberWithBarcodeEntity =
@@ -178,7 +175,7 @@ export class LogPlantImportService {
         logEntity.create_at = this.momentWrapper
           .moment()
           .format('YYYY-MM-DD HH:mm:ss');
-        logEntity.create_by = memberEntity.member_id;
+        logEntity.create_by = createBy;
         logEntity.food_plant_id = `${foodEntity.food_id}`;
         logEntity.import_date = input.import_date;
         logEntity.main_work_type_id = input.main_work_type_id;
@@ -218,30 +215,20 @@ export class LogPlantImportService {
 
   async updateBarcode(input: LogImportUpdateInput): Promise<any> {
     // Check Member
-    let memberEntity = null;
-    const logTokenEntity = await this.logTokenRepository.findOne({
-      where: {
-        token: input.token,
-      },
-    });
+    const logTokenEntity = await this.logTokenService.getLogToken({
+      token: input.token,
+    } as LogTokenGetInput);
+
     if (!logTokenEntity) {
-      return {
-        code: 400,
-        message: 'Username นี้ ถูก Block',
-      };
-    } else {
-      memberEntity = await this.memberRepository.findOne({
-        where: {
-          member_id: logTokenEntity.member_id,
-        },
-      });
-      if (!memberEntity || memberEntity.is_block === '1') {
-        return {
+      throw new HttpException(
+        {
           code: 400,
           message: 'Username นี้ ถูก Block',
-        };
-      }
+        },
+        HttpStatus.BAD_REQUEST,
+      );
     }
+    const createBy = logTokenEntity.member_id;
 
     const logPlantImportNowEntity =
       await this.logPlantImportNowRepository.findOne({
@@ -288,30 +275,20 @@ export class LogPlantImportService {
 
   async updateBarcodeAll(input: LogImportUpdateAllInput): Promise<any> {
     // Check Member
-    let memberEntity = null;
-    const logTokenEntity = await this.logTokenRepository.findOne({
-      where: {
-        token: input.token,
-      },
-    });
+    const logTokenEntity = await this.logTokenService.getLogToken({
+      token: input.token,
+    } as LogTokenGetInput);
+
     if (!logTokenEntity) {
-      return {
-        code: 400,
-        message: 'Username นี้ ถูก Block',
-      };
-    } else {
-      memberEntity = await this.memberRepository.findOne({
-        where: {
-          member_id: logTokenEntity.member_id,
-        },
-      });
-      if (!memberEntity || memberEntity.is_block === '1') {
-        return {
+      throw new HttpException(
+        {
           code: 400,
           message: 'Username นี้ ถูก Block',
-        };
-      }
+        },
+        HttpStatus.BAD_REQUEST,
+      );
     }
+    const createBy = logTokenEntity.member_id;
 
     const receiptEntity = await this.receiptRepository.findOne({
       where: {
@@ -360,30 +337,20 @@ export class LogPlantImportService {
 
   async deleteBarcode(input: LogImportDeleteInput): Promise<any> {
     // Check Member
-    let memberEntity = null;
-    const logTokenEntity = await this.logTokenRepository.findOne({
-      where: {
-        token: input.token,
-      },
-    });
+    const logTokenEntity = await this.logTokenService.getLogToken({
+      token: input.token,
+    } as LogTokenGetInput);
+
     if (!logTokenEntity) {
-      return {
-        code: 400,
-        message: 'Username นี้ ถูก Block',
-      };
-    } else {
-      memberEntity = await this.memberRepository.findOne({
-        where: {
-          member_id: logTokenEntity.member_id,
-        },
-      });
-      if (!memberEntity || memberEntity.is_block === '1') {
-        return {
+      throw new HttpException(
+        {
           code: 400,
           message: 'Username นี้ ถูก Block',
-        };
-      }
+        },
+        HttpStatus.BAD_REQUEST,
+      );
     }
+    const createBy = logTokenEntity.member_id;
 
     const logPlantRemoveNowEntity =
       await this.logPlantRemoveNowRepository.findOne({
@@ -444,30 +411,20 @@ export class LogPlantImportService {
     input: LogImportDeleteRangeBarcodeInput,
   ): Promise<any> {
     // Check Member
-    let memberEntity = null;
-    const logTokenEntity = await this.logTokenRepository.findOne({
-      where: {
-        token: input.token,
-      },
-    });
+    const logTokenEntity = await this.logTokenService.getLogToken({
+      token: input.token,
+    } as LogTokenGetInput);
+
     if (!logTokenEntity) {
-      return {
-        code: 400,
-        message: 'Username นี้ ถูก Block',
-      };
-    } else {
-      memberEntity = await this.memberRepository.findOne({
-        where: {
-          member_id: logTokenEntity.member_id,
-        },
-      });
-      if (!memberEntity || memberEntity.is_block === '1') {
-        return {
+      throw new HttpException(
+        {
           code: 400,
           message: 'Username นี้ ถูก Block',
-        };
-      }
+        },
+        HttpStatus.BAD_REQUEST,
+      );
     }
+    const createBy = logTokenEntity.member_id;
 
     await this.logPlantImportNowRepository
       .createQueryBuilder()

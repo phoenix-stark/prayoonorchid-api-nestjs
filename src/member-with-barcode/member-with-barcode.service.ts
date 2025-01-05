@@ -6,8 +6,8 @@ import { MemberWithBarcodeGetByBarcodeInput } from './dto/member-with-barcode-ge
 import { MemberWithBarcodeDeleteInput } from './dto/member-with-barcode-delete.input';
 import { MemberWithBarcodeCreateInput } from './dto/member-with-barcode-create.input';
 import { MomentService } from 'src/utils/MomentService';
-import { LogTokenService } from 'src/log_token/log-token.service';
-import { LogTokenGetInput } from 'src/log_token/dto/log-token-get.input';
+import { LogTokenService } from 'src/log-token/log-token.service';
+import { LogTokenGetInput } from 'src/log-token/dto/log-token-get.input';
 import { MemberWithBarcodeUpdateInput } from './dto/member-with-barcode-update.input';
 import { MemberWithBarcodeSearchInput } from './dto/member-with-barcode-search.input';
 import { MemberWithBarcodeGetAllInput } from './dto/member-with-barcode-get-all.input';

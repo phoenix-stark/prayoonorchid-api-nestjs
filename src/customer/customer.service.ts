@@ -9,8 +9,8 @@ import { CustomerGetAllInput } from './dto/customer-get-all.input';
 import { CustomerGetByIdInput } from './dto/customer-get-by-id.input';
 import { CustomerSearchInput } from './dto/customer-search';
 import { MomentService } from 'src/utils/MomentService';
-import { LogTokenService } from 'src/log_token/log-token.service';
-import { LogTokenGetInput } from 'src/log_token/dto/log-token-get.input';
+import { LogTokenService } from 'src/log-token/log-token.service';
+import { LogTokenGetInput } from 'src/log-token/dto/log-token-get.input';
 import { ReceiptService } from 'src/receipt/receipt.service';
 import { ReceiptGetTotalByCustomerIdInput } from 'src/receipt/dto/receipt-get-total-by-customer-id-input';
 

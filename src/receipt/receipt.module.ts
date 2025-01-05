@@ -6,7 +6,7 @@ import { Receipt } from './entity/receipt-entity.model';
 import { ReceiptController } from './receipt.controller';
 import { ReceiptService } from './receipt.service';
 import { Member } from 'src/member/entity/member-entity.model';
-import { LogToken } from 'src/log_token/entity/log-token-entity.model';
+import { LogToken } from 'src/log-token/entity/log-token-entity.model';
 
 @Module({
   imports: [

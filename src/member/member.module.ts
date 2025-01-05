@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Member } from './entity/member-entity.model';
-import { LogTokenModule } from 'src/log_token/log-token.module';
+import { LogTokenModule } from 'src/log-token/log-token.module';
 import { MemberController } from './member.controller';
 import { MemberService } from './member.service';
 import { SourcesGrantModule } from 'src/sources-grant/sources-grant.module';

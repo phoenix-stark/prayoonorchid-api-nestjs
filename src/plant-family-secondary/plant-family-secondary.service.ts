@@ -1,13 +1,13 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { LogTokenService } from 'src/log_token/log-token.service';
+import { LogTokenService } from 'src/log-token/log-token.service';
 import { PlantFamilyMain } from 'src/plant-family-main/entity/plant-family-main-entity.model';
 import { MomentService } from 'src/utils/MomentService';
 import { Repository } from 'typeorm';
 import { PlantFamilySecondaryCreateInput } from './dto/plant-family-secondary-create.input';
 import { PlantFamilySecondaryGetAllInput } from './dto/plant-family-secondary-get-all.input';
 import { PlantFamilySecondaryGetByIdInput } from './dto/plant-family-secondary-get-by-id.input';
-import { LogTokenGetInput } from 'src/log_token/dto/log-token-get.input';
+import { LogTokenGetInput } from 'src/log-token/dto/log-token-get.input';
 import { PlantFamilySecondary } from './entity/plant-family-secondary-entity.model';
 
 @Injectable()

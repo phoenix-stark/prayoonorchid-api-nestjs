@@ -3,8 +3,8 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { FoodPlant } from './entity/food-plant-entity.model';
 import { FoodPlantService } from './food-plant.service';
 import { MomentService } from 'src/utils/MomentService';
-import { LogTokenModule } from 'src/log_token/log-token.module';
-import { LogPlantImportModule } from 'src/log_plant_import/log-plant-import.module';
+import { LogTokenModule } from 'src/log-token/log-token.module';
+import { LogPlantImportModule } from 'src/log-plant-import/log-plant-import.module';
 import { FoodPlantController } from './food-plant.controller';
 
 @Module({

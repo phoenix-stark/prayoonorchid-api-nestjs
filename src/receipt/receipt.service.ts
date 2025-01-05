@@ -6,7 +6,7 @@ import { Repository } from 'typeorm';
 import { ReceiptGetInput } from './dto/receipt-get-input';
 import { Receipt } from './entity/receipt-entity.model';
 import { ReceiptDeleteInput } from './dto/receipt-delete-input';
-import { LogToken } from 'src/log_token/entity/log-token-entity.model';
+import { LogToken } from 'src/log-token/entity/log-token-entity.model';
 import { Member } from 'src/member/entity/member-entity.model';
 import { ReceiptGetTotalByCustomerIdInput } from './dto/receipt-get-total-by-customer-id-input';
 import { ReceiptGetTotalByPlantFamilyMainIdInput } from './dto/receipt-get-total-by-plant-family-main-id-input';

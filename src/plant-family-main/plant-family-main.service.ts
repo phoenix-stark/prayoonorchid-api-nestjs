@@ -1,6 +1,6 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { LogTokenService } from 'src/log_token/log-token.service';
+import { LogTokenService } from 'src/log-token/log-token.service';
 import { PlantFamilyMain } from 'src/plant-family-main/entity/plant-family-main-entity.model';
 import { MomentService } from 'src/utils/MomentService';
 import { Like, Repository } from 'typeorm';
@@ -9,7 +9,7 @@ import { PlantFamilyMainUpdateInput } from './dto/plant-family-main-update.input
 import { PlantFamilyMainDeleteInput } from './dto/plant-family-main-delete.input';
 import { PlantFamilyMainGetAllInput } from './dto/plant-family-main-get-all.input';
 import { PlantFamilyMainGetByIdInput } from './dto/plant-family-main-get-by-id.input';
-import { LogTokenGetInput } from 'src/log_token/dto/log-token-get.input';
+import { LogTokenGetInput } from 'src/log-token/dto/log-token-get.input';
 import { PlantFamilyMainSearchInput } from './dto/plant-family-main-search';
 import { ReceiptService } from 'src/receipt/receipt.service';
 import { ReceiptGetTotalByPlantFamilyMainIdInput } from 'src/receipt/dto/receipt-get-total-by-plant-family-main-id-input';

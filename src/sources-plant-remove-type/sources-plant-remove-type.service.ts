@@ -1,9 +1,9 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { LogTokenService } from 'src/log_token/log-token.service';
+import { LogTokenService } from 'src/log-token/log-token.service';
 import { MomentService } from 'src/utils/MomentService';
 import { Repository } from 'typeorm';
-import { LogTokenGetInput } from 'src/log_token/dto/log-token-get.input';
+import { LogTokenGetInput } from 'src/log-token/dto/log-token-get.input';
 import { SourcesWorkMainTypeGetByIdInput } from 'src/sources-work-main-type/dto/sources-work-main-type-get-by-id.input';
 import { SourcesPlantRemoveTypeGetAllInput } from './dto/sources-plant-remove-type-get-all.input';
 import { SourcesPlantRemoveType } from './entity/sources-plant-remove-type-entity.model';

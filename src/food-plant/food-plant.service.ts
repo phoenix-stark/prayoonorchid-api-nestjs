@@ -2,8 +2,8 @@ import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Like, Repository } from 'typeorm';
 import { FoodPlant } from './entity/food-plant-entity.model';
-import { LogTokenGetInput } from 'src/log_token/dto/log-token-get.input';
-import { LogTokenService } from 'src/log_token/log-token.service';
+import { LogTokenGetInput } from 'src/log-token/dto/log-token-get.input';
+import { LogTokenService } from 'src/log-token/log-token.service';
 import { MomentService } from 'src/utils/MomentService';
 import { FoodPlantCreateInput } from './dto/food-plant-create.input';
 import { FoodPlantUpdateInput } from './dto/food-plant-update.input';
@@ -11,8 +11,8 @@ import { FoodPlantDeleteInput } from './dto/food-plant-delete.input';
 import { FoodPlantGetAllInput } from './dto/food-plant-get-all.input';
 import { FoodPlantGetByIdInput } from './dto/food-plant-get-by-id.input';
 import { FoodPlantSearchInput } from './dto/food-plant-search';
-import { LogPlantImportService } from 'src/log_plant_import/log-plant-import.service';
-import { LogImportGetTotalByFoodIdInput } from 'src/log_plant_import/dto/log-import-get-total-by-foodid.input';
+import { LogPlantImportService } from 'src/log-plant-import/log-plant-import.service';
+import { LogImportGetTotalByFoodIdInput } from 'src/log-plant-import/dto/log-import-get-total-by-foodid.input';
 @Injectable()
 export class FoodPlantService {
   constructor(

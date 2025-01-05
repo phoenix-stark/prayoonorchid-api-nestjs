@@ -4,8 +4,8 @@ import { Repository } from 'typeorm';
 import { SourcesGrantInput } from './dto/sources-grant.input';
 import { SourcesGrant } from './entity/sources-grant-entity.model';
 import { SourcesGrantGetAllInput } from './dto/sources-grant-get-all.input';
-import { LogTokenService } from 'src/log_token/log-token.service';
-import { LogTokenGetInput } from 'src/log_token/dto/log-token-get.input';
+import { LogTokenService } from 'src/log-token/log-token.service';
+import { LogTokenGetInput } from 'src/log-token/dto/log-token-get.input';
 
 @Injectable()
 export class SourcesGrantService {

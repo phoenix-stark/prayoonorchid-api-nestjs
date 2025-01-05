@@ -3,7 +3,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { CustomerService } from './customer.service';
 import { Customer } from './entity/customer-entity.model';
 import { MomentService } from 'src/utils/MomentService';
-import { LogTokenModule } from 'src/log_token/log-token.module';
+import { LogTokenModule } from 'src/log-token/log-token.module';
 import { ReceiptModule } from 'src/receipt/receipt.module';
 import { CustomerController } from './customer.controller';
 

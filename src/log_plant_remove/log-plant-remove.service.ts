@@ -10,7 +10,7 @@ import { Repository } from 'typeorm';
 import { LogPlantRemove } from './entity/log-plant-remove-entity.model';
 import { LogRemoveCreateInput } from './dto/log-remove-create.input';
 import { MomentService } from 'src/utils/MomentService';
-import { LogPlantImportNow } from 'src/log_plant_import/entity/log-plant-import-now-entity.model';
+import { LogPlantImportNow } from 'src/log-plant-import/entity/log-plant-import-now-entity.model';
 import { LogPlantRemoveNow } from './entity/log-plant-remove-now-entity.model';
 import { LogRemoveDeleteInput } from './dto/log-remove-delete.input';
 import { LogRemoveUpdateInput } from './dto/log-remove-update.input';
@@ -19,8 +19,8 @@ import { LogRemoveDeleteRangeBarcodeInput } from './dto/log-remove-delete-range-
 import { LogRemoveDeleteByReceiptIdInput } from './dto/log-remove-delete-by-receipt-id.input';
 import { MemberWithBarcodeGetByBarcodeInput } from 'src/member-with-barcode/dto/member-with-barcode-get-by-barcode.input';
 import { MemberWithBarcodeService } from 'src/member-with-barcode/member-with-barcode.service';
-import { LogTokenService } from 'src/log_token/log-token.service';
-import { LogTokenGetInput } from 'src/log_token/dto/log-token-get.input';
+import { LogTokenService } from 'src/log-token/log-token.service';
+import { LogTokenGetInput } from 'src/log-token/dto/log-token-get.input';
 
 @Injectable()
 export class LogPlantRemoveService {

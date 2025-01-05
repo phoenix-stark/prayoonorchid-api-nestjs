@@ -3,7 +3,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { MemberWithBarcode } from './entity/member-with-barcode-entity.model';
 import { MemberWithBarcodeController } from './member-with-barcode.controller';
 import { MemberWithBarcodeService } from './member-with-barcode.service';
-import { LogTokenModule } from 'src/log_token/log-token.module';
+import { LogTokenModule } from 'src/log-token/log-token.module';
 import { MomentService } from 'src/utils/MomentService';
 
 @Module({
