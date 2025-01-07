@@ -4,7 +4,7 @@ import moment from 'moment-timezone';
 import { Customer } from 'src/customer/entity/customer-entity.model';
 import { FoodPlant } from 'src/food-plant/entity/food-plant-entity.model';
 import { LogPlantImport } from 'src/log-plant-import/entity/log-plant-import-entity.model';
-import { LogPlantRemove } from 'src/log_plant_remove/entity/log-plant-remove-entity.model';
+import { LogPlantRemove } from 'src/log-plant-remove/entity/log-plant-remove-entity.model';
 import { Member } from 'src/member/entity/member-entity.model';
 import { PlantFamilyMain } from 'src/plant-family-main/entity/plant-family-main-entity.model';
 import { Receipt } from 'src/receipt/entity/receipt-entity.model';

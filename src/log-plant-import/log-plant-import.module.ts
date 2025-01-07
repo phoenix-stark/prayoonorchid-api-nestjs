@@ -10,10 +10,11 @@ import { LogToken } from 'src/log-token/entity/log-token-entity.model';
 import { MomentService } from 'src/utils/MomentService';
 import { LogPlantImportController } from './log-plant-import.controller';
 import { Receipt } from 'src/receipt/entity/receipt-entity.model';
-import { LogPlantRemoveNow } from 'src/log_plant_remove/entity/log-plant-remove-now-entity.model';
+import { LogPlantRemoveNow } from 'src/log-plant-remove/entity/log-plant-remove-now-entity.model';
 import { MemberWithBarcode } from 'src/member-with-barcode/entity/member-with-barcode-entity.model';
 import { MemberWithBarcodeModule } from 'src/member-with-barcode/member-with-barcode.module';
 import { LogTokenModule } from 'src/log-token/log-token.module';
+import { ReceiptModule } from 'src/receipt/receipt.module';
 
 @Module({
   imports: [
@@ -28,6 +29,7 @@ import { LogTokenModule } from 'src/log-token/log-token.module';
       Receipt,
     ]),
     MemberWithBarcodeModule,
+    ReceiptModule,
     forwardRef(() => LogTokenModule),
   ],
   controllers: [LogPlantImportController],

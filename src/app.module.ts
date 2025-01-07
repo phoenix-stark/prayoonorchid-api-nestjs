@@ -11,7 +11,7 @@ import { PlantFamilyMainModule } from './plant-family-main/plant-family-main.mod
 import { CustomerModule } from './customer/customer.module';
 import { LogPlantImportModule } from './log-plant-import/log-plant-import.module';
 import { ReportModule } from './report/report.module';
-import { LogPlantRemoveModule } from './log_plant_remove/log-plant-remove.module';
+import { LogPlantRemoveModule } from './log-plant-remove/log-plant-remove.module';
 import { FoodPlantModule } from './food-plant/food-plant.module';
 import { SourcesWorkMainTypeModule } from './sources-work-main-type/sources-work-main-type.module';
 import { MemberModule } from './member/member.module';

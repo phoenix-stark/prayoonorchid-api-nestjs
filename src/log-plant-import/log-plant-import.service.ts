@@ -18,7 +18,7 @@ import { Receipt } from 'src/receipt/entity/receipt-entity.model';
 import { LogImportUpdateInput } from './dto/log-import-update.input';
 import { LogImportUpdateAllInput } from './dto/log-import-update-all.input';
 import { LogImportDeleteInput } from './dto/log-import-delete.input';
-import { LogPlantRemoveNow } from 'src/log_plant_remove/entity/log-plant-remove-now-entity.model';
+import { LogPlantRemoveNow } from 'src/log-plant-remove/entity/log-plant-remove-now-entity.model';
 import { LogImportDeleteRangeBarcodeInput } from './dto/log-import-delete-range-barcode.input';
 import { LogImportDeleteByReceiptIdInput } from './dto/log-import-delete-by-receipt-id.input';
 import { LogImportGetTotalByFoodIdInput } from './dto/log-import-get-total-by-foodid.input';
@@ -28,6 +28,10 @@ import { MemberWithBarcodeGetByBarcodeInput } from 'src/member-with-barcode/dto/
 import { MemberWithBarcodeService } from 'src/member-with-barcode/member-with-barcode.service';
 import { LogTokenService } from 'src/log-token/log-token.service';
 import { LogTokenGetInput } from 'src/log-token/dto/log-token-get.input';
+import { LogImportGetByReceiptIdInput } from './dto/log-import-get-by-receipt-id.input';
+import { PlantFamilyMain } from 'src/plant-family-main/entity/plant-family-main-entity.model';
+import { ReceiptService } from 'src/receipt/receipt.service';
+import { LogImportGetDetailByBarcodeInput } from './dto/log-import-get-detail-by-barcode.input';
 
 @Injectable()
 export class LogPlantImportService {
@@ -49,6 +53,7 @@ export class LogPlantImportService {
     @InjectRepository(Member)
     private readonly memberRepository: Repository<Member>,
     private memberWithBarcodeService: MemberWithBarcodeService,
+    private receiptService: ReceiptService,
     private momentWrapper: MomentService,
   ) {}
 
@@ -487,5 +492,192 @@ export class LogPlantImportService {
     });
 
     return results.length;
+  }
+
+  async getLogPlantImportByReceipt(
+    input: LogImportGetByReceiptIdInput,
+  ): Promise<any> {
+    // Check Member
+    const logTokenEntity = await this.logTokenService.getLogToken({
+      token: input.token,
+    } as LogTokenGetInput);
+
+    if (!logTokenEntity) {
+      throw new HttpException(
+        {
+          code: 400,
+          message: 'Username นี้ ถูก Block',
+        },
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    const result = await this.logPlantImportRepository
+      .createQueryBuilder('log_plant_import')
+      .leftJoinAndSelect(
+        Member,
+        'member',
+        'member.member_id = log_plant_import.member_made',
+      )
+      .leftJoinAndSelect(
+        PlantFamilyMain,
+        'plant_family_main',
+        'plant_family_main.id = log_plant_import.main_work_type_id',
+      )
+      .leftJoinAndSelect(
+        SourcesWorkType,
+        'sources_work_type',
+        'sources_work_type.id = log_plant_import.work_type_id',
+      )
+      .leftJoinAndSelect(
+        FoodPlant,
+        'food_plant',
+        'food_plant.food_id = log_plant_import.food_plant_id',
+      )
+      .where('log_plant_import.receipt_id = :receipt_id', {
+        receipt_id: input.receipt_id,
+      })
+      .select([
+        'log_plant_import.log_plant_import_id',
+        'log_plant_import.barcode',
+        'log_plant_import.receipt_id',
+        'log_plant_import.member_made',
+        'log_plant_import.import_date',
+        'log_plant_import.food_plant_id',
+        'log_plant_import.main_work_type_id',
+        'log_plant_import.work_type_id',
+        'member',
+        'plant_family_main',
+        'food_plant',
+      ])
+      .orderBy('log_plant_import.import_date', 'DESC')
+      .getRawMany();
+    const logPlantImportEntities = result.map((row: any) => ({
+      log_plant_import_id: row.log_plant_import_log_plant_import_id,
+      barcode: row.log_plant_import_barcode,
+      import_date: row.log_plant_import_import_date,
+      member_made: {
+        member_id: row.member_member_id,
+        username: row.member_username,
+        name: row.member_name,
+        surname: row.member_surname,
+      },
+      main_work_type: {
+        id: row.plant_family_main_id,
+        description: row.plant_family_main_description,
+      },
+      work_type: {
+        id: row.food_plant_food_id,
+        description: row.food_plant_description,
+      },
+      food_plant: {
+        food_id: row.food_plant_food_id,
+        description: row.food_plant_description,
+      },
+    }));
+    return {
+      code: 200,
+      data: logPlantImportEntities,
+    };
+    return result;
+  }
+
+  async getLogPlantImportDetailByBarcode(
+    input: LogImportGetDetailByBarcodeInput,
+  ): Promise<any> {
+    // Check Member
+    const logTokenEntity = await this.logTokenService.getLogToken({
+      token: input.token,
+    } as LogTokenGetInput);
+
+    if (!logTokenEntity) {
+      throw new HttpException(
+        {
+          code: 400,
+          message: 'Username นี้ ถูก Block',
+        },
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    const result = await this.logPlantImportRepository
+      .createQueryBuilder('log_plant_import')
+      .leftJoinAndSelect(
+        Member,
+        'member',
+        'member.member_id = log_plant_import.member_made',
+      )
+      .leftJoinAndSelect(
+        PlantFamilyMain,
+        'plant_family_main',
+        'plant_family_main.id = log_plant_import.main_work_type_id',
+      )
+      .leftJoinAndSelect(
+        SourcesWorkType,
+        'sources_work_type',
+        'sources_work_type.id = log_plant_import.work_type_id',
+      )
+      .leftJoinAndSelect(
+        FoodPlant,
+        'food_plant',
+        'food_plant.food_id = log_plant_import.food_plant_id',
+      )
+      .leftJoinAndSelect(
+        Receipt,
+        'receipt',
+        'receipt.receipt_id = log_plant_import.receipt_id',
+      )
+      .where('log_plant_import.barcode = :barcode', {
+        barcode: input.barcode,
+      })
+      .select([
+        'log_plant_import.log_plant_import_id',
+        'log_plant_import.barcode',
+        'log_plant_import.receipt_id',
+        'log_plant_import.member_made',
+        'log_plant_import.import_date',
+        'log_plant_import.food_plant_id',
+        'log_plant_import.main_work_type_id',
+        'log_plant_import.work_type_id',
+        'member',
+        'receipt',
+        'plant_family_main',
+        'food_plant',
+      ])
+      .orderBy('log_plant_import.import_date', 'DESC')
+      .getRawMany();
+
+    const logPlantImportEntities = result.map((row: any) => ({
+      log_plant_import_id: row.log_plant_import_log_plant_import_id,
+      barcode: row.log_plant_import_barcode,
+      import_date: row.log_plant_import_import_date,
+      member_made: {
+        member_id: row.member_member_id,
+        username: row.member_username,
+        name: row.member_name,
+        surname: row.member_surname,
+      },
+      receipt: {
+        receipt_id: row.receipt_receipt_id,
+        code: row.receipt_code,
+      },
+      main_work_type: {
+        id: row.plant_family_main_id,
+        description: row.plant_family_main_description,
+      },
+      work_type: {
+        id: row.food_plant_food_id,
+        description: row.food_plant_description,
+      },
+      food_plant: {
+        food_id: row.food_plant_food_id,
+        description: row.food_plant_description,
+      },
+    }));
+    return {
+      code: 200,
+      data: logPlantImportEntities,
+    };
+    return result;
   }
 }

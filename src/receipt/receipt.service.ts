@@ -10,6 +10,8 @@ import { LogToken } from 'src/log-token/entity/log-token-entity.model';
 import { Member } from 'src/member/entity/member-entity.model';
 import { ReceiptGetTotalByCustomerIdInput } from './dto/receipt-get-total-by-customer-id-input';
 import { ReceiptGetTotalByPlantFamilyMainIdInput } from './dto/receipt-get-total-by-plant-family-main-id-input';
+import { ReceiptGetByIdInput } from './dto/receipt-get-by-id.input';
+import { FoodPlant } from 'src/food-plant/entity/food-plant-entity.model';
 
 @Injectable()
 export class ReceiptService {
@@ -111,5 +113,84 @@ export class ReceiptService {
     });
 
     return results.length;
+  }
+
+  async getReceiptById(input: ReceiptGetByIdInput): Promise<any> {
+    //   name: 'Barcode',
+    //   selector: row => row.barcode,
+    //   sortable: true,
+    // },
+    // {
+    //     name: 'วันที่นำเข้า',
+    //     selector: row => formatDate(row.import_date),
+    //     sortable: true,
+    // },
+    // {
+    //     name: 'พนักงาน',
+    //     selector: row => row.member_made.name,
+    //     sortable: true,
+    // },
+    // {
+    //     name: 'สายพันธุ์',
+    //     selector: row => row.main_work_type.description,
+    //     sortable: true,
+    // },
+    // {
+    //     name: 'อาหารวุ้น',
+    //     selector: row => row.food_plant.description,
+    //     sortable: true,
+    // },
+    const result = await this.receiptRepository
+      .createQueryBuilder('receipt')
+      .leftJoinAndSelect(
+        Member,
+        'member',
+        'member.member_id = receipt.create_by',
+      )
+      .leftJoinAndSelect(
+        PlantFamilyMain,
+        'plant_family_main',
+        'plant_family_main.id = receipt.family_main_id',
+      )
+      .leftJoinAndSelect(
+        FoodPlant,
+        'food_plant',
+        'food_plant.id = receipt.family_main_id',
+      )
+      .where('receipt.receipt_id = :receipt_id', {
+        receipt_id: input.receipt_id,
+      })
+      .select([
+        'receipt.receipt_id',
+        'receipt.code',
+        'receipt.name',
+        'receipt.create_by',
+        'receipt.create_at',
+        'receipt.family_main_id',
+        'receipt.family_secondary_id',
+        'receipt.customer_id',
+        'member',
+        'plant_family_main',
+        'plant_family_main',
+      ])
+      .getRawOne();
+    /*
+      {
+    receipt_id: result.receipt_receipt_id,
+        code: result.receipt_code,
+        import_date: result.receipt_import_date,
+        import_date: result.receipt_import_date,
+      }
+      setPlantFood({
+        id: infos.food_plant.food_id,
+        description:infos.food_plant.description
+      })
+      setMainWorkTypeId(infos.main_work_type.id)
+      setWorkTypeId({
+        id: infos.work_type.id,
+        description: infos.work_type.description
+      }) 
+    */
+    return result;
   }
 }
