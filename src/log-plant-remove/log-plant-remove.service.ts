@@ -21,6 +21,10 @@ import { MemberWithBarcodeGetByBarcodeInput } from 'src/member-with-barcode/dto/
 import { MemberWithBarcodeService } from 'src/member-with-barcode/member-with-barcode.service';
 import { LogTokenService } from 'src/log-token/log-token.service';
 import { LogTokenGetInput } from 'src/log-token/dto/log-token-get.input';
+import { Member } from 'src/member/entity/member-entity.model';
+import { LogRemoveGetByReceiptIdInput } from './dto/log-remove-get-by-receipt-id.input';
+import { SourcesPlantRemoveType } from 'src/sources-plant-remove-type/entity/sources-plant-remove-type-entity.model';
+import { LogRemoveGetDetailByBarcodeInput } from './dto/log-remove-get-detail-by-barcode.input';
 
 @Injectable()
 export class LogPlantRemoveService {
@@ -405,5 +409,151 @@ export class LogPlantRemoveService {
     return {
       code: 200,
     };
+  }
+
+  async getLogPlantRemoveByReceipt(
+    input: LogRemoveGetByReceiptIdInput,
+  ): Promise<any> {
+    // Check Member
+    const logTokenEntity = await this.logTokenService.getLogToken({
+      token: input.token,
+    } as LogTokenGetInput);
+
+    if (!logTokenEntity) {
+      throw new HttpException(
+        {
+          code: 400,
+          message: 'Username นี้ ถูก Block',
+        },
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    const query = this.logPlantRemoveRepository
+      .createQueryBuilder('log_plant_remove')
+      .leftJoinAndSelect(
+        Member,
+        'member',
+        'member.member_id = log_plant_remove.member_made',
+      )
+      .leftJoinAndSelect(
+        SourcesPlantRemoveType,
+        'sources_plant_remove_type',
+        'sources_plant_remove_type.id = log_plant_remove.plant_remove_type_id',
+      )
+      .where('log_plant_remove.receipt_id = :receipt_id', {
+        receipt_id: input.receipt_id,
+      })
+      .select([
+        'log_plant_remove.log_plant_import_id',
+        'log_plant_remove.barcode',
+        'log_plant_remove.remove_date',
+        'log_plant_remove.remark',
+        'member',
+        'sources_plant_remove_type',
+      ])
+      .orderBy('log_plant_remove.remove_date', 'DESC');
+    if (input.type_id == '0') {
+      query.andWhere('log_plant_remove.plant_remove_type_id != 5');
+    } else {
+      query.andWhere(
+        'log_plant_remove.plant_remove_type_id = :plant_remove_type_id',
+        {
+          plant_remove_type_id: input.type_id,
+        },
+      );
+    }
+    const result = await query.getRawMany();
+    const logPlantImportEntities = result.map((row: any) => ({
+      log_plant_import_id: row.log_plant_remove_log_plant_import_id,
+      barcode: row.log_plant_remove_barcode,
+      remove_date: row.log_plant_remove_remove_date,
+      remark: row.log_plant_remove_remark,
+      member_made: {
+        member_id: row.member_member_id,
+        username: row.member_username,
+        name: row.member_name,
+        surname: row.member_surname,
+      },
+      plant_remove_type: {
+        id: row.sources_plant_remove_type_id,
+        code: row.sources_plant_remove_type_code,
+        description: row.sources_plant_remove_type_description,
+      },
+    }));
+    return {
+      code: 200,
+      data: logPlantImportEntities,
+    };
+    return result;
+  }
+
+  async getLogPlantRemoveDetailByBarcode(
+    input: LogRemoveGetDetailByBarcodeInput,
+  ): Promise<any> {
+    // Check Member
+    const logTokenEntity = await this.logTokenService.getLogToken({
+      token: input.token,
+    } as LogTokenGetInput);
+
+    if (!logTokenEntity) {
+      throw new HttpException(
+        {
+          code: 400,
+          message: 'Username นี้ ถูก Block',
+        },
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    const query = this.logPlantRemoveRepository
+      .createQueryBuilder('log_plant_remove')
+      .leftJoinAndSelect(
+        Member,
+        'member',
+        'member.member_id = log_plant_remove.member_made',
+      )
+      .leftJoinAndSelect(
+        SourcesPlantRemoveType,
+        'sources_plant_remove_type',
+        'sources_plant_remove_type.id = log_plant_remove.plant_remove_type_id',
+      )
+      .where('log_plant_remove.barcode = :barcode', {
+        barcode: input.barcode,
+      })
+      .select([
+        'log_plant_remove.log_plant_import_id',
+        'log_plant_remove.barcode',
+        'log_plant_remove.remove_date',
+        'log_plant_remove.remark',
+        'member',
+        'sources_plant_remove_type',
+      ]);
+    const result = await query.getRawOne();
+
+    const row = result;
+
+    const logPlantImportEntities = {
+      log_plant_import_id: row.log_plant_remove_log_plant_import_id,
+      barcode: row.log_plant_remove_barcode,
+      remove_date: row.log_plant_remove_remove_date,
+      remark: row.log_plant_remove_remark,
+      member_made: {
+        member_id: row.member_member_id,
+        username: row.member_username,
+        name: row.member_name,
+        surname: row.member_surname,
+      },
+      plant_remove_type: {
+        id: row.sources_plant_remove_type_id,
+        code: row.sources_plant_remove_type_code,
+        description: row.sources_plant_remove_type_description,
+      },
+    };
+    return {
+      code: 200,
+      data: logPlantImportEntities,
+    };
+    return result;
   }
 }

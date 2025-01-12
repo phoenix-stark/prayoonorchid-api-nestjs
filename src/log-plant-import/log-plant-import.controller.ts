@@ -17,6 +17,7 @@ import { LogImportDeleteRangeBarcodeInput } from './dto/log-import-delete-range-
 import { LogImportDeleteByReceiptIdInput } from './dto/log-import-delete-by-receipt-id.input';
 import { LogImportGetByReceiptIdInput } from './dto/log-import-get-by-receipt-id.input';
 import { LogImportGetDetailByBarcodeInput } from './dto/log-import-get-detail-by-barcode.input';
+import { LogImportUpdateGroupAllInput } from './dto/log-import-update-group-all.input';
 
 @Controller('log-plant-import')
 export class LogPlantImportController {
@@ -78,5 +79,13 @@ export class LogPlantImportController {
     return await this.logPlantImportService.getLogPlantImportDetailByBarcode(
       input,
     );
+  }
+
+  @Put('group')
+  @HttpCode(200)
+  async updateLogPlantImportGroupAll(
+    @Body() input: LogImportUpdateGroupAllInput,
+  ): Promise<any> {
+    return await this.logPlantImportService.updateLogPlantImportGroupAll(input);
   }
 }

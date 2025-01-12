@@ -15,6 +15,8 @@ import { LogRemoveUpdateInput } from './dto/log-remove-update.input';
 import { LogRemoveUpdateAllInput } from './dto/log-remove-update-all.input';
 import { LogRemoveDeleteRangeBarcodeInput } from './dto/log-remove-delete-range-barcode.input';
 import { LogRemoveDeleteByReceiptIdInput } from './dto/log-remove-delete-by-receipt-id.input';
+import { LogRemoveGetByReceiptIdInput } from './dto/log-remove-get-by-receipt-id.input';
+import { LogRemoveGetDetailByBarcodeInput } from './dto/log-remove-get-detail-by-barcode.input';
 
 @Controller('log-plant-remove')
 export class LogPlantRemoveController {
@@ -58,5 +60,23 @@ export class LogPlantRemoveController {
     @Body() input: LogRemoveDeleteByReceiptIdInput,
   ): Promise<any> {
     return await this.logPlantRemoveService.deleteBarcodeByReceiptId(input);
+  }
+
+  @Get('receipt')
+  @HttpCode(200)
+  async getLogPlantRemoveByReceipt(
+    @Query() input: LogRemoveGetByReceiptIdInput,
+  ): Promise<any> {
+    return await this.logPlantRemoveService.getLogPlantRemoveByReceipt(input);
+  }
+
+  @Get('receipt/detail')
+  @HttpCode(200)
+  async getLogPlantRemoveDetailByBarcode(
+    @Query() input: LogRemoveGetDetailByBarcodeInput,
+  ): Promise<any> {
+    return await this.logPlantRemoveService.getLogPlantRemoveDetailByBarcode(
+      input,
+    );
   }
 }

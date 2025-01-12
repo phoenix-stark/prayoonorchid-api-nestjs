@@ -32,6 +32,10 @@ import { LogImportGetByReceiptIdInput } from './dto/log-import-get-by-receipt-id
 import { PlantFamilyMain } from 'src/plant-family-main/entity/plant-family-main-entity.model';
 import { ReceiptService } from 'src/receipt/receipt.service';
 import { LogImportGetDetailByBarcodeInput } from './dto/log-import-get-detail-by-barcode.input';
+import { LogImportUpdateGroupAllInput } from './dto/log-import-update-group-all.input';
+import { SourcesWorkMainType } from 'src/sources-work-main-type/entity/sources-work-main-type-entity.model';
+import { LogPlantRemove } from 'src/log-plant-remove/entity/log-plant-remove-entity.model';
+import { Customer } from 'src/customer/entity/customer-entity.model';
 
 @Injectable()
 export class LogPlantImportService {
@@ -520,9 +524,9 @@ export class LogPlantImportService {
         'member.member_id = log_plant_import.member_made',
       )
       .leftJoinAndSelect(
-        PlantFamilyMain,
-        'plant_family_main',
-        'plant_family_main.id = log_plant_import.main_work_type_id',
+        SourcesWorkMainType,
+        'sources_work_main_type',
+        'sources_work_main_type.id = log_plant_import.main_work_type_id',
       )
       .leftJoinAndSelect(
         SourcesWorkType,
@@ -547,7 +551,8 @@ export class LogPlantImportService {
         'log_plant_import.main_work_type_id',
         'log_plant_import.work_type_id',
         'member',
-        'plant_family_main',
+        'sources_work_main_type',
+        'sources_work_type',
         'food_plant',
       ])
       .orderBy('log_plant_import.import_date', 'DESC')
@@ -563,12 +568,12 @@ export class LogPlantImportService {
         surname: row.member_surname,
       },
       main_work_type: {
-        id: row.plant_family_main_id,
-        description: row.plant_family_main_description,
+        id: row.sources_work_main_type_id,
+        description: row.sources_work_main_type_description,
       },
       work_type: {
-        id: row.food_plant_food_id,
-        description: row.food_plant_description,
+        id: row.sources_work_type_id,
+        description: row.sources_work_type_description,
       },
       food_plant: {
         food_id: row.food_plant_food_id,
@@ -608,9 +613,9 @@ export class LogPlantImportService {
         'member.member_id = log_plant_import.member_made',
       )
       .leftJoinAndSelect(
-        PlantFamilyMain,
-        'plant_family_main',
-        'plant_family_main.id = log_plant_import.main_work_type_id',
+        SourcesWorkMainType,
+        'sources_work_main_type',
+        'sources_work_main_type.id = log_plant_import.main_work_type_id',
       )
       .leftJoinAndSelect(
         SourcesWorkType,
@@ -641,7 +646,8 @@ export class LogPlantImportService {
         'log_plant_import.work_type_id',
         'member',
         'receipt',
-        'plant_family_main',
+        'sources_work_main_type',
+        'sources_work_type',
         'food_plant',
       ])
       .orderBy('log_plant_import.import_date', 'DESC')
@@ -662,12 +668,12 @@ export class LogPlantImportService {
         code: row.receipt_code,
       },
       main_work_type: {
-        id: row.plant_family_main_id,
-        description: row.plant_family_main_description,
+        id: row.sources_work_main_type_id,
+        description: row.sources_work_main_type_description,
       },
       work_type: {
-        id: row.food_plant_food_id,
-        description: row.food_plant_description,
+        id: row.sources_work_type_id,
+        description: row.sources_work_type_description,
       },
       food_plant: {
         food_id: row.food_plant_food_id,
@@ -679,5 +685,182 @@ export class LogPlantImportService {
       data: logPlantImportEntities,
     };
     return result;
+  }
+
+  async updateLogPlantImportGroupAll(
+    input: LogImportUpdateGroupAllInput,
+  ): Promise<any> {
+    // Check Member
+    const logTokenEntity = await this.logTokenService.getLogToken({
+      token: input.token,
+    } as LogTokenGetInput);
+
+    if (!logTokenEntity) {
+      throw new HttpException(
+        {
+          code: 400,
+          message: 'Username นี้ ถูก Block',
+        },
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    // ALL
+    const queryBuilder = this.logPlantImportRepository
+      .createQueryBuilder('log_plant_import')
+      .leftJoinAndSelect(
+        LogPlantRemove,
+        'log_plant_remove',
+        'log_plant_remove.log_plant_import_id = log_plant_import.log_plant_import_id',
+      )
+      .leftJoinAndSelect(
+        Receipt,
+        'receipt',
+        'receipt.receipt_id = log_plant_import.receipt_id',
+      )
+      .leftJoinAndSelect(
+        PlantFamilyMain,
+        'plant_family_main',
+        'plant_family_main.id = receipt.family_main_id',
+      )
+      .leftJoinAndSelect(
+        Customer,
+        'customer',
+        'customer.customer_id = receipt.customer_id',
+      )
+      .leftJoinAndSelect(
+        FoodPlant,
+        'food_plant',
+        'food_plant.food_id = log_plant_import.food_plant_id',
+      )
+      .leftJoinAndSelect(
+        SourcesWorkMainType,
+        'sources_work_main_type',
+        'sources_work_main_type.id = log_plant_import.main_work_type_id',
+      );
+    const filter = input.filter;
+    // RECEIPT CODE
+    if (filter.code) {
+      const code = filter.code;
+      const isMatchAllCode = filter.isMatchAllCode;
+      queryBuilder.andWhere(`receipt.code LIKE :code`, {
+        code: isMatchAllCode ? code : `%${code}%`,
+      });
+    }
+    // RECEIPT NAME
+    if (filter.name) {
+      const name = filter.name;
+      const isMatchAllName = filter.isMatchAllName;
+      queryBuilder.andWhere(`receipt.name LIKE :name`, {
+        name: isMatchAllName ? name : `%${name}%`,
+      });
+    }
+    // PLANT FAMILY MAIN + RECEIPT
+    if (filter.familyMain) {
+      const familyMain = filter.familyMain;
+      const isMatchAllFamilyMain = filter.isMatchAllFamilyMain;
+      queryBuilder.andWhere(`plant_family_main.description LIKE :familyMain`, {
+        familyMain: isMatchAllFamilyMain ? familyMain : `%${familyMain}%`,
+      });
+    }
+
+    // CUSTOMER ID
+    if (filter.customer) {
+      const customer = filter.customer;
+      const isMatchAllCustomer = filter.isMatchAllCustomer;
+      queryBuilder.andWhere(`customer.customer_id LIKE :customer`, {
+        customer: isMatchAllCustomer ? customer : `%${customer}%`,
+      });
+    }
+
+    // REMOVE DATE START - END
+    if (filter.removeStart && filter.removeEnd) {
+      const removeStart = filter.removeStart;
+      const removeEnd = filter.removeEnd;
+      queryBuilder.andWhere(
+        `(log_plant_remove.remove_date BETWEEN :removeStart AND :removeEnd)`,
+        { removeStart, removeEnd },
+      );
+    }
+
+    // IMPORT DATE START - END
+    if (filter.importStart && filter.importEnd) {
+      const importStart = filter.importStart;
+      const importEnd = filter.importEnd;
+      queryBuilder.andWhere(
+        `(log_plant_import.import_date BETWEEN :importStart AND :importEnd)`,
+        { importStart, importEnd },
+      );
+    }
+
+    // FOOD PLANT
+    if (filter.food) {
+      const food = filter.food;
+      const isMatchAllFood = filter.isMatchAllFood;
+      queryBuilder.andWhere(`food_plant.description LIKE :food`, {
+        food: isMatchAllFood ? food : `%${food}%`,
+      });
+    }
+
+    // REMOVE BY EMPLOYEE ID
+    if (filter.employee) {
+      const employee = filter.employee;
+      queryBuilder.andWhere(`log_plant_remove.create_by = :employee`, {
+        employee,
+      });
+    }
+
+    // WORK TYPE
+    if (filter.workType) {
+      const workType = filter.workType;
+      queryBuilder.andWhere(`log_plant_import.work_type_id = :workType`, {
+        workType,
+      });
+    }
+
+    // WORK MAIN TYPE
+    if (filter.mainTask) {
+      const mainTask = filter.mainTask;
+      queryBuilder.andWhere(
+        `sources_work_main_type.description LIKE :mainTask`,
+        {
+          mainTask: `%${mainTask}%`,
+        },
+      );
+    }
+
+    // TIME PER DAY
+    if (input.time_per_day) {
+      const timePerDay = input.time_per_day;
+      queryBuilder.andWhere(`log_plant_remove.time_per_day = :timePerDay`, {
+        timePerDay,
+      });
+    }
+
+    // PLANT REMOVE TYPE ID
+    if (filter.plantRemoveTypeId && filter.plantRemoveTypeId != '0') {
+      const plantRemoveTypeId = filter.plantRemoveTypeId;
+      queryBuilder.andWhere(
+        `log_plant_remove.plant_remove_type_id = :plantRemoveTypeId`,
+        {
+          plantRemoveTypeId,
+        },
+      );
+    }
+
+    const resultIds = await queryBuilder.getMany();
+    const ids = resultIds.map((item) => item.log_plant_import_id);
+    console.log(resultIds);
+    const updateResult = await this.logPlantImportRepository
+      .createQueryBuilder()
+      .update(LogPlantRemove)
+      .set({
+        plant_remove_type_id: input.plant_remove_type_id,
+        remove_date: input.remove_date,
+        remark: input.remark,
+      })
+      .whereInIds(ids)
+      .execute();
+    return updateResult;
   }
 }
