@@ -851,6 +851,7 @@ export class LogPlantImportService {
     const resultIds = await queryBuilder.getMany();
     const ids = resultIds.map((item) => item.log_plant_import_id);
     console.log(resultIds);
+    // UPDATE REMOVE LOG
     const updateResult = await this.logPlantImportRepository
       .createQueryBuilder()
       .update(LogPlantRemove)
@@ -861,6 +862,18 @@ export class LogPlantImportService {
       })
       .whereInIds(ids)
       .execute();
-    return updateResult;
+
+    // UPDATE REMOVE LOG NOW
+    const updateNowResult = await this.logPlantImportNowRepository
+      .createQueryBuilder()
+      .update(LogPlantRemoveNow)
+      .set({
+        plant_remove_type_id: input.plant_remove_type_id,
+        remove_date: input.remove_date,
+        remark: input.remark,
+      })
+      .whereInIds(ids)
+      .execute();
+    return { updateResult, updateNowResult };
   }
 }
