@@ -9,6 +9,7 @@ import { PlantFamilySecondaryGetAllInput } from './dto/plant-family-secondary-ge
 import { PlantFamilySecondaryGetByIdInput } from './dto/plant-family-secondary-get-by-id.input';
 import { LogTokenGetInput } from 'src/log-token/dto/log-token-get.input';
 import { PlantFamilySecondary } from './entity/plant-family-secondary-entity.model';
+import { PlantFamilySecondaryGetByDescInput } from './dto/plant-family-secondary-get-by-desc.input';
 
 @Injectable()
 export class PlantFamilySecondaryService {
@@ -128,5 +129,18 @@ export class PlantFamilySecondaryService {
       code: 200,
       data: plantFamilySecondaryEntities,
     };
+  }
+
+  async getPlantFamilySecondaryByDesc(
+    input: PlantFamilySecondaryGetByDescInput,
+  ): Promise<any> {
+    const plantFamilySecondaryEntities =
+      await this.plantFamilySecondaryRepository.findOne({
+        where: {
+          description: input.description.trim(),
+        },
+      });
+
+    return plantFamilySecondaryEntities;
   }
 }

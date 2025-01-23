@@ -1,4 +1,10 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import {
+  forwardRef,
+  HttpException,
+  HttpStatus,
+  Inject,
+  Injectable,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { LogTokenService } from 'src/log-token/log-token.service';
 import { PlantFamilyMain } from 'src/plant-family-main/entity/plant-family-main-entity.model';
@@ -13,14 +19,18 @@ import { LogTokenGetInput } from 'src/log-token/dto/log-token-get.input';
 import { PlantFamilyMainSearchInput } from './dto/plant-family-main-search';
 import { ReceiptService } from 'src/receipt/receipt.service';
 import { ReceiptGetTotalByPlantFamilyMainIdInput } from 'src/receipt/dto/receipt-get-total-by-plant-family-main-id-input';
+import { PlantFamilyMainGetByDescInput } from './dto/plant-family-main-get-by-desc.input';
 
 @Injectable()
 export class PlantFamilyMainService {
   constructor(
+    @Inject(forwardRef(() => LogTokenService))
+    private readonly logTokenService: LogTokenService,
+    @Inject(forwardRef(() => ReceiptService))
+    private readonly receiptService: ReceiptService,
     @InjectRepository(PlantFamilyMain)
     private readonly plantFamilyMainRepository: Repository<PlantFamilyMain>,
-    private logTokenService: LogTokenService,
-    private receiptService: ReceiptService,
+
     private momentWrapper: MomentService,
   ) {}
 
@@ -212,6 +222,19 @@ export class PlantFamilyMainService {
       code: 200,
       data: plantFamilyMainEntities,
     };
+  }
+
+  async getPlantFamilyMainByDesc(
+    input: PlantFamilyMainGetByDescInput,
+  ): Promise<any> {
+    const plantFamilyMainEntities =
+      await this.plantFamilyMainRepository.findOne({
+        where: {
+          description: input.description.trim(),
+        },
+      });
+
+    return plantFamilyMainEntities;
   }
 
   async searchPlantFamilyMain(input: PlantFamilyMainSearchInput): Promise<any> {

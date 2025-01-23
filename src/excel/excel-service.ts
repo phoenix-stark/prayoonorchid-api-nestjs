@@ -1,18 +1,18 @@
-import { Injectable } from '@nestjs/common';
+import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { Workbook } from 'exceljs';
-import moment from 'moment-timezone';
 import { ReceiptService } from 'src/receipt/receipt.service';
 import { FilterObject } from 'src/report/modal/filter';
 import { FilterMultipleObject } from 'src/report/modal/filterMultiple';
 import { ReportService } from 'src/report/report.service';
 import { MomentService } from 'src/utils/MomentService';
 import * as tmp from 'tmp';
-import { ExcelExportReportStockInput } from './dto/excel-export-report-stock.input';
 import { ReportGetInput } from './dto/report-get.input';
 @Injectable()
 export class ExcelService {
   constructor(
+    @Inject(forwardRef(() => ReceiptService))
     private readonly receiptService: ReceiptService,
+    @Inject(forwardRef(() => ReportService))
     private readonly reportService: ReportService,
     private momentWrapper: MomentService,
   ) {}

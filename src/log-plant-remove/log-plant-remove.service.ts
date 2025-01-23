@@ -25,6 +25,8 @@ import { Member } from 'src/member/entity/member-entity.model';
 import { LogRemoveGetByReceiptIdInput } from './dto/log-remove-get-by-receipt-id.input';
 import { SourcesPlantRemoveType } from 'src/sources-plant-remove-type/entity/sources-plant-remove-type-entity.model';
 import { LogRemoveGetDetailByBarcodeInput } from './dto/log-remove-get-detail-by-barcode.input';
+import { LogRemoveGetTotalByReceiptIdInput } from './dto/log-remove-get-total-by-receiptid.input';
+import { LogRemoveGetTotalByReceiptIdAndTypeInput } from './dto/log-remove-get-total-by-receiptid-type.input';
 
 @Injectable()
 export class LogPlantRemoveService {
@@ -555,5 +557,36 @@ export class LogPlantRemoveService {
       data: logPlantImportEntities,
     };
     return result;
+  }
+
+  async getLogPlantRemoveTotalByReceiptId(
+    input: LogRemoveGetTotalByReceiptIdInput,
+  ): Promise<any> {
+    const results = await this.logPlantRemoveRepository.find({
+      where: {
+        receipt_id: input.receipt_id,
+      },
+    });
+
+    return results.length;
+  }
+
+  async getLogPlantRemoveTotalByReceiptIdAndType(
+    input: LogRemoveGetTotalByReceiptIdAndTypeInput,
+  ): Promise<any> {
+    const results = await this.logPlantRemoveRepository
+      .createQueryBuilder()
+      .where('receipt_id = :receipt_id', {
+        receipt_id: input.receipt_id,
+      });
+    if (input.plant_remove_type_id && input.plant_remove_type_id != '0') {
+      results.andWhere('plant_remove_type_id = :plant_remove_type_id', {
+        plant_remove_type_id: input.plant_remove_type_id,
+      });
+    } else {
+      results.andWhere('plant_remove_type_id != 5');
+    }
+
+    return (await results.getRawMany()).length;
   }
 }

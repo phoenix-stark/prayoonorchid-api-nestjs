@@ -36,14 +36,16 @@ import { LogImportUpdateGroupAllInput } from './dto/log-import-update-group-all.
 import { SourcesWorkMainType } from 'src/sources-work-main-type/entity/sources-work-main-type-entity.model';
 import { LogPlantRemove } from 'src/log-plant-remove/entity/log-plant-remove-entity.model';
 import { Customer } from 'src/customer/entity/customer-entity.model';
+import { ReceiptGetByCodeInput } from 'src/receipt/dto/receipt-get-by-code.input';
+import { LogImportGetTotalByReceiptIdInput } from './dto/log-import-get-total-by-receiptid.input';
 
 @Injectable()
 export class LogPlantImportService {
   constructor(
     @Inject(forwardRef(() => LogTokenService))
     private readonly logTokenService: LogTokenService,
-    @InjectRepository(Receipt)
-    private readonly receiptRepository: Repository<Receipt>,
+    @Inject(forwardRef(() => ReceiptService))
+    private readonly receiptService: ReceiptService,
     @InjectRepository(LogPlantImport)
     private readonly logPlantImportRepository: Repository<LogPlantImport>,
     @InjectRepository(LogPlantImportNow)
@@ -57,7 +59,6 @@ export class LogPlantImportService {
     @InjectRepository(Member)
     private readonly memberRepository: Repository<Member>,
     private memberWithBarcodeService: MemberWithBarcodeService,
-    private receiptService: ReceiptService,
     private momentWrapper: MomentService,
   ) {}
 
@@ -162,11 +163,9 @@ export class LogPlantImportService {
         if (input.reciept_id) {
           recipetId = input.reciept_id;
         } else {
-          const receiptEntity = await this.receiptRepository.findOne({
-            where: {
-              code: input.reciept_code,
-            },
-          });
+          const receiptEntity = await this.receiptService.getReceiptByCode({
+            code: input.reciept_code,
+          } as ReceiptGetByCodeInput);
           if (receiptEntity) {
             recipetId = receiptEntity.receipt_id;
           }
@@ -299,11 +298,9 @@ export class LogPlantImportService {
     }
     const createBy = logTokenEntity.member_id;
 
-    const receiptEntity = await this.receiptRepository.findOne({
-      where: {
-        code: input.reciept_code,
-      },
-    });
+    const receiptEntity = await this.receiptService.getReceiptByCode({
+      code: input.reciept_code,
+    } as ReceiptGetByCodeInput);
     for (let i = 0; i < input.barcodes.length; i++) {
       const barcode = input.barcodes[i];
       const logPlantImportNowEntity =
@@ -492,6 +489,18 @@ export class LogPlantImportService {
     const results = await this.logPlantImportRepository.find({
       where: {
         work_type_id: input.work_type_id,
+      },
+    });
+
+    return results.length;
+  }
+
+  async getLogPlantImportTotalByReceiptId(
+    input: LogImportGetTotalByReceiptIdInput,
+  ): Promise<any> {
+    const results = await this.logPlantImportRepository.find({
+      where: {
+        receipt_id: input.receipt_id,
       },
     });
 

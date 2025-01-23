@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { PlantFamilyMain } from './entity/plant-family-main-entity.model';
 import { PlantFamilyMainController } from './plant-family-main.controller';
@@ -10,8 +10,8 @@ import { ReceiptModule } from 'src/receipt/receipt.module';
 @Module({
   imports: [
     TypeOrmModule.forFeature([PlantFamilyMain]),
-    LogTokenModule,
-    ReceiptModule,
+    forwardRef(() => LogTokenModule),
+    forwardRef(() => ReceiptModule),
   ],
   controllers: [PlantFamilyMainController],
   providers: [PlantFamilyMainService, MomentService],
