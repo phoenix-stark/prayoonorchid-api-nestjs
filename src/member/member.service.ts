@@ -18,6 +18,7 @@ import { MemberUpdateBlockInput } from './dto/member-update-block.input';
 import { MemberGetByIdInput } from './dto/member-get-by-id.input';
 import { MemberGetAllInput } from './dto/member-get-all';
 import { MemberSearchInput } from './dto/member-search.input';
+import { MemberResetPasswordInput } from './dto/member-reset-password.input';
 
 @Injectable()
 export class MemberService {
@@ -103,14 +104,14 @@ export class MemberService {
       throw new HttpException(
         {
           code: 400,
-          errors: 'ไม่พบผู้ใช้งานในระบบ',
+          message: 'ไม่พบผู้ใช้งานในระบบ',
         },
         HttpStatus.BAD_REQUEST,
       );
     }
   }
 
-  async resetPassword(input: MemberUpdatePasswordInput): Promise<any> {
+  async resetPassword(input: MemberResetPasswordInput): Promise<any> {
     const updateAt = this.momentWrapper.moment().format('YYYY-MM-DD HH:mm:ss');
     const logTokenEntity = await this.logTokenService.getLogToken({
       token: input.token,
@@ -151,7 +152,86 @@ export class MemberService {
       );
     }
 
+    const memberUserEntity = await this.memberRepository.findOne({
+      where: {
+        member_id: input.id,
+      },
+    });
+
     const newPassword = this.generateRandomString(5);
+
+    const hashPassword = await bcrypt.hash(newPassword, PASSWORD.SALT_ROUND);
+    memberUserEntity.password = hashPassword;
+    memberUserEntity.update_at = updateAt;
+    const result = await this.memberRepository.save(memberUserEntity);
+    console.log(hashPassword);
+    console.log(result);
+
+    return {
+      code: 200,
+      data: {
+        member_id: input.id,
+        password: newPassword,
+      },
+    };
+  }
+
+  async changePassword(input: MemberUpdatePasswordInput): Promise<any> {
+    const updateAt = this.momentWrapper.moment().format('YYYY-MM-DD HH:mm:ss');
+    const logTokenEntity = await this.logTokenService.getLogToken({
+      token: input.token,
+    } as LogTokenGetInput);
+
+    if (!logTokenEntity) {
+      throw new HttpException(
+        {
+          code: 400,
+          message: 'Username นี้ ถูก Block',
+        },
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    const memberEntity = await this.memberRepository.findOne({
+      where: {
+        member_id: logTokenEntity.member_id,
+      },
+    });
+
+    if (!memberEntity) {
+      throw new HttpException(
+        {
+          code: 400,
+          message: 'ไม่พบผู้ใช้งานในระบบ',
+        },
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+    if (memberEntity.is_block == '1') {
+      throw new HttpException(
+        {
+          code: 400,
+          message: 'Username นี้ ถูก Block',
+        },
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    const isAuth = await bcrypt.compare(
+      input.old_password,
+      memberEntity.password,
+    );
+    if (!isAuth) {
+      throw new HttpException(
+        {
+          code: 400,
+          message: 'รหัสผ่านเดิมไม่ถูกต้อง',
+        },
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    const newPassword = input.new_password;
 
     const hashPassword = await bcrypt.hash(newPassword, PASSWORD.SALT_ROUND);
     memberEntity.password = hashPassword;
@@ -161,8 +241,7 @@ export class MemberService {
     return {
       code: 200,
       data: {
-        member_id: input.id,
-        password: newPassword,
+        member_id: memberEntity.member_id,
       },
     };
   }
@@ -365,9 +444,7 @@ export class MemberService {
 
     return {
       code: 200,
-      data: {
-        data: info,
-      },
+      data: info,
     };
   }
 
@@ -418,9 +495,7 @@ export class MemberService {
 
     return {
       code: 200,
-      data: {
-        data: results,
-      },
+      data: results,
     };
   }
 
@@ -476,9 +551,7 @@ export class MemberService {
 
     return {
       code: 200,
-      data: {
-        data: results,
-      },
+      data: results,
     };
   }
 

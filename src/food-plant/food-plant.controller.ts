@@ -40,19 +40,21 @@ export class FoodPlantController {
 
   @Get('all')
   @HttpCode(200)
-  async getFoodPlantAll(@Body() input: FoodPlantGetAllInput): Promise<any[]> {
+  async getFoodPlantAll(@Query() input: FoodPlantGetAllInput): Promise<any[]> {
     return await this.foodPlantService.getFoodPlantAll(input);
   }
 
   @Get()
   @HttpCode(200)
-  async getFoodPlantById(@Body() input: FoodPlantGetByIdInput): Promise<any[]> {
+  async getFoodPlantById(
+    @Query() input: FoodPlantGetByIdInput,
+  ): Promise<any[]> {
     return await this.foodPlantService.getFoodPlantById(input);
   }
 
   @Get('search')
   @HttpCode(200)
-  async searchFoodPlant(@Body() input: FoodPlantSearchInput): Promise<any[]> {
+  async searchFoodPlant(@Query() input: FoodPlantSearchInput): Promise<any[]> {
     return await this.foodPlantService.searchFoodPlant(input);
   }
 }

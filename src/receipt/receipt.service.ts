@@ -423,7 +423,9 @@ export class ReceiptService {
     }
 
     receiptNewEntity.code = input.code.trim();
-    receiptNewEntity.date = input.date;
+    receiptNewEntity.date = this.momentWrapper
+      .momentDate(input.date)
+      .format('YYYY-MM-DD');
     receiptNewEntity.name = input.name.trim();
     receiptNewEntity.num_order = parseInt(numOrder.toString());
     receiptNewEntity.family_main_id = parseInt(plantFamilyMainId);
@@ -470,10 +472,8 @@ export class ReceiptService {
     return {
       code: 200,
       data: {
-        data: {
-          total_import: totalImport,
-          total_remove: totalRemove,
-        },
+        total_import: totalImport,
+        total_remove: totalRemove,
       },
     };
   }
@@ -627,9 +627,7 @@ export class ReceiptService {
 
     return {
       code: 200,
-      data: {
-        data: transformedData,
-      },
+      data: transformedData,
     };
   }
 
@@ -697,47 +695,42 @@ export class ReceiptService {
       const receiptEntity = receiptEntities[i];
 
       lists.push({
-        code: 200,
-        data: {
-          receipt_id: receiptEntity.receipt_receipt_id,
-          code: receiptEntity.receipt_code,
-          name: receiptEntity.receipt_name,
-          num_order: receiptEntity.receipt_num_order,
-          create_by: {
-            member_id: receiptEntity.member_member_id,
-            username: receiptEntity.member_username,
-            email: receiptEntity.member_email,
-            phone: receiptEntity.member_phone,
-            name: receiptEntity.member_name,
-            surname: receiptEntity.member_surname,
-          },
-          create_at: receiptEntity.receipt_create_at,
-          family_main: {
-            id: receiptEntity.family_main_id,
-            description: receiptEntity.family_main_description,
-          },
-          family_secondary: {
-            id: receiptEntity.family_secondary_id,
-            description: receiptEntity.family_secondary_description,
-          },
-          customer: {
-            customer_id: receiptEntity.customer_customer_id,
-            name: receiptEntity.customer_name,
-            update_at: receiptEntity.customer_update_at,
-            create_at: receiptEntity.customer_create_at,
-            address: receiptEntity.customer_address,
-            phone: receiptEntity.customer_phone,
-            email: receiptEntity.customer_email,
-          },
+        receipt_id: receiptEntity.receipt_receipt_id,
+        code: receiptEntity.receipt_code,
+        name: receiptEntity.receipt_name,
+        num_order: receiptEntity.receipt_num_order,
+        create_by: {
+          member_id: receiptEntity.member_member_id,
+          username: receiptEntity.member_username,
+          email: receiptEntity.member_email,
+          phone: receiptEntity.member_phone,
+          name: receiptEntity.member_name,
+          surname: receiptEntity.member_surname,
+        },
+        create_at: receiptEntity.receipt_create_at,
+        family_main: {
+          id: receiptEntity.family_main_id,
+          description: receiptEntity.family_main_description,
+        },
+        family_secondary: {
+          id: receiptEntity.family_secondary_id,
+          description: receiptEntity.family_secondary_description,
+        },
+        customer: {
+          customer_id: receiptEntity.customer_customer_id,
+          name: receiptEntity.customer_name,
+          update_at: receiptEntity.customer_update_at,
+          create_at: receiptEntity.customer_create_at,
+          address: receiptEntity.customer_address,
+          phone: receiptEntity.customer_phone,
+          email: receiptEntity.customer_email,
         },
       });
     }
 
     return {
       code: 200,
-      data: {
-        data: lists,
-      },
+      data: lists,
     };
   }
 
@@ -843,26 +836,23 @@ export class ReceiptService {
       const receiptEntity = receiptEntities[i];
 
       lists.push({
-        code: 200,
-        data: {
-          receipt_id: receiptEntity.receipt_receipt_id,
-          code: receiptEntity.receipt_code,
-          name: receiptEntity.receipt_name,
-          num_order: receiptEntity.receipt_num_order,
-          create_at: receiptEntity.receipt_create_at,
-          family_main: {
-            id: receiptEntity.family_main_id,
-            description: receiptEntity.family_main_description,
-          },
-          customer: {
-            customer_id: receiptEntity.customer_customer_id,
-            name: receiptEntity.customer_name,
-            update_at: receiptEntity.customer_update_at,
-            create_at: receiptEntity.customer_create_at,
-            address: receiptEntity.customer_address,
-            phone: receiptEntity.customer_phone,
-            email: receiptEntity.customer_email,
-          },
+        receipt_id: receiptEntity.receipt_receipt_id,
+        code: receiptEntity.receipt_code,
+        name: receiptEntity.receipt_name,
+        num_order: receiptEntity.receipt_num_order,
+        create_at: receiptEntity.receipt_create_at,
+        family_main: {
+          id: receiptEntity.family_main_id,
+          description: receiptEntity.family_main_description,
+        },
+        customer: {
+          customer_id: receiptEntity.customer_customer_id,
+          name: receiptEntity.customer_name,
+          update_at: receiptEntity.customer_update_at,
+          create_at: receiptEntity.customer_create_at,
+          address: receiptEntity.customer_address,
+          phone: receiptEntity.customer_phone,
+          email: receiptEntity.customer_email,
         },
       });
     }

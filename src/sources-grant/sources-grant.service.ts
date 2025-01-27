@@ -46,6 +46,9 @@ export class SourcesGrantService {
       },
     });
 
-    return grantEntity;
+    return {
+      code: 200,
+      data: grantEntity,
+    };
   }
 }

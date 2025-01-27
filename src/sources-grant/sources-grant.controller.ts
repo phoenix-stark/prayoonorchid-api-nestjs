@@ -1,4 +1,4 @@
-import { Body, Controller, Get, HttpCode } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, Query } from '@nestjs/common';
 import { SourcesGrantService } from './sources-grant.service';
 import { SourcesGrantGetAllInput } from './dto/sources-grant-get-all.input';
 
@@ -9,7 +9,7 @@ export class SourcesGrantController {
   @Get('all')
   @HttpCode(200)
   async getSourcesGrantAll(
-    @Body() input: SourcesGrantGetAllInput,
+    @Query() input: SourcesGrantGetAllInput,
   ): Promise<any[]> {
     return await this.sourcesGrantService.getAll(input);
   }

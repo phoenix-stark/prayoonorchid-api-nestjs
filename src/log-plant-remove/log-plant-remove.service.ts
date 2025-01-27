@@ -436,7 +436,7 @@ export class LogPlantRemoveService {
       .leftJoinAndSelect(
         Member,
         'member',
-        'member.member_id = log_plant_remove.member_made',
+        'member.member_id = log_plant_remove.create_by',
       )
       .leftJoinAndSelect(
         SourcesPlantRemoveType,

@@ -49,7 +49,7 @@ export class MemberWithBarcodeController {
   @Get('search')
   @HttpCode(200)
   async searchBarcode(
-    @Body() input: MemberWithBarcodeSearchInput,
+    @Query() input: MemberWithBarcodeSearchInput,
   ): Promise<any> {
     return await this.memberWithBarcodeService.searchBarcode(input);
   }
@@ -57,7 +57,7 @@ export class MemberWithBarcodeController {
   @Get('all')
   @HttpCode(200)
   async getBarcodeAll(
-    @Body() input: MemberWithBarcodeGetAllInput,
+    @Query() input: MemberWithBarcodeGetAllInput,
   ): Promise<any> {
     return await this.memberWithBarcodeService.getBarcodeAll(input);
   }

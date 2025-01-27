@@ -50,8 +50,8 @@ export class LogPlantImportService {
     private readonly logPlantImportRepository: Repository<LogPlantImport>,
     @InjectRepository(LogPlantImportNow)
     private readonly logPlantImportNowRepository: Repository<LogPlantImportNow>,
-    @InjectRepository(LogPlantRemoveNow)
-    private readonly logPlantRemoveNowRepository: Repository<LogPlantRemoveNow>,
+    @InjectRepository(LogPlantRemove)
+    private readonly logPlantRemoveRepository: Repository<LogPlantRemove>,
     @InjectRepository(FoodPlant)
     private readonly foodPlantRepository: Repository<FoodPlant>,
     @InjectRepository(SourcesWorkType)
@@ -358,33 +358,32 @@ export class LogPlantImportService {
     }
     const createBy = logTokenEntity.member_id;
 
-    const logPlantRemoveNowEntity =
-      await this.logPlantRemoveNowRepository.findOne({
+    const logPlantRemoveRepository =
+      await this.logPlantRemoveRepository.findOne({
         where: {
           barcode: `${input.barcode}`,
         },
       });
-    if (logPlantRemoveNowEntity) {
-      return {
-        code: 400,
-        message: 'กรุณาลบประวัติการนำออกของ Barcode นี้ก่อนลบ',
-      };
+    if (logPlantRemoveRepository) {
+      throw new HttpException(
+        {
+          code: 400,
+          message: 'กรุณาลบประวัติการนำออกของ Barcode นี้ก่อนลบ',
+        },
+        HttpStatus.BAD_REQUEST,
+      );
     }
-    const logPlantImportNowEntity =
-      await this.logPlantImportNowRepository.findOne({
-        where: {
-          barcode: `${input.barcode}`,
-        },
-      });
-    await this.logPlantImportNowRepository.delete(logPlantImportNowEntity);
+    await this.logPlantImportNowRepository
+      .createQueryBuilder()
+      .delete()
+      .where({ barcode: `${input.barcode}` })
+      .execute();
 
-    const logPlantImportRepositoryEntity =
-      await this.logPlantImportRepository.findOne({
-        where: {
-          barcode: `${input.barcode}`,
-        },
-      });
-    await this.logPlantImportRepository.delete(logPlantImportRepositoryEntity);
+    await this.logPlantImportRepository
+      .createQueryBuilder()
+      .delete()
+      .where({ barcode: `${input.barcode}` })
+      .execute();
 
     return {
       data: {},
@@ -530,7 +529,7 @@ export class LogPlantImportService {
       .leftJoinAndSelect(
         Member,
         'member',
-        'member.member_id = log_plant_import.member_made',
+        'member.member_id = log_plant_import.create_by',
       )
       .leftJoinAndSelect(
         SourcesWorkMainType,
@@ -614,7 +613,7 @@ export class LogPlantImportService {
       );
     }
 
-    const result = await this.logPlantImportRepository
+    const row = await this.logPlantImportRepository
       .createQueryBuilder('log_plant_import')
       .leftJoinAndSelect(
         Member,
@@ -660,9 +659,9 @@ export class LogPlantImportService {
         'food_plant',
       ])
       .orderBy('log_plant_import.import_date', 'DESC')
-      .getRawMany();
+      .getRawOne();
 
-    const logPlantImportEntities = result.map((row: any) => ({
+    const logPlantImportEntities = {
       log_plant_import_id: row.log_plant_import_log_plant_import_id,
       barcode: row.log_plant_import_barcode,
       import_date: row.log_plant_import_import_date,
@@ -688,12 +687,11 @@ export class LogPlantImportService {
         food_id: row.food_plant_food_id,
         description: row.food_plant_description,
       },
-    }));
+    };
     return {
       code: 200,
       data: logPlantImportEntities,
     };
-    return result;
   }
 
   async updateLogPlantImportGroupAll(

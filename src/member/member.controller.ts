@@ -17,6 +17,7 @@ import { MemberUpdateBlockInput } from './dto/member-update-block.input';
 import { MemberGetAllInput } from './dto/member-get-all';
 import { MemberGetByIdInput } from './dto/member-get-by-id.input';
 import { MemberSearchInput } from './dto/member-search.input';
+import { MemberResetPasswordInput } from './dto/member-reset-password.input';
 
 @Controller('member')
 export class MemberController {
@@ -36,19 +37,19 @@ export class MemberController {
 
   @Get('all')
   @HttpCode(200)
-  async getMemberAll(@Body() input: MemberGetAllInput): Promise<any[]> {
+  async getMemberAll(@Query() input: MemberGetAllInput): Promise<any[]> {
     return await this.memberService.getMemberAll(input);
   }
 
   @Get()
   @HttpCode(200)
-  async getMemberById(@Body() input: MemberGetByIdInput): Promise<any[]> {
+  async getMemberById(@Query() input: MemberGetByIdInput): Promise<any[]> {
     return await this.memberService.getMemberById(input);
   }
 
   @Get('search')
   @HttpCode(200)
-  async searchMember(@Body() input: MemberSearchInput): Promise<any[]> {
+  async searchMember(@Query() input: MemberSearchInput): Promise<any[]> {
     return await this.memberService.searchMember(input);
   }
 
@@ -68,9 +69,15 @@ export class MemberController {
 
   @Put('change-password')
   @HttpCode(200)
-  async resetPassword(
+  async changePassword(
     @Body() input: MemberUpdatePasswordInput,
   ): Promise<any[]> {
+    return await this.memberService.changePassword(input);
+  }
+
+  @Put('reset-password')
+  @HttpCode(200)
+  async resetPassword(@Body() input: MemberResetPasswordInput): Promise<any[]> {
     return await this.memberService.resetPassword(input);
   }
 }

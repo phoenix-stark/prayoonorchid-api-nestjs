@@ -49,7 +49,7 @@ export class PlantFamilyMainController {
   @Get('all')
   @HttpCode(200)
   async getPlantFamilyMainAll(
-    @Body() input: PlantFamilyMainGetAllInput,
+    @Query() input: PlantFamilyMainGetAllInput,
   ): Promise<any[]> {
     return await this.plantFamilyMainService.getPlantFamilyMainAll(input);
   }
@@ -57,7 +57,7 @@ export class PlantFamilyMainController {
   @Get()
   @HttpCode(200)
   async getPlantFamilyMainById(
-    @Body() input: PlantFamilyMainGetByIdInput,
+    @Query() input: PlantFamilyMainGetByIdInput,
   ): Promise<any[]> {
     return await this.plantFamilyMainService.getPlantFamilyMainById(input);
   }
@@ -65,7 +65,7 @@ export class PlantFamilyMainController {
   @Get('search')
   @HttpCode(200)
   async searchPlantFamilyMain(
-    @Body() input: PlantFamilyMainSearchInput,
+    @Query() input: PlantFamilyMainSearchInput,
   ): Promise<any[]> {
     return await this.plantFamilyMainService.searchPlantFamilyMain(input);
   }

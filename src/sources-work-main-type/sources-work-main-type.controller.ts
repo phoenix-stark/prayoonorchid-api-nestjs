@@ -6,6 +6,7 @@ import {
   HttpCode,
   Post,
   Put,
+  Query,
 } from '@nestjs/common';
 import { SourcesWorkMainTypeService } from './sources-work-main-type.service';
 import { SourcesWorkMainTypeCreateInput } from './dto/sources-work-main-type-create.input';
@@ -54,7 +55,7 @@ export class SourcesWorkMainTypeController {
   @Get('all')
   @HttpCode(200)
   async getSourcesWorkMainTypeAll(
-    @Body() input: SourcesWorkMainTypeGetAllInput,
+    @Query() input: SourcesWorkMainTypeGetAllInput,
   ): Promise<any[]> {
     return await this.sourcesWorkMainTypeService.getSourcesWorkMainTypeAll(
       input,
@@ -64,7 +65,7 @@ export class SourcesWorkMainTypeController {
   @Get()
   @HttpCode(200)
   async getSourcesWorkMainTypeById(
-    @Body() input: SourcesWorkMainTypeGetByIdInput,
+    @Query() input: SourcesWorkMainTypeGetByIdInput,
   ): Promise<any[]> {
     return await this.sourcesWorkMainTypeService.getSourcesWorkMainTypeById(
       input,
@@ -74,7 +75,7 @@ export class SourcesWorkMainTypeController {
   @Get('search')
   @HttpCode(200)
   async searchSourcesWorkMainType(
-    @Body() input: SourcesWorkMainTypeSearchInput,
+    @Query() input: SourcesWorkMainTypeSearchInput,
   ): Promise<any[]> {
     return await this.sourcesWorkMainTypeService.searchSourcesWorkMainType(
       input,

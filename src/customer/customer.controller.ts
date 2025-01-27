@@ -40,19 +40,19 @@ export class CustomerController {
 
   @Get('all')
   @HttpCode(200)
-  async getCustomerAll(@Body() input: CustomerGetAllInput): Promise<any[]> {
+  async getCustomerAll(@Query() input: CustomerGetAllInput): Promise<any[]> {
     return await this.customerService.getCustomerAll(input);
   }
 
   @Get()
   @HttpCode(200)
-  async getCustomerById(@Body() input: CustomerGetByIdInput): Promise<any[]> {
+  async getCustomerById(@Query() input: CustomerGetByIdInput): Promise<any[]> {
     return await this.customerService.getCustomerById(input);
   }
 
   @Get('search')
   @HttpCode(200)
-  async searchCustomer(@Body() input: CustomerSearchInput): Promise<any[]> {
+  async searchCustomer(@Query() input: CustomerSearchInput): Promise<any[]> {
     return await this.customerService.searchCustomer(input);
   }
 }

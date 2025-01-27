@@ -1,4 +1,5 @@
 export class MemberUpdatePasswordInput {
   token: string;
-  id: string;
+  old_password: string;
+  new_password: string;
 }
