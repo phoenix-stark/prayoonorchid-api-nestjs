@@ -790,11 +790,11 @@ export class ReceiptService {
 
     if (input.family_main != '') {
       if (input.is_match_all_family_main == 'true') {
-        query.andWhere('family_main.description LIKE :name', {
+        query.andWhere('family_main.description LIKE :family_main', {
           family_main: `${input.family_main}`,
         });
       } else {
-        query.andWhere('family_main.description LIKE :name', {
+        query.andWhere('family_main.description LIKE :family_main', {
           family_main: `%${input.family_main}%`,
         });
       }
@@ -802,12 +802,12 @@ export class ReceiptService {
 
     if (input.customer != '') {
       if (input.is_match_all_customer == 'true') {
-        query.andWhere('receipt.customer_id LIKE :customer_id', {
-          customer_id: `${input.customer}`,
+        query.andWhere('customer.name LIKE :customer_name', {
+          customer_name: `${input.customer}`,
         });
       } else {
-        query.andWhere('receipt.customer_id LIKE :customer_id', {
-          customer_id: `%${input.customer}%`,
+        query.andWhere('customer.name LIKE :customer_name', {
+          customer_name: `%${input.customer}%`,
         });
       }
     }
