@@ -16,6 +16,7 @@ import { SourcesWorkMainTypeSearchInput } from './dto/sources-work-main-type-sea
 import { SourcesWorkMainTypeGetByIdInput } from './dto/sources-work-main-type-get-by-id.input';
 import { LogPlantImportService } from 'src/log-plant-import/log-plant-import.service';
 import { LogImportGetTotalByWorkMainTypeIdInput } from 'src/log-plant-import/dto/log-import-get-total-by-workmaintypeid.input';
+import { GetIndexStartOfPage } from 'src/utils/calculate-page';
 
 @Injectable()
 export class SourcesWorkMainTypeService {
@@ -188,16 +189,47 @@ export class SourcesWorkMainTypeService {
       );
     }
 
-    const sourcesWorkMainTypEntities =
-      await this.sourcesWorkMainTypeRepository.find({
-        order: {
-          description: 'ASC',
-        },
-      });
+    const query = this.sourcesWorkMainTypeRepository.createQueryBuilder(
+      'source_work_main_type',
+    );
+
+    const startIndex: number = GetIndexStartOfPage(input.page, input.per_page);
+    const endIndex: number =
+      parseInt(startIndex + '') + parseInt(input.per_page + '') - 1;
+
+    const queryTotal = query;
+
+    const resultTotal = await queryTotal
+      .select('COUNT(*)', 'total')
+      .getRawOne();
+
+    if (input.page && input.per_page) {
+      const start = this.getStartIndexPage(input.page, input.per_page);
+      query.offset(start);
+      query.limit(input.per_page);
+    }
+
+    query
+      .select(['source_work_main_type'])
+      .orderBy('description', 'ASC')
+      .getRawMany();
+
+    const result = await query.getRawMany();
+    const sourcesWorkMainTypEntities = result.map((row: any) => ({
+      id: row.source_work_main_type_id,
+      description: row.source_work_main_type_description,
+    }));
 
     return {
       code: 200,
-      data: sourcesWorkMainTypEntities,
+      data: {
+        start_index: startIndex,
+        end_index: endIndex,
+        page: parseInt(input.page.toString()),
+        per_page: parseInt(input.per_page.toString()),
+        total_all: parseInt(resultTotal.total.toString()),
+        data: sourcesWorkMainTypEntities,
+      },
     };
   }
 
@@ -248,17 +280,89 @@ export class SourcesWorkMainTypeService {
       );
     }
 
-    const sourcesWorkMainTypEntities =
-      await this.sourcesWorkMainTypeRepository.find({
-        where: [{ description: Like(`%${input.word}%`) }],
-        order: {
-          description: 'ASC',
-        },
-      });
+    const query = this.sourcesWorkMainTypeRepository
+      .createQueryBuilder('source_work_main_type')
+      .where('description LIKE :keyword', { keyword: `%${input.word}%` });
+
+    query
+      .select(['source_work_main_type'])
+      .orderBy('description', 'ASC')
+      .getRawMany();
+
+    const result = await query.getRawMany();
+    const sourcesWorkMainTypEntities = result.map((row: any) => ({
+      id: row.source_work_main_type_id,
+      description: row.source_work_main_type_description,
+    }));
 
     return {
       code: 200,
       data: sourcesWorkMainTypEntities,
     };
   }
+
+  async searchSourcesWorkMainTypeByWord(
+    input: SourcesWorkMainTypeSearchInput,
+  ): Promise<any> {
+    const logTokenEntity = await this.logTokenService.getLogToken({
+      token: input.token,
+    } as LogTokenGetInput);
+
+    if (!logTokenEntity) {
+      throw new HttpException(
+        {
+          code: 400,
+          message: 'Username นี้ ถูก Block',
+        },
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    const query = this.sourcesWorkMainTypeRepository
+      .createQueryBuilder('source_work_main_type')
+      .where('description LIKE :keyword', { keyword: `%${input.word}%` });
+
+    const startIndex: number = GetIndexStartOfPage(input.page, input.per_page);
+    const endIndex: number =
+      parseInt(startIndex + '') + parseInt(input.per_page + '') - 1;
+
+    const queryTotal = query;
+
+    const resultTotal = await queryTotal
+      .select('COUNT(*)', 'total')
+      .getRawOne();
+
+    if (input.page && input.per_page) {
+      const start = this.getStartIndexPage(input.page, input.per_page);
+      query.offset(start);
+      query.limit(input.per_page);
+    }
+
+    query
+      .select(['source_work_main_type'])
+      .orderBy('description', 'ASC')
+      .getRawMany();
+
+    const result = await query.getRawMany();
+    const sourcesWorkMainTypEntities = result.map((row: any) => ({
+      id: row.source_work_main_type_id,
+      description: row.source_work_main_type_description,
+    }));
+
+    return {
+      code: 200,
+      data: {
+        start_index: startIndex,
+        end_index: endIndex,
+        page: parseInt(input.page.toString()),
+        per_page: parseInt(input.per_page.toString()),
+        total_all: parseInt(resultTotal.total.toString()),
+        data: sourcesWorkMainTypEntities,
+      },
+    };
+  }
+
+  getStartIndexPage = (page: number, limit_per_page: number) => {
+    return (page - 1) * limit_per_page;
+  };
 }

@@ -26,7 +26,13 @@ export class LogPlantImportController {
   @Post()
   @HttpCode(200)
   async insertBarcode(@Body() input: LogImportCreateInput): Promise<any> {
-    return await this.logPlantImportService.insertBarcode(input);
+    return await this.logPlantImportService.insertBarcode(input, false);
+  }
+
+  @Post('add-on')
+  @HttpCode(200)
+  async addOnBarcode(@Body() input: LogImportCreateInput): Promise<any> {
+    return await this.logPlantImportService.insertBarcode(input, true);
   }
 
   @Put()
@@ -38,7 +44,15 @@ export class LogPlantImportController {
   @Put('all')
   @HttpCode(200)
   async updateBarcodeAll(@Body() input: LogImportUpdateAllInput): Promise<any> {
-    return await this.logPlantImportService.updateBarcodeAll(input);
+    return await this.logPlantImportService.updateBarcodeAllV2(input, false);
+  }
+
+  @Post('all/check')
+  @HttpCode(200)
+  async getUpdateBarcodeAll(
+    @Body() input: LogImportUpdateAllInput,
+  ): Promise<any> {
+    return await this.logPlantImportService.updateBarcodeAllV2(input, true);
   }
 
   @Delete()

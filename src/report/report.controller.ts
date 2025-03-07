@@ -16,6 +16,11 @@ import { ReportGetLogPlantImportGroupingDetailInput } from './dto/report-get-log
 import { ReportGetLogPlantRemoveGroupingInput } from './dto/report-get-log-plant-remove-grouping.input';
 import { ReportGetLogPlantRemoveTimeInput } from './dto/report-get-log-plant-remove-time.input';
 import { ReportGetLogPlantRemoveGroupingDetailInput } from './dto/report-get-log-plant-remove-grouping-detail.input';
+import { ReportGetProductionMultipleInput } from './dto/report-get-production-multiple.input';
+import { ReportGetStockInput } from './dto/report-get-stock.input';
+import { ReportGetBottleInput } from './dto/report-get-bottle.input';
+import { ReportGetFailInput } from './dto/report-get-fail.input';
+import { ReportGetRemoveAllInput } from './dto/report-get-remove-all.input';
 
 @Controller('report')
 export class ReportController {
@@ -27,10 +32,10 @@ export class ReportController {
     return await this.reportService.getReportProduction(input);
   }
 
-  @Post('production-multiple')
+  @Get('production-multiple')
   @HttpCode(200)
   async getReportProductionMultiple(
-    @Body() input: ReportGetInput,
+    @Query() input: ReportGetProductionMultipleInput,
   ): Promise<any> {
     return await this.reportService.getReportProductionMultiple(input);
   }
@@ -41,33 +46,39 @@ export class ReportController {
     return await this.reportService.getReportStock(input);
   }
 
-  @Post('stock-multiple')
+  @Get('stock-multiple')
   @HttpCode(200)
-  async getReportStockMultiple(@Body() input: ReportGetInput): Promise<any> {
+  async getReportStockMultiple(
+    @Query() input: ReportGetStockInput,
+  ): Promise<any> {
     return await this.reportService.getReportStockMultiple(input);
   }
 
-  @Post('bottle')
+  @Get('bottle')
   @HttpCode(200)
-  async getReportBottle(@Body() input: ReportGetInput): Promise<any> {
+  async getReportBottle(@Query() input: ReportGetBottleInput): Promise<any> {
     return await this.reportService.getReportBottle(input);
   }
 
-  @Post('plant-fail')
+  @Get('plant-fail')
   @HttpCode(200)
-  async getReportPlantFail(@Body() input: ReportGetInput): Promise<any> {
+  async getReportPlantFail(@Query() input: ReportGetFailInput): Promise<any> {
     return await this.reportService.getReportPlantFail(input);
   }
 
-  @Post('plant-fail-all')
+  @Get('plant-fail-all')
   @HttpCode(200)
-  async getReportPlantFailAll(@Body() input: ReportGetInput): Promise<any> {
+  async getReportPlantFailAll(
+    @Query() input: ReportGetFailInput,
+  ): Promise<any> {
     return await this.reportService.getReportPlantFailAll(input);
   }
 
-  @Post('remove-all')
+  @Get('remove-all')
   @HttpCode(200)
-  async getReportRemoveAll(@Body() input: ReportGetInput): Promise<any> {
+  async getReportRemoveAll(
+    @Query() input: ReportGetRemoveAllInput,
+  ): Promise<any> {
     return await this.reportService.getReportRemoveAll(input);
   }
 
@@ -79,6 +90,7 @@ export class ReportController {
     return await this.reportService.getReportBarcode(input);
   }
 
+  // แยกตามครั้งที่ ระดับ 1
   @Get('log-plant-import/history/grouping')
   @HttpCode(200)
   async getReportLogImportHistoryGrouping(
@@ -87,6 +99,7 @@ export class ReportController {
     return await this.reportService.getReportLogImportHistoryGrouping(input);
   }
 
+  // รายละเอียดของครั้งนั้น
   @Get('log-plant-import/history/grouping/detail')
   @HttpCode(200)
   async getReportLogImportHistoryGroupingDetail(
@@ -97,6 +110,7 @@ export class ReportController {
     );
   }
 
+  // แยกตามครั้งที่ ระดับ 1
   @Get('log-plant-remove/history/time')
   @HttpCode(200)
   async getReportLogRemoveHistoryTime(
@@ -105,6 +119,7 @@ export class ReportController {
     return await this.reportService.getReportLogRemoveHistoryTime(input);
   }
 
+  // แยกตามครั้งที่ - กลุ่ม สาเหตุ
   @Get('log-plant-remove/history/grouping')
   @HttpCode(200)
   async getReportLogRemoveHistoryGrouping(
@@ -113,6 +128,7 @@ export class ReportController {
     return await this.reportService.getReportLogRemoveHistoryGrouping(input);
   }
 
+  // แยกตามครั้งที่ - กลุ่ม สาเหตุ - รายละเอียด
   @Get('log-plant-remove/history/grouping/detail')
   @HttpCode(200)
   async getReportLogRemoveHistoryGroupingDetail(

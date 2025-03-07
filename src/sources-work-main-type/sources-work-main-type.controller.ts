@@ -81,4 +81,14 @@ export class SourcesWorkMainTypeController {
       input,
     );
   }
+
+  @Get('search/word')
+  @HttpCode(200)
+  async searchSourcesWorkMainTypeByWord(
+    @Query() input: SourcesWorkMainTypeSearchInput,
+  ): Promise<any[]> {
+    return await this.sourcesWorkMainTypeService.searchSourcesWorkMainTypeByWord(
+      input,
+    );
+  }
 }

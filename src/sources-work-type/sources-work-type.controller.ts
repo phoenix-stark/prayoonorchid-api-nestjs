@@ -69,4 +69,12 @@ export class SourcesWorkTypeController {
   ): Promise<any[]> {
     return await this.sourcesWorkTypeService.searchSourcesWorkType(input);
   }
+
+  @Get('search/word')
+  @HttpCode(200)
+  async searchSourcesWorkTypeWord(
+    @Query() input: SourcesWorkTypeSearchInput,
+  ): Promise<any[]> {
+    return await this.sourcesWorkTypeService.searchSourcesWorkTypeWord(input);
+  }
 }

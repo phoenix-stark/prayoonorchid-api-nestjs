@@ -17,6 +17,7 @@ import { LogRemoveDeleteRangeBarcodeInput } from './dto/log-remove-delete-range-
 import { LogRemoveDeleteByReceiptIdInput } from './dto/log-remove-delete-by-receipt-id.input';
 import { LogRemoveGetByReceiptIdInput } from './dto/log-remove-get-by-receipt-id.input';
 import { LogRemoveGetDetailByBarcodeInput } from './dto/log-remove-get-detail-by-barcode.input';
+import { LogRemoveUpdateDetailAllInput } from './dto/log-remove-update-detail-all.input';
 
 @Controller('log-plant-remove')
 export class LogPlantRemoveController {
@@ -37,7 +38,38 @@ export class LogPlantRemoveController {
   @Put('all')
   @HttpCode(200)
   async updateBarcodeAll(@Body() input: LogRemoveUpdateAllInput): Promise<any> {
-    return await this.logPlantRemoveService.updateBarcodeAll(input);
+    return await this.logPlantRemoveService.updateBarcodeAllV2(input, false);
+  }
+
+  @Post('all/check')
+  @HttpCode(200)
+  async getUpdateBarcodeAll(
+    @Body() input: LogRemoveUpdateAllInput,
+  ): Promise<any> {
+    return await this.logPlantRemoveService.updateBarcodeAllV2(input, true);
+  }
+
+  // ตรวจสอบรายละเอียด
+  @Post('all/detail/check')
+  @HttpCode(200)
+  async checkBarcodeDetailAllV2(
+    @Body() input: LogRemoveUpdateDetailAllInput,
+  ): Promise<any> {
+    return await this.logPlantRemoveService.updateBarcodeDetailAllV2(
+      input,
+      true,
+    );
+  }
+
+  @Put('all/detail')
+  @HttpCode(200)
+  async updateBarcodeDetailAllV2(
+    @Body() input: LogRemoveUpdateDetailAllInput,
+  ): Promise<any> {
+    return await this.logPlantRemoveService.updateBarcodeDetailAllV2(
+      input,
+      false,
+    );
   }
 
   @Delete()

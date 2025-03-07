@@ -180,7 +180,7 @@ export class ReceiptService {
       .leftJoinAndSelect(
         FoodPlant,
         'food_plant',
-        'food_plant.id = receipt.family_main_id',
+        'food_plant.id = receipt.food_id',
       )
       .where('receipt.receipt_id = :receipt_id', {
         receipt_id: input.receipt_id,

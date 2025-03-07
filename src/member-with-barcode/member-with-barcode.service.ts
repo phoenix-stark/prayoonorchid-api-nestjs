@@ -13,6 +13,7 @@ import { MemberWithBarcodeSearchInput } from './dto/member-with-barcode-search.i
 import { MemberWithBarcodeGetAllInput } from './dto/member-with-barcode-get-all.input';
 import { Member } from 'src/member/entity/member-entity.model';
 import { SourcesGrant } from 'src/sources-grant/entity/sources-grant-entity.model';
+import { GetIndexStartOfPage } from 'src/utils/calculate-page';
 @Injectable()
 export class MemberWithBarcodeService {
   constructor(
@@ -242,8 +243,7 @@ export class MemberWithBarcodeService {
   async searchBarcode(input: MemberWithBarcodeSearchInput): Promise<any> {
     const logTokenEntity = await this.logTokenService.getLogToken({
       token: input.token,
-      // eslint-disable-next-line prettier/prettier
-      } as LogTokenGetInput);
+    } as LogTokenGetInput);
 
     if (!logTokenEntity) {
       throw new HttpException(
@@ -255,7 +255,7 @@ export class MemberWithBarcodeService {
       );
     }
 
-    const result = await this.memberWithBarcodeRepository
+    const query = this.memberWithBarcodeRepository
       .createQueryBuilder('member_with_barcode')
       .leftJoinAndSelect(
         Member,
@@ -273,7 +273,25 @@ export class MemberWithBarcodeService {
         {
           barcodePattern: `%${input.word}%`,
         },
-      )
+      );
+
+    const startIndex: number = GetIndexStartOfPage(input.page, input.per_page);
+    const endIndex: number =
+      parseInt(startIndex + '') + parseInt(input.per_page + '') - 1;
+
+    const queryTotal = query;
+
+    const resultTotal = await queryTotal
+      .select('COUNT(*)', 'total')
+      .getRawOne();
+
+    if (input.page && input.per_page) {
+      const start = this.getStartIndexPage(input.page, input.per_page);
+      query.offset(start);
+      query.limit(input.per_page);
+    }
+
+    query
       .select([
         'member_with_barcode.log_id',
         'member_with_barcode.barcode_start',
@@ -291,6 +309,7 @@ export class MemberWithBarcodeService {
       .orderBy('barcode_start', 'DESC')
       .getRawMany();
 
+    const result = await query.getRawMany();
     const memberWithBarcodeEntities = result.map((row: any) => ({
       log_id: row.member_with_barcode_log_id,
       member: {
@@ -311,7 +330,14 @@ export class MemberWithBarcodeService {
     }));
     return {
       code: 200,
-      data: memberWithBarcodeEntities,
+      data: {
+        start_index: startIndex,
+        end_index: endIndex,
+        page: parseInt(input.page.toString()),
+        per_page: parseInt(input.per_page.toString()),
+        total_all: parseInt(resultTotal.total.toString()),
+        data: memberWithBarcodeEntities,
+      },
     };
   }
 
@@ -331,14 +357,32 @@ export class MemberWithBarcodeService {
       );
     }
 
-    const result = await this.memberWithBarcodeRepository
+    const query = this.memberWithBarcodeRepository
       .createQueryBuilder('member_with_barcode')
       .leftJoinAndSelect(
         Member,
         'member',
         'member.member_id = member_with_barcode.member_id',
       )
-      .leftJoinAndSelect(SourcesGrant, 'grant', 'grant.id = member.grant_id')
+      .leftJoinAndSelect(SourcesGrant, 'grant', 'grant.id = member.grant_id');
+
+    const startIndex: number = GetIndexStartOfPage(input.page, input.per_page);
+    const endIndex: number =
+      parseInt(startIndex + '') + parseInt(input.per_page + '') - 1;
+
+    const queryTotal = query;
+
+    const resultTotal = await queryTotal
+      .select('COUNT(*)', 'total')
+      .getRawOne();
+
+    if (input.page && input.per_page) {
+      const start = this.getStartIndexPage(input.page, input.per_page);
+      query.offset(start);
+      query.limit(input.per_page);
+    }
+
+    query
       .select([
         'member_with_barcode.log_id',
         'member_with_barcode.barcode_start',
@@ -355,6 +399,7 @@ export class MemberWithBarcodeService {
       ])
       .orderBy('barcode_start', 'DESC')
       .getRawMany();
+    const result = await query.getRawMany();
     const memberWithBarcodeEntities = result.map((row: any) => ({
       log_id: row.member_with_barcode_log_id,
       member: {
@@ -375,7 +420,18 @@ export class MemberWithBarcodeService {
     }));
     return {
       code: 200,
-      data: memberWithBarcodeEntities,
+      data: {
+        start_index: startIndex,
+        end_index: endIndex,
+        page: parseInt(input.page.toString()),
+        per_page: parseInt(input.per_page.toString()),
+        total_all: parseInt(resultTotal.total.toString()),
+        data: memberWithBarcodeEntities,
+      },
     };
   }
+
+  getStartIndexPage = (page: number, limit_per_page: number) => {
+    return (page - 1) * limit_per_page;
+  };
 }

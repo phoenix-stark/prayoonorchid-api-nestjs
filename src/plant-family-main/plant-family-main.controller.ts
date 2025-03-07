@@ -69,4 +69,12 @@ export class PlantFamilyMainController {
   ): Promise<any[]> {
     return await this.plantFamilyMainService.searchPlantFamilyMain(input);
   }
+
+  @Get('search/word')
+  @HttpCode(200)
+  async searchPlantFamilyMainByWord(
+    @Query() input: PlantFamilyMainSearchInput,
+  ): Promise<any[]> {
+    return await this.plantFamilyMainService.searchPlantFamilyMainByWord(input);
+  }
 }

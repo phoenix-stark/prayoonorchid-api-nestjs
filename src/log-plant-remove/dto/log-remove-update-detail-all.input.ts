@@ -1,14 +1,12 @@
-export class LogImportUpdateAllInput {
+export class LogRemoveUpdateDetailAllInput {
   token: string;
-  update_import_date: string;
-  update_food_id: string;
-  update_work_type_id: number;
-  update_receipt_id: string;
-  update_main_work_type_id: number;
-  barcodes?: any[];
-
+  update_remove_date: string;
+  update_plant_remove_type_id: number;
+  update_remark: string;
   import_start: string;
   import_end: string;
+  remove_start: string;
+  remove_end: string;
   main_work_type_desc: string;
   work_type_id: string;
   employee_id: string;
@@ -23,4 +21,5 @@ export class LogImportUpdateAllInput {
   customer_id: string;
   customer_id_is_match_all: boolean;
   time_per_day: string;
+  plant_remove_type_id: string;
 }

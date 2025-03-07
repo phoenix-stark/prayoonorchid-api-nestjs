@@ -20,6 +20,7 @@ import { PlantFamilyMainSearchInput } from './dto/plant-family-main-search';
 import { ReceiptService } from 'src/receipt/receipt.service';
 import { ReceiptGetTotalByPlantFamilyMainIdInput } from 'src/receipt/dto/receipt-get-total-by-plant-family-main-id-input';
 import { PlantFamilyMainGetByDescInput } from './dto/plant-family-main-get-by-desc.input';
+import { GetIndexStartOfPage } from 'src/utils/calculate-page';
 
 @Injectable()
 export class PlantFamilyMainService {
@@ -182,15 +183,46 @@ export class PlantFamilyMainService {
       );
     }
 
-    const plantFamilyMainEntities = await this.plantFamilyMainRepository.find({
-      order: {
-        description: 'ASC',
-      },
-    });
+    const query =
+      this.plantFamilyMainRepository.createQueryBuilder('plant_family_main');
+
+    const startIndex: number = GetIndexStartOfPage(input.page, input.per_page);
+    const endIndex: number =
+      parseInt(startIndex + '') + parseInt(input.per_page + '') - 1;
+
+    const queryTotal = query;
+
+    const resultTotal = await queryTotal
+      .select('COUNT(*)', 'total')
+      .getRawOne();
+
+    if (input.page && input.per_page) {
+      const start = this.getStartIndexPage(input.page, input.per_page);
+      query.offset(start);
+      query.limit(input.per_page);
+    }
+
+    query
+      .select(['plant_family_main'])
+      .orderBy('description', 'ASC')
+      .getRawMany();
+
+    const result = await query.getRawMany();
+    const plantFamilyMainEntities = result.map((row: any) => ({
+      id: row.plant_family_main_id,
+      description: row.plant_family_main_description,
+    }));
 
     return {
       code: 200,
-      data: plantFamilyMainEntities,
+      data: {
+        start_index: startIndex,
+        end_index: endIndex,
+        page: parseInt(input.page.toString()),
+        per_page: parseInt(input.per_page.toString()),
+        total_all: parseInt(resultTotal.total.toString()),
+        data: plantFamilyMainEntities,
+      },
     };
   }
 
@@ -237,6 +269,67 @@ export class PlantFamilyMainService {
     return plantFamilyMainEntities;
   }
 
+  async searchPlantFamilyMainByWord(
+    input: PlantFamilyMainSearchInput,
+  ): Promise<any> {
+    const logTokenEntity = await this.logTokenService.getLogToken({
+      token: input.token,
+    } as LogTokenGetInput);
+
+    if (!logTokenEntity) {
+      throw new HttpException(
+        {
+          code: 400,
+          message: 'Username นี้ ถูก Block',
+        },
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    const query = this.plantFamilyMainRepository
+      .createQueryBuilder('plant_family_main')
+      .where('description LIKE :keyword', { keyword: `%${input.word}%` });
+
+    const startIndex: number = GetIndexStartOfPage(input.page, input.per_page);
+    const endIndex: number =
+      parseInt(startIndex + '') + parseInt(input.per_page + '') - 1;
+
+    const queryTotal = query;
+
+    const resultTotal = await queryTotal
+      .select('COUNT(*)', 'total')
+      .getRawOne();
+
+    if (input.page && input.per_page) {
+      const start = this.getStartIndexPage(input.page, input.per_page);
+      query.offset(start);
+      query.limit(input.per_page);
+    }
+
+    query
+      .select(['plant_family_main'])
+      .orderBy('description', 'ASC')
+      .getRawMany();
+
+    const result = await query.getRawMany();
+    const plantFamilyMainEntities = result.map((row: any) => ({
+      id: row.plant_family_main_id,
+      description: row.plant_family_main_description,
+    }));
+
+    return {
+      code: 200,
+      data: {
+        start_index: startIndex,
+        end_index: endIndex,
+        page: parseInt(input.page.toString()),
+        per_page: parseInt(input.per_page.toString()),
+        total_all: parseInt(resultTotal.total.toString()),
+        data: plantFamilyMainEntities,
+      },
+    };
+  }
+
   async searchPlantFamilyMain(input: PlantFamilyMainSearchInput): Promise<any> {
     const logTokenEntity = await this.logTokenService.getLogToken({
       token: input.token,
@@ -252,16 +345,28 @@ export class PlantFamilyMainService {
       );
     }
 
-    const plantFamilyMainEntities = await this.plantFamilyMainRepository.find({
-      where: [{ description: Like(`%${input.word}%`) }],
-      order: {
-        description: 'ASC',
-      },
-    });
+    const query = this.plantFamilyMainRepository
+      .createQueryBuilder('plant_family_main')
+      .where('description LIKE :keyword', { keyword: `%${input.word}%` });
+
+    query
+      .select(['plant_family_main'])
+      .orderBy('description', 'ASC')
+      .getRawMany();
+
+    const result = await query.getRawMany();
+    const plantFamilyMainEntities = result.map((row: any) => ({
+      id: row.plant_family_main_id,
+      description: row.plant_family_main_description,
+    }));
 
     return {
       code: 200,
       data: plantFamilyMainEntities,
     };
   }
+
+  getStartIndexPage = (page: number, limit_per_page: number) => {
+    return (page - 1) * limit_per_page;
+  };
 }

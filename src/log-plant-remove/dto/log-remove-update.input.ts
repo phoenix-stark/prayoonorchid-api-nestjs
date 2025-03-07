@@ -4,4 +4,5 @@ export class LogRemoveUpdateInput {
   barcode: number;
   plant_remove_type_id: number;
   remark: string;
+  time_per_day: string;
 }

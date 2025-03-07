@@ -1,4 +1,7 @@
 export class ReportGetLogPlantRemoveGroupingDetailInput {
+  token: string;
+  page: number;
+  per_page: number;
   import_start: string;
   import_end: string;
   remove_start: string;
@@ -17,4 +20,5 @@ export class ReportGetLogPlantRemoveGroupingDetailInput {
   customer_id: string;
   customer_id_is_match_all: boolean;
   time_per_day: string;
+  plant_remove_type_id: string;
 }

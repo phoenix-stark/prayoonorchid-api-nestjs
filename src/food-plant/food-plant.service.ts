@@ -13,6 +13,7 @@ import { FoodPlantGetByIdInput } from './dto/food-plant-get-by-id.input';
 import { FoodPlantSearchInput } from './dto/food-plant-search';
 import { LogPlantImportService } from 'src/log-plant-import/log-plant-import.service';
 import { LogImportGetTotalByFoodIdInput } from 'src/log-plant-import/dto/log-import-get-total-by-foodid.input';
+import { GetIndexStartOfPage } from 'src/utils/calculate-page';
 @Injectable()
 export class FoodPlantService {
   constructor(
@@ -173,15 +174,44 @@ export class FoodPlantService {
       );
     }
 
-    const foodEntities = await this.foodPlantRepository.find({
-      order: {
-        description: 'ASC',
-      },
-    });
+    const query = this.foodPlantRepository.createQueryBuilder('food_plant');
+
+    const startIndex: number = GetIndexStartOfPage(input.page, input.per_page);
+    const endIndex: number =
+      parseInt(startIndex + '') + parseInt(input.per_page + '') - 1;
+
+    const queryTotal = query;
+
+    const resultTotal = await queryTotal
+      .select('COUNT(*)', 'total')
+      .getRawOne();
+
+    if (input.page && input.per_page) {
+      const start = this.getStartIndexPage(input.page, input.per_page);
+      query.offset(start);
+      query.limit(input.per_page);
+    }
+
+    query.select(['food_plant']).orderBy('description', 'ASC').getRawMany();
+
+    const result = await query.getRawMany();
+    const foodEntities = result.map((row: any) => ({
+      food_id: row.food_plant_food_id,
+      description: row.food_plant_description,
+      create_at: row.food_plant_create_at,
+      create_by: row.food_plant_create_by,
+    }));
 
     return {
       code: 200,
-      data: foodEntities,
+      data: {
+        start_index: startIndex,
+        end_index: endIndex,
+        page: parseInt(input.page.toString()),
+        per_page: parseInt(input.per_page.toString()),
+        total_all: parseInt(resultTotal.total.toString()),
+        data: foodEntities,
+      },
     };
   }
 
@@ -227,16 +257,105 @@ export class FoodPlantService {
       );
     }
 
-    const foodEntities = await this.foodPlantRepository.find({
-      where: [{ description: Like(`%${input.word}%`) }],
-      order: {
-        description: 'ASC',
-      },
-    });
+    const query = this.foodPlantRepository
+      .createQueryBuilder('food_plant')
+      .where('food_plant.description LIKE :keyword', {
+        keyword: '%' + input.word + '%',
+      });
+
+    const startIndex: number = GetIndexStartOfPage(input.page, input.per_page);
+    const endIndex: number =
+      parseInt(startIndex + '') + parseInt(input.per_page + '') - 1;
+
+    const queryTotal = query;
+
+    const resultTotal = await queryTotal
+      .select('COUNT(*)', 'total')
+      .getRawOne();
+
+    if (input.page && input.per_page) {
+      const start = this.getStartIndexPage(input.page, input.per_page);
+      query.offset(start);
+      query.limit(input.per_page);
+    }
+
+    query.select(['food_plant']).orderBy('description', 'ASC').getRawMany();
+
+    const result = await query.getRawMany();
+    const foodEntities = result.map((row: any) => ({
+      food_id: row.food_plant_food_id,
+      description: row.food_plant_description,
+      create_at: row.food_plant_create_at,
+      create_by: row.food_plant_create_by,
+    }));
 
     return {
       code: 200,
       data: foodEntities,
     };
   }
+
+  async searchFoodPlantWord(input: FoodPlantSearchInput): Promise<any> {
+    const logTokenEntity = await this.logTokenService.getLogToken({
+      token: input.token,
+    } as LogTokenGetInput);
+
+    if (!logTokenEntity) {
+      throw new HttpException(
+        {
+          code: 400,
+          message: 'Username นี้ ถูก Block',
+        },
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    const query = this.foodPlantRepository
+      .createQueryBuilder('food_plant')
+      .where('food_plant.description LIKE :keyword', {
+        keyword: '%' + input.word + '%',
+      });
+
+    const startIndex: number = GetIndexStartOfPage(input.page, input.per_page);
+    const endIndex: number =
+      parseInt(startIndex + '') + parseInt(input.per_page + '') - 1;
+
+    const queryTotal = query;
+
+    const resultTotal = await queryTotal
+      .select('COUNT(*)', 'total')
+      .getRawOne();
+
+    if (input.page && input.per_page) {
+      const start = this.getStartIndexPage(input.page, input.per_page);
+      query.offset(start);
+      query.limit(input.per_page);
+    }
+
+    query.select(['food_plant']).orderBy('description', 'ASC').getRawMany();
+
+    const result = await query.getRawMany();
+    const foodEntities = result.map((row: any) => ({
+      food_id: row.food_plant_food_id,
+      description: row.food_plant_description,
+      create_at: row.food_plant_create_at,
+      create_by: row.food_plant_create_by,
+    }));
+
+    return {
+      code: 200,
+      data: {
+        start_index: startIndex,
+        end_index: endIndex,
+        page: parseInt(input.page.toString()),
+        per_page: parseInt(input.per_page.toString()),
+        total_all: parseInt(resultTotal.total.toString()),
+        data: foodEntities,
+      },
+    };
+  }
+
+  getStartIndexPage = (page: number, limit_per_page: number) => {
+    return (page - 1) * limit_per_page;
+  };
 }

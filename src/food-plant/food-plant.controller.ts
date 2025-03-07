@@ -57,4 +57,12 @@ export class FoodPlantController {
   async searchFoodPlant(@Query() input: FoodPlantSearchInput): Promise<any[]> {
     return await this.foodPlantService.searchFoodPlant(input);
   }
+
+  @Get('search/word')
+  @HttpCode(200)
+  async searchFoodPlantWord(
+    @Query() input: FoodPlantSearchInput,
+  ): Promise<any[]> {
+    return await this.foodPlantService.searchFoodPlantWord(input);
+  }
 }

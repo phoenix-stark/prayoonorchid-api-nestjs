@@ -3,7 +3,7 @@ export class ReportGetLogPlantRemoveTimeInput {
   per_page: number;
   remove_start: string;
   remove_end: string;
-  main_work_type_desc: string;
+  main_work_type: string;
   work_type_id: string;
   employee_id: string;
   food_plant_desc: string;

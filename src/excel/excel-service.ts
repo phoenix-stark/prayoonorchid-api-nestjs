@@ -7,6 +7,11 @@ import { ReportService } from 'src/report/report.service';
 import { MomentService } from 'src/utils/MomentService';
 import * as tmp from 'tmp';
 import { ReportGetInput } from './dto/report-get.input';
+import { ReportGetProductionMultipleInput } from 'src/report/dto/report-get-production-multiple.input';
+import { ReportGetStockInput } from 'src/report/dto/report-get-stock.input';
+import { ReportGetBottleInput } from 'src/report/dto/report-get-bottle.input';
+import { ReportGetFailInput } from 'src/report/dto/report-get-fail.input';
+import { ReportGetRemoveAllInput } from 'src/report/dto/report-get-remove-all.input';
 @Injectable()
 export class ExcelService {
   constructor(
@@ -17,26 +22,36 @@ export class ExcelService {
     private momentWrapper: MomentService,
   ) {}
 
-  async exportReportBottle(input: ReportGetInput): Promise<any> {
+  async exportReportBottle(input: ReportGetBottleInput): Promise<any> {
     const book = new Workbook();
     const sheet = book.addWorksheet('Sheet1');
 
-    const filter = this.getFilter(input.filter);
     sheet.mergeCells('A1:K1');
+
+    let strId = '';
+    if (input.work_main_types) {
+      const itemMainTask = JSON.parse(input.work_main_types);
+      for (let b = 0; b < itemMainTask.length; b++) {
+        const id = itemMainTask[b].description;
+        strId += id + ', ';
+      }
+      if (strId !== '') {
+        strId.substring(0, strId.length - 2);
+      }
+    }
+
     sheet.getCell('A1').value = `วันที่นำออกเริ่มต้น: ${this.momentWrapper
-      .momentDate(filter.filter[8].import_start_date.description)
+      .momentDate(input.import_start_date)
       .format('DD/MM/YYYY')}, วันที่นำออกสิ้นสุด: ${this.momentWrapper
-      .momentDate(filter.filter[9].import_end_date.description)
+      .momentDate(input.import_end_date)
       .format('DD/MM/YYYY')}, รหัสพันธุ์ไม้: ${
-      filter.filter[1].plant_code.description
-    } ชื่อพันธุ์ไม้: ${
-      filter.filter[0].plant_name.description
-    }  สายพันธุ์หลัก: ${
-      filter.filter[2].family_main.description
-    } ประเภทงานหลัก: ${filter.filter[7].main_task.description} ชื่อคู่ค้า: ${
-      filter.filter[5].customer.description
-    } อาหารวุ้น: ${filter.filter[4].food.description} ชื่อ-นามสกุลพนักงาน: ${
-      filter.filter[6].employee.description
+      input.receipt_code_desc
+    } ชื่อพันธุ์ไม้: ${input.receipt_name_desc}  สายพันธุ์หลัก: ${
+      input.family_main_desc
+    } ประเภทงานหลัก: ${strId} ชื่อคู่ค้า: ${
+      input.customer_name_desc
+    } อาหารวุ้น: ${input.food_plant_desc} ชื่อ-นามสกุลพนักงาน: ${
+      input.employee_name
     }`;
 
     const data = [];
@@ -197,26 +212,36 @@ export class ExcelService {
     return file;
   }
 
-  async exportReportRemoveAll(input: ReportGetInput): Promise<any> {
+  async exportReportRemoveAll(input: ReportGetRemoveAllInput): Promise<any> {
     const book = new Workbook();
     const sheet = book.addWorksheet('Sheet1');
-    const filter = this.getFilter(input.filter);
     sheet.mergeCells('A1:N1');
+
+    let strId = '';
+    if (input.work_main_types) {
+      const itemMainTask = JSON.parse(input.work_main_types);
+      for (let b = 0; b < itemMainTask.length; b++) {
+        const id = itemMainTask[b].description;
+        strId += id + ', ';
+      }
+      if (strId !== '') {
+        strId.substring(0, strId.length - 2);
+      }
+    }
+
     sheet.getCell('A1').value = `วันที่นำออกเริ่มต้น: ${this.momentWrapper
-      .momentDate(filter.filter[8].import_start_date.description)
+      .momentDate(input.import_start_date)
       .format('DD/MM/YYYY')}, วันที่นำออกสิ้นสุด: ${this.momentWrapper
-      .momentDate(filter.filter[9].import_end_date.description)
+      .momentDate(input.import_end_date)
       .format('DD/MM/YYYY')}, รหัสพันธุ์ไม้: ${
-      filter.filter[1].plant_code.description
-    } ชื่อพันธุ์ไม้: ${
-      filter.filter[0].plant_name.description
-    }  สายพันธุ์หลัก: ${
-      filter.filter[2].family_main.description
-    } ประเภทงานหลัก: ${filter.filter[7].main_task.description} ชื่อคู่ค้า: ${
-      filter.filter[5].customer.description
-    } อาหารวุ้น: ${filter.filter[4].food.description} ชื่อ-นามสกุลพนักงาน: ${
-      filter.filter[6].employee.description
-    } สาเหตุการนำออก ${filter.filter[10].reason_remove_type.description}`;
+      input.receipt_code_desc
+    } ชื่อพันธุ์ไม้: ${input.receipt_name_desc}  สายพันธุ์หลัก: ${
+      input.family_main_desc
+    } ประเภทงานหลัก: ${strId} ชื่อคู่ค้า: ${
+      input.customer_name_desc
+    } อาหารวุ้น: ${input.food_plant_desc} ชื่อ-นามสกุลพนักงาน: ${
+      input.employee_name
+    } สาเหตุการนำออก ${input.reason_remove_type_desc}`;
     const data = [];
     const rows = [];
     data.push({
@@ -625,19 +650,17 @@ export class ExcelService {
     return file;
   }
 
-  async exportReportStockMultiple(input: ReportGetInput): Promise<any> {
+  async exportReportStockMultiple(input: ReportGetStockInput): Promise<any> {
     const book = new Workbook();
     const sheet = book.addWorksheet('Sheet1');
-    const filter = this.getFilterMultiple(input.filter);
 
     sheet.mergeCells('A1:Q1');
 
     let strId = '';
-    if (filter.filter[10].main_task_multiple) {
-      const itemMainTask = filter.filter[10].main_task_multiple;
-
-      for (let b = 0; b < itemMainTask.description.length; b++) {
-        const id = itemMainTask.description[b].description;
+    if (input.work_main_types) {
+      const itemMainTask = JSON.parse(input.work_main_types);
+      for (let b = 0; b < itemMainTask.length; b++) {
+        const id = itemMainTask[b].description;
         strId += id + ', ';
       }
       if (strId !== '') {
@@ -646,19 +669,17 @@ export class ExcelService {
     }
 
     sheet.getCell('A1').value = `วันที่นำเข้าเริ่มต้น: ${this.momentWrapper
-      .momentDate(filter.filter[8].import_start_date.description)
+      .momentDate(input.import_start_date)
       .format('DD/MM/YYYY')}, วันที่นำเข้าสิ้นสุด: ${this.momentWrapper
-      .momentDate(filter.filter[9].import_end_date.description)
+      .momentDate(input.import_end_date)
       .format('DD/MM/YYYY')}, รหัสพันธุ์ไม้: ${
-      filter.filter[1].plant_code.description
-    } ชื่อพันธุ์ไม้: ${
-      filter.filter[0].plant_name.description
-    }  สายพันธุ์หลัก: ${
-      filter.filter[2].family_main.description
+      input.receipt_code_desc
+    } ชื่อพันธุ์ไม้: ${input.receipt_name_desc}  สายพันธุ์หลัก: ${
+      input.family_main_desc
     } ประเภทงานหลัก: ${strId} ชื่อคู่ค้า: ${
-      filter.filter[5].customer.description
-    } อาหารวุ้น: ${filter.filter[4].food.description} ชื่อ-นามสกุลพนักงาน: ${
-      filter.filter[6].employee.description
+      input.customer_name_desc
+    } อาหารวุ้น: ${input.food_plant_desc} ชื่อ-นามสกุลพนักงาน: ${
+      input.employee_name
     }`;
 
     const data = [];
@@ -1079,18 +1100,18 @@ export class ExcelService {
     return file;
   }
 
-  async exportReportProductionMultiple(input: ReportGetInput): Promise<any> {
+  async exportReportProductionMultiple(
+    input: ReportGetProductionMultipleInput,
+  ): Promise<any> {
     const book = new Workbook();
     const sheet = book.addWorksheet('Sheet1');
-    const filter = this.getFilterMultiple(input.filter);
     sheet.mergeCells('A1:Q1');
 
     let strId = '';
-    if (filter.filter[10].main_task_multiple) {
-      const itemMainTask = filter.filter[10].main_task_multiple;
-
-      for (let b = 0; b < itemMainTask.description.length; b++) {
-        const id = itemMainTask.description[b].description;
+    if (input.work_main_types) {
+      const itemMainTask = JSON.parse(input.work_main_types);
+      for (let b = 0; b < itemMainTask.length; b++) {
+        const id = itemMainTask[b].description;
         strId += id + ', ';
       }
       if (strId !== '') {
@@ -1099,20 +1120,19 @@ export class ExcelService {
     }
 
     sheet.getCell('A1').value = `วันที่นำเข้าเริ่มต้น: ${this.momentWrapper
-      .momentDate(filter.filter[8].import_start_date.description)
+      .momentDate(input.import_start_date)
       .format('DD/MM/YYYY')}, วันที่นำเข้าสิ้นสุด: ${this.momentWrapper
-      .momentDate(filter.filter[9].import_end_date.description)
+      .momentDate(input.import_end_date)
       .format('DD/MM/YYYY')}, รหัสพันธุ์ไม้: ${
-      filter.filter[1].plant_code.description
-    } ชื่อพันธุ์ไม้: ${
-      filter.filter[0].plant_name.description
-    }  สายพันธุ์หลัก: ${
-      filter.filter[2].family_main.description
+      input.receipt_code_desc
+    } ชื่อพันธุ์ไม้: ${input.receipt_name_desc}  สายพันธุ์หลัก: ${
+      input.family_main_desc
     } ประเภทงานหลัก: ${strId} ชื่อคู่ค้า: ${
-      filter.filter[5].customer.description
-    } อาหารวุ้น: ${filter.filter[4].food.description} ชื่อ-นามสกุลพนักงาน: ${
-      filter.filter[6].employee.description
-    }`;
+      input.customer_name_desc
+    } อาหารวุ้น: ${input.food_plant_desc} ชื่อ-นามสกุลพนักงาน: ${
+      input.employee_name
+    } ${input.employee_surname}
+    `;
 
     const data = [];
     const rows = [];
@@ -1137,7 +1157,8 @@ export class ExcelService {
     });
 
     // Add Data Row
-    const result = await this.reportService.getReportProductionMultiple(input);
+    const req = input;
+    const result = await this.reportService.getReportProductionMultiple(req);
     for (let i = 0; i < result.data.length; i++) {
       const rowsDB = result.data[i];
       data.push({
@@ -1313,25 +1334,35 @@ export class ExcelService {
     return file;
   }
 
-  async exportReportFail(input: ReportGetInput): Promise<any> {
+  async exportReportFail(input: ReportGetFailInput): Promise<any> {
     const book = new Workbook();
     const sheet = book.addWorksheet('Sheet1');
-    const filter = this.getFilter(input.filter);
     sheet.mergeCells('A1:F1');
+
+    let strId = '';
+    if (input.work_main_types) {
+      const itemMainTask = JSON.parse(input.work_main_types);
+      for (let b = 0; b < itemMainTask.length; b++) {
+        const id = itemMainTask[b].description;
+        strId += id + ', ';
+      }
+      if (strId !== '') {
+        strId.substring(0, strId.length - 2);
+      }
+    }
+
     sheet.getCell('A1').value = `วันที่นำออกเริ่มต้น: ${this.momentWrapper
-      .momentDate(filter.filter[8].import_start_date.description)
+      .momentDate(input.import_start_date)
       .format('DD/MM/YYYY')}, วันที่นำออกสิ้นสุด: ${this.momentWrapper
-      .momentDate(filter.filter[9].import_end_date.description)
+      .momentDate(input.import_end_date)
       .format('DD/MM/YYYY')}, รหัสพันธุ์ไม้: ${
-      filter.filter[1].plant_code.description
-    } ชื่อพันธุ์ไม้: ${
-      filter.filter[0].plant_name.description
-    }  สายพันธุ์หลัก: ${
-      filter.filter[2].family_main.description
-    } ประเภทงานหลัก: ${filter.filter[7].main_task.description} ชื่อคู่ค้า: ${
-      filter.filter[5].customer.description
-    } อาหารวุ้น: ${filter.filter[4].food.description} ชื่อ-นามสกุลพนักงาน: ${
-      filter.filter[6].employee.description
+      input.receipt_code_desc
+    } ชื่อพันธุ์ไม้: ${input.food_plant_desc}  สายพันธุ์หลัก: ${
+      input.family_main_desc
+    } ประเภทงานหลัก: ${strId} ชื่อคู่ค้า: ${
+      input.customer_name_desc
+    } อาหารวุ้น: ${input.food_plant_desc} ชื่อ-นามสกุลพนักงาน: ${
+      input.family_main_desc
     }`;
 
     const data = [];

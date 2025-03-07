@@ -5,8 +5,8 @@ import {
   Inject,
   Injectable,
 } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { InjectConnection, InjectRepository } from '@nestjs/typeorm';
+import { Connection, Repository } from 'typeorm';
 import { LogPlantImport } from './entity/log-plant-import-entity.model';
 import { LogPlantImportNow } from './entity/log-plant-import-now-entity.model';
 import { LogImportCreateInput } from './dto/log-import-create.input';
@@ -38,10 +38,15 @@ import { LogPlantRemove } from 'src/log-plant-remove/entity/log-plant-remove-ent
 import { Customer } from 'src/customer/entity/customer-entity.model';
 import { ReceiptGetByCodeInput } from 'src/receipt/dto/receipt-get-by-code.input';
 import { LogImportGetTotalByReceiptIdInput } from './dto/log-import-get-total-by-receiptid.input';
+import { GetIndexStartOfPage } from 'src/utils/calculate-page';
+import { ReportProductionResponse } from 'src/report/modal/report-production.response';
+import { SourcesPlantRemoveType } from 'src/sources-plant-remove-type/entity/sources-plant-remove-type-entity.model';
 
 @Injectable()
 export class LogPlantImportService {
   constructor(
+    @InjectConnection()
+    private connection: Connection,
     @Inject(forwardRef(() => LogTokenService))
     private readonly logTokenService: LogTokenService,
     @Inject(forwardRef(() => ReceiptService))
@@ -66,7 +71,10 @@ export class LogPlantImportService {
     return await this.logPlantImportRepository.find();
   }
 
-  async insertBarcode(input: LogImportCreateInput): Promise<any> {
+  async insertBarcode(
+    input: LogImportCreateInput,
+    is_add_on: boolean,
+  ): Promise<any> {
     // Check Member
     const logTokenEntity = await this.logTokenService.getLogToken({
       token: input.token,
@@ -97,7 +105,7 @@ export class LogPlantImportService {
         });
       if (logPlantImportNowEntity) {
         return {
-          cose: 400,
+          code: 400,
           message: `นำเข้า Barcode ${input.barcode} แล้วในระบบ`,
         };
       } else {
@@ -172,7 +180,7 @@ export class LogPlantImportService {
         }
         if (!recipetId) {
           return {
-            cose: 400,
+            code: 400,
             message: `ไม่พบรหัสใบงาน`,
           };
         }
@@ -187,7 +195,12 @@ export class LogPlantImportService {
         logEntity.food_plant_id = `${foodEntity.food_id}`;
         logEntity.import_date = input.import_date;
         logEntity.main_work_type_id = input.main_work_type_id;
-        logEntity.member_made = memberWithBarcodeEntity.member_id;
+        if (is_add_on == true) {
+          logEntity.member_made = input.member_id;
+        } else {
+          logEntity.member_made = memberWithBarcodeEntity.member_id;
+        }
+
         logEntity.receipt_id = recipetId;
         logEntity.time_per_day = parseInt(timePerDay);
         logEntity.work_type_id = workTypeEntity.id;
@@ -196,7 +209,9 @@ export class LogPlantImportService {
         logEntity.log_plant_import_id = newLogPlant.log_plant_import_id;
         console.log('logEntity:');
         console.log(logEntity);
-        await this.logPlantImportNowRepository.save(logEntity);
+        const r = await this.logPlantImportNowRepository.save(logEntity);
+        console.log('r2');
+        console.log(r);
         const memberMadeEntity = await this.memberRepository.findOne({
           where: {
             member_id: memberWithBarcodeEntity.member_id,
@@ -215,7 +230,7 @@ export class LogPlantImportService {
       }
     } else {
       return {
-        cose: 400,
+        code: 400,
         message: `ไม่พบ Barcode ${input.barcode} ในระบบ ก่อนนำเข้า`,
       };
     }
@@ -248,7 +263,7 @@ export class LogPlantImportService {
     logPlantImportNowEntity.work_type_id = input.work_type_id;
     logPlantImportNowEntity.main_work_type_id = input.main_work_type_id;
     logPlantImportNowEntity.import_date = input.import_date;
-    logPlantImportNowEntity.receipt_id = input.reciept_id;
+    logPlantImportNowEntity.receipt_id = input.receipt_id;
     const resultLogNow = await this.logPlantImportNowRepository.save(
       logPlantImportNowEntity,
     );
@@ -263,7 +278,7 @@ export class LogPlantImportService {
     logPlantImportRepositoryEntity.work_type_id = input.work_type_id;
     logPlantImportRepositoryEntity.main_work_type_id = input.main_work_type_id;
     logPlantImportRepositoryEntity.import_date = input.import_date;
-    logPlantImportRepositoryEntity.receipt_id = input.reciept_id;
+    logPlantImportRepositoryEntity.receipt_id = input.receipt_id;
     const resultLog = await this.logPlantImportRepository.save(
       logPlantImportRepositoryEntity,
     );
@@ -281,7 +296,10 @@ export class LogPlantImportService {
     }
   }
 
-  async updateBarcodeAll(input: LogImportUpdateAllInput): Promise<any> {
+  async updateBarcodeAll(
+    input: LogImportUpdateAllInput,
+    is_check_total: boolean,
+  ): Promise<any> {
     // Check Member
     const logTokenEntity = await this.logTokenService.getLogToken({
       token: input.token,
@@ -298,47 +316,328 @@ export class LogPlantImportService {
     }
     const createBy = logTokenEntity.member_id;
 
-    const receiptEntity = await this.receiptService.getReceiptByCode({
-      code: input.reciept_code,
-    } as ReceiptGetByCodeInput);
-    for (let i = 0; i < input.barcodes.length; i++) {
-      const barcode = input.barcodes[i];
-      const logPlantImportNowEntity =
-        await this.logPlantImportNowRepository.findOne({
-          where: {
-            barcode: `${barcode}`,
-          },
-        });
-      logPlantImportNowEntity.food_plant_id = `${input.food_id}`;
-      logPlantImportNowEntity.work_type_id = input.work_type_id;
-      logPlantImportNowEntity.main_work_type_id = input.main_work_type_id;
-      logPlantImportNowEntity.import_date = input.import_date;
-      logPlantImportNowEntity.receipt_id = receiptEntity.receipt_id;
-      const resultLogNow = await this.logPlantImportNowRepository.save(
-        logPlantImportNowEntity,
-      );
+    // for (let i = 0; i < input.barcodes.length; i++) {
+    //   const barcode = input.barcodes[i];
 
-      const logPlantImportRepositoryEntity =
-        await this.logPlantImportRepository.findOne({
-          where: {
-            barcode: `${barcode}`,
-          },
-        });
-      logPlantImportRepositoryEntity.food_plant_id = `${input.food_id}`;
-      logPlantImportRepositoryEntity.work_type_id = input.work_type_id;
-      logPlantImportRepositoryEntity.main_work_type_id =
-        input.main_work_type_id;
-      logPlantImportRepositoryEntity.import_date = input.import_date;
-      logPlantImportRepositoryEntity.receipt_id = receiptEntity.receipt_id;
-      const resultLog = await this.logPlantImportRepository.save(
-        logPlantImportRepositoryEntity,
-      );
+    //   if (is_check_total == false) {
+    //     const logPlantImportNowEntity =
+    //       await this.logPlantImportNowRepository.findOne({
+    //         where: {
+    //           barcode: `${barcode}`,
+    //         },
+    //       });
+    //     logPlantImportNowEntity.food_plant_id = `${input.food_id}`;
+    //     logPlantImportNowEntity.work_type_id = input.work_type_id;
+    //     logPlantImportNowEntity.main_work_type_id = input.main_work_type_id;
+    //     logPlantImportNowEntity.import_date = input.import_date;
+    //     logPlantImportNowEntity.receipt_id = input.receipt_id;
+    //     const resultLogNow = await this.logPlantImportNowRepository.save(
+    //       logPlantImportNowEntity,
+    //     );
+
+    //     const logPlantImportRepositoryEntity =
+    //       await this.logPlantImportRepository.findOne({
+    //         where: {
+    //           barcode: `${barcode}`,
+    //         },
+    //       });
+    //     logPlantImportRepositoryEntity.food_plant_id = `${input.food_id}`;
+    //     logPlantImportRepositoryEntity.work_type_id = input.work_type_id;
+    //     logPlantImportRepositoryEntity.main_work_type_id =
+    //       input.main_work_type_id;
+    //     logPlantImportRepositoryEntity.import_date = input.import_date;
+    //     logPlantImportRepositoryEntity.receipt_id = input.receipt_id;
+    //     const resultLog = await this.logPlantImportRepository.save(
+    //       logPlantImportRepositoryEntity,
+    //     );
+    //   }
+    // }
+
+    if (is_check_total == true) {
+      return {
+        data: {
+          total: input.barcodes.length,
+        },
+      };
     }
+
     return {
       data: {
         barcodes: input.barcodes,
       },
     };
+  }
+
+  async updateBarcodeAllV2(
+    input: LogImportUpdateAllInput,
+    is_check_total: boolean,
+  ): Promise<any> {
+    const filterImportStart = input.import_start;
+    const filterImportEnd = input.import_end;
+    const filterMainWorkTypeDesc = input.main_work_type_desc;
+    const filterWorkTypeId = input.work_type_id;
+    const filterEmployeeId = input.employee_id;
+    const filterReceiptCode = input.receipt_code;
+    const filterReceiptCodeIsMatchAll = input.receipt_code_is_match_all;
+    const filterReceiptName = input.receipt_name;
+    const filterReceiptNameIsMatchAll = input.receipt_name_is_match_all;
+    const filterFoodPlantDesc = input.food_plant_desc;
+    const filterFoodPlantDescIsMatchAll = input.food_plant_desc_is_match_all;
+    const filterFamilyMainDesc = input.family_main_desc;
+    const filterFamilyMainDescIsMatchAll = input.family_main_desc_is_match_all;
+    const filterCustomerId = input.customer_id;
+    const filterCustomerIdIsMatchAll = input.customer_id_is_match_all;
+    // add
+    const filterTimePerDay = input.time_per_day;
+
+    if (filterImportStart == '' || filterImportEnd == '') {
+      return {
+        code: 200,
+        data: [],
+      };
+    }
+
+    const query = await this.connection
+      .createQueryBuilder()
+      .from((subQuery) => {
+        const sub = subQuery
+          .select('import.barcode', 'barcode')
+          .addSelect('import.time_per_day', 'time_per_day')
+          .addSelect('import.import_date', 'import_date')
+          .addSelect('import.member_made', 'member_made')
+          .addSelect('import.receipt_id', 'receipt_id')
+          .addSelect('import.main_work_type_id', 'main_work_type_id')
+          .addSelect('import.work_type_id', 'work_type_id')
+          .addSelect('import.food_plant_id', 'food_plant_id')
+          .addSelect('sources_plant_remove_type_tb.description', 'remove_type')
+          .from(LogPlantImport, 'import')
+          .leftJoin(
+            SourcesWorkMainType,
+            'sources_work_main_type_tb',
+            'sources_work_main_type_tb.id = import.main_work_type_id',
+          )
+          .leftJoin(
+            LogPlantRemove,
+            'remove',
+            'remove.log_plant_import_id = import.log_plant_import_id',
+          )
+          .leftJoin(
+            SourcesPlantRemoveType,
+            'sources_plant_remove_type_tb',
+            'sources_plant_remove_type_tb.id = remove.plant_remove_type_id',
+          );
+        // Import Date
+        if (
+          filterImportStart &&
+          filterImportEnd &&
+          filterImportStart != '' &&
+          filterImportEnd != ''
+        ) {
+          sub.andWhere(
+            '( import.import_date >= :importStart AND import.import_date <= :importEnd ) ',
+            {
+              importStart: filterImportStart,
+              importEnd: filterImportEnd,
+            },
+          );
+        }
+
+        // Main Work Type
+        if (filterMainWorkTypeDesc && filterMainWorkTypeDesc !== '') {
+          sub.andWhere('sources_work_main_type_tb.description = :mainTask ', {
+            mainTask: filterMainWorkTypeDesc,
+          });
+        }
+        // Work Type
+        if (filterWorkTypeId) {
+          sub.andWhere('import.work_type_id = :workType ', {
+            workType: filterWorkTypeId,
+          });
+        }
+
+        // Employee
+        if (filterEmployeeId && filterEmployeeId != '') {
+          sub.andWhere('import.member_made = :employee ', {
+            employee: filterEmployeeId,
+          });
+        }
+
+        // TIME PER DAY
+        if (filterTimePerDay && filterTimePerDay != '') {
+          sub.andWhere('import.time_per_day = :time_per_day ', {
+            time_per_day: filterTimePerDay,
+          });
+        }
+
+        return sub;
+      }, 'result_group')
+      .leftJoin(
+        Member,
+        'member_tb',
+        'member_tb.member_id = result_group.member_made',
+      )
+      .leftJoin(
+        Receipt,
+        'receipt_tb',
+        'receipt_tb.receipt_id = result_group.receipt_id',
+      )
+      .leftJoin(
+        Customer,
+        'customer_tb',
+        'customer_tb.customer_id = receipt_tb.customer_id',
+      )
+      .leftJoin(
+        PlantFamilyMain,
+        'plant_family_main_tb',
+        'plant_family_main_tb.id = receipt_tb.family_main_id',
+      )
+      .leftJoin(
+        SourcesWorkMainType,
+        'sources_work_main_type_tb',
+        'sources_work_main_type_tb.id = result_group.main_work_type_id',
+      )
+      .leftJoin(
+        FoodPlant,
+        'food_plant',
+        'food_plant.food_id = result_group.food_plant_id',
+      )
+      .leftJoin(
+        SourcesWorkType,
+        'sources_work_type_tb',
+        'sources_work_type_tb.id = result_group.work_type_id',
+      );
+    // Code
+    if (filterReceiptCode && filterReceiptCode != '') {
+      if (filterReceiptCodeIsMatchAll == true) {
+        query.andWhere('receipt_tb.code  LIKE :code ', {
+          code: `${filterReceiptCode}`,
+        });
+      } else {
+        query.andWhere('receipt_tb.code  LIKE :code ', {
+          code: `%${filterReceiptCode}%`,
+        });
+      }
+    } else {
+      query.andWhere('receipt_tb.code  LIKE :code ', {
+        code: `%%`,
+      });
+    }
+
+    // Receipt Name
+    if (filterReceiptName && filterReceiptName != '') {
+      if (filterReceiptNameIsMatchAll == true) {
+        query.andWhere('receipt_tb.name  LIKE :receipt_name ', {
+          receipt_name: `${filterReceiptName}`,
+        });
+      } else {
+        query.andWhere('receipt_tb.name  LIKE :receipt_name ', {
+          receipt_name: `%${filterReceiptName}%`,
+        });
+      }
+    }
+
+    // FOOD PLANT
+    if (filterFoodPlantDesc && filterFoodPlantDesc != '') {
+      if (filterFoodPlantDescIsMatchAll == true) {
+        query.andWhere('food_plant.description  LIKE :food ', {
+          food: `${filterFoodPlantDesc}`,
+        });
+      } else {
+        query.andWhere('food_plant.description  LIKE :food ', {
+          food: `%${filterFoodPlantDesc}%`,
+        });
+      }
+    }
+
+    // Family main
+    if (filterFamilyMainDesc && filterFamilyMainDesc != '') {
+      if (filterFamilyMainDescIsMatchAll == true) {
+        query.andWhere('plant_family_main_tb.description  LIKE :familyMain ', {
+          familyMain: `${filterFamilyMainDesc}`,
+        });
+      } else {
+        query.andWhere('plant_family_main_tb.description  LIKE :familyMain ', {
+          familyMain: `%${filterFamilyMainDesc}%`,
+        });
+      }
+    }
+
+    // Customer
+    if (filterCustomerId && filterCustomerId != '') {
+      if (filterCustomerIdIsMatchAll == true) {
+        query.andWhere('customer_tb.customer_id  LIKE :customer ', {
+          customer: `${filterCustomerId}`,
+        });
+      } else {
+        query.andWhere('customer_tb.customer_id  LIKE :customer ', {
+          customer: `${filterCustomerId}`,
+        });
+      }
+    }
+
+    // Employee
+    if (filterEmployeeId && filterEmployeeId != '') {
+      query.andWhere('result_group.member_made = :employee ', {
+        employee: filterEmployeeId,
+      });
+    }
+
+    const queryTotal = query;
+    const totalAll = await queryTotal.select('COUNT(*)', 'total').getRawOne();
+
+    if (is_check_total == false) {
+      // UPDATE-ALL
+      let totalNow = 0;
+      let totalLog = 0;
+      query.select('result_group.barcode', 'barcode');
+
+      const result = await query.getRawMany();
+
+      for (let i = 0; i < result.length; i++) {
+        const barcode = result[i].barcode;
+        await this.logPlantImportNowRepository.update(
+          { barcode }, // ค้นหาด้วย barcode
+          {
+            food_plant_id: `${input.update_food_id}`,
+            work_type_id: input.update_work_type_id,
+            main_work_type_id: input.update_main_work_type_id,
+            import_date: input.update_import_date,
+            receipt_id: input.update_receipt_id,
+          },
+        );
+        totalNow++;
+      }
+
+      for (let i = 0; i < result.length; i++) {
+        const barcode = result[i].barcode;
+        await this.logPlantImportRepository.update(
+          { barcode }, // ค้นหาด้วย barcode
+          {
+            food_plant_id: `${input.update_food_id}`,
+            work_type_id: input.update_work_type_id,
+            main_work_type_id: input.update_main_work_type_id,
+            import_date: input.update_import_date,
+            receipt_id: input.update_receipt_id,
+          },
+        );
+        totalLog++;
+      }
+
+      return {
+        code: 200,
+        data: {
+          total_now: totalNow,
+          total_log: totalLog,
+        },
+      };
+    } else {
+      return {
+        code: 200,
+        data: {
+          total: totalAll.total,
+        },
+      };
+    }
   }
 
   async deleteBarcode(input: LogImportDeleteInput): Promise<any> {
@@ -524,7 +823,7 @@ export class LogPlantImportService {
       );
     }
 
-    const result = await this.logPlantImportRepository
+    const query = await this.logPlantImportRepository
       .createQueryBuilder('log_plant_import')
       .leftJoinAndSelect(
         Member,
@@ -548,7 +847,25 @@ export class LogPlantImportService {
       )
       .where('log_plant_import.receipt_id = :receipt_id', {
         receipt_id: input.receipt_id,
-      })
+      });
+
+    const startIndex: number = GetIndexStartOfPage(input.page, input.per_page);
+    const endIndex: number =
+      parseInt(startIndex + '') + parseInt(input.per_page + '') - 1;
+
+    const queryTotal = query;
+
+    const resultTotal = await queryTotal
+      .select('COUNT(*)', 'total')
+      .getRawOne();
+
+    if (input.page && input.per_page) {
+      const start = this.getStartIndexPage(input.page, input.per_page);
+      query.offset(start);
+      query.limit(input.per_page);
+    }
+
+    const receiptEntities = await query
       .select([
         'log_plant_import.log_plant_import_id',
         'log_plant_import.barcode',
@@ -565,34 +882,46 @@ export class LogPlantImportService {
       ])
       .orderBy('log_plant_import.import_date', 'DESC')
       .getRawMany();
-    const logPlantImportEntities = result.map((row: any) => ({
-      log_plant_import_id: row.log_plant_import_log_plant_import_id,
-      barcode: row.log_plant_import_barcode,
-      import_date: row.log_plant_import_import_date,
-      member_made: {
-        member_id: row.member_member_id,
-        username: row.member_username,
-        name: row.member_name,
-        surname: row.member_surname,
-      },
-      main_work_type: {
-        id: row.sources_work_main_type_id,
-        description: row.sources_work_main_type_description,
-      },
-      work_type: {
-        id: row.sources_work_type_id,
-        description: row.sources_work_type_description,
-      },
-      food_plant: {
-        food_id: row.food_plant_food_id,
-        description: row.food_plant_description,
-      },
-    }));
+
+    const lists: any[] = [];
+    for (let i = 0; i < receiptEntities.length; i++) {
+      const row = receiptEntities[i];
+      lists.push({
+        log_plant_import_id: row.log_plant_import_log_plant_import_id,
+        barcode: row.log_plant_import_barcode,
+        import_date: row.log_plant_import_import_date,
+        member_made: {
+          member_id: row.member_member_id,
+          username: row.member_username,
+          name: row.member_name,
+          surname: row.member_surname,
+        },
+        main_work_type: {
+          id: row.sources_work_main_type_id,
+          description: row.sources_work_main_type_description,
+        },
+        work_type: {
+          id: row.sources_work_type_id,
+          description: row.sources_work_type_description,
+        },
+        food_plant: {
+          food_id: row.food_plant_food_id,
+          description: row.food_plant_description,
+        },
+      });
+    }
+
     return {
       code: 200,
-      data: logPlantImportEntities,
+      data: {
+        start_index: startIndex,
+        end_index: endIndex,
+        page: parseInt(input.page.toString()),
+        per_page: parseInt(input.per_page.toString()),
+        total_all: parseInt(resultTotal.total.toString()),
+        data: lists,
+      },
     };
-    return result;
   }
 
   async getLogPlantImportDetailByBarcode(
@@ -883,4 +1212,7 @@ export class LogPlantImportService {
       .execute();
     return { updateResult, updateNowResult };
   }
+  getStartIndexPage = (page: number, limit_per_page: number) => {
+    return (page - 1) * limit_per_page;
+  };
 }

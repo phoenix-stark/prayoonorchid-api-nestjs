@@ -15,6 +15,7 @@ import { CustomerDeleteInput } from './dto/customer-delete.input';
 import { CustomerGetAllInput } from './dto/customer-get-all.input';
 import { CustomerGetByIdInput } from './dto/customer-get-by-id.input';
 import { CustomerSearchInput } from './dto/customer-search';
+import { CustomerSearchWordInput } from './dto/customer-search-word';
 
 @Controller('customer')
 export class CustomerController {
@@ -54,5 +55,13 @@ export class CustomerController {
   @HttpCode(200)
   async searchCustomer(@Query() input: CustomerSearchInput): Promise<any[]> {
     return await this.customerService.searchCustomer(input);
+  }
+
+  @Get('search/word')
+  @HttpCode(200)
+  async searchCustomerWord(
+    @Query() input: CustomerSearchWordInput,
+  ): Promise<any[]> {
+    return await this.customerService.searchCustomerWord(input);
   }
 }

@@ -3,7 +3,7 @@ export class ReportGetLogPlantImportGroupingInput {
   per_page: number;
   import_start: string;
   import_end: string;
-  main_work_type_desc: string;
+  main_work_type: string;
   work_type_id: string;
   employee_id: string;
   receipt_code: string;

@@ -8,4 +8,5 @@ export class LogImportCreateInput {
   reciept_code?: string;
   main_work_type_id: number;
   time_per_day: string;
+  member_id: string;
 }

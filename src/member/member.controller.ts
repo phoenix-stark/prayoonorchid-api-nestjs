@@ -18,6 +18,7 @@ import { MemberGetAllInput } from './dto/member-get-all';
 import { MemberGetByIdInput } from './dto/member-get-by-id.input';
 import { MemberSearchInput } from './dto/member-search.input';
 import { MemberResetPasswordInput } from './dto/member-reset-password.input';
+import { MemberSearchWordInput } from './dto/member-search-word.input';
 
 @Controller('member')
 export class MemberController {
@@ -51,6 +52,14 @@ export class MemberController {
   @HttpCode(200)
   async searchMember(@Query() input: MemberSearchInput): Promise<any[]> {
     return await this.memberService.searchMember(input);
+  }
+
+  @Get('search/word')
+  @HttpCode(200)
+  async searchMemberWord(
+    @Query() input: MemberSearchWordInput,
+  ): Promise<any[]> {
+    return await this.memberService.searchMemberWord(input);
   }
 
   @Put('block')

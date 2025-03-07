@@ -1,4 +1,6 @@
 export class ReportGetLogPlantImportGroupingDetailInput {
+  page: number;
+  per_page: number;
   import_start: string;
   import_end: string;
   main_work_type_desc: string;
