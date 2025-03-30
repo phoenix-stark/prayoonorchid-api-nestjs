@@ -89,4 +89,10 @@ export class MemberController {
   async resetPassword(@Body() input: MemberResetPasswordInput): Promise<any[]> {
     return await this.memberService.resetPassword(input);
   }
+
+  @Post('update-password-all')
+  @HttpCode(200)
+  async updatePasswordMemberAll(): Promise<any[]> {
+    return await this.memberService.updatePasswordMemberAll();
+  }
 }

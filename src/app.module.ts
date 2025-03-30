@@ -24,6 +24,7 @@ import { TasksModule } from './task/task.module';
 import { SourcesGrantModule } from './sources-grant/sources-grant.module';
 import { PlantFamilySecondaryModule } from './plant-family-secondary/plant-family-secondary.module';
 import { MemberWithBarcodeModule } from './member-with-barcode/member-with-barcode.module';
+import { LogPlantRemoveEditModule } from './log-plant-remove-edit/log-plant-remove-edit.module';
 
 @Module({
   imports: [
@@ -67,6 +68,7 @@ import { MemberWithBarcodeModule } from './member-with-barcode/member-with-barco
     TasksModule,
     SourcesGrantModule,
     PlantFamilySecondaryModule,
+    LogPlantRemoveEditModule,
   ],
   controllers: [AppController],
   providers: [AppService],

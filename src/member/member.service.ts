@@ -711,4 +711,36 @@ export class MemberService {
   getStartIndexPage = (page: number, limit_per_page: number) => {
     return (page - 1) * limit_per_page;
   };
+
+  async updatePasswordMemberAll(): Promise<any> {
+    const query = this.memberRepository.createQueryBuilder('member');
+
+    query
+      .select(['member'])
+      .orderBy('name', 'ASC')
+      .addOrderBy('surname', 'ASC')
+      .getRawMany();
+
+    const memberEntities = await query.getRawMany();
+    const results = [];
+    for (let i = 0; i < memberEntities.length; i++) {
+      const memberEntity = memberEntities[i];
+
+      const member_id = memberEntity.member_member_id;
+      // UPDATE PASSWORD
+      const memberObj = await this.memberRepository.findOne({
+        where: {
+          member_id: member_id,
+        },
+      });
+      console.log('User:' + memberObj.username);
+      const hashPassword = await bcrypt.hash('1234', PASSWORD.SALT_ROUND);
+      memberObj.password = hashPassword;
+      await this.memberRepository.save(memberObj);
+    }
+
+    return {
+      code: 200,
+    };
+  }
 }

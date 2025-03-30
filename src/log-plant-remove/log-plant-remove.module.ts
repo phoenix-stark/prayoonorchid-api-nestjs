@@ -10,6 +10,7 @@ import { LogPlantRemoveController } from './log-plant-remove.controller';
 import { MemberWithBarcodeService } from 'src/member-with-barcode/member-with-barcode.service';
 import { LogTokenModule } from 'src/log-token/log-token.module';
 import { MemberWithBarcodeModule } from 'src/member-with-barcode/member-with-barcode.module';
+import { LogPlantRemoveEditModule } from 'src/log-plant-remove-edit/log-plant-remove-edit.module';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { MemberWithBarcodeModule } from 'src/member-with-barcode/member-with-bar
       LogPlantImportNow,
       Member,
     ]),
+    forwardRef(() => LogPlantRemoveEditModule),
     forwardRef(() => LogTokenModule),
     forwardRef(() => MemberWithBarcodeModule),
   ],

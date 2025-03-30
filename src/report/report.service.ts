@@ -2359,8 +2359,10 @@ export class ReportService {
       .addSelect('sources_work_type.description', 'work_type')
       .addSelect('food_plant.description', 'food_plant')
       .addSelect('sources_plant_remove_type.description', 'remove_type')
+      .addSelect('sources_plant_remove_type.id', 'plant_remove_type_id')
       .addSelect('log_plant_remove.remove_date', 'remove_date')
       .addSelect('log_plant_remove.remark', 'remark')
+      .addSelect('log_plant_remove.time_per_day', 'time_per_day')
       .addSelect('member.name', 'member_name')
       .addSelect('member.surname', 'member_surname')
       .leftJoin(

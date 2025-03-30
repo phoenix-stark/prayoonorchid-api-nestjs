@@ -36,6 +36,7 @@ import { Receipt } from 'src/receipt/entity/receipt-entity.model';
 import { SourcesWorkMainType } from 'src/sources-work-main-type/entity/sources-work-main-type-entity.model';
 import { SourcesWorkType } from 'src/sources-work-type/entity/sources-work-type-entity.model';
 import { LogRemoveUpdateDetailAllInput } from './dto/log-remove-update-detail-all.input';
+import { LogPlantRemoveEditService } from 'src/log-plant-remove-edit/log-plant-remove-edit.service';
 
 @Injectable()
 export class LogPlantRemoveService {
@@ -46,6 +47,8 @@ export class LogPlantRemoveService {
     private readonly logTokenService: LogTokenService,
     @Inject(forwardRef(() => MemberWithBarcodeService))
     private readonly memberWithBarcodeService: MemberWithBarcodeService,
+    @Inject(forwardRef(() => LogPlantRemoveEditService))
+    private readonly logPlantRemoveEditService: LogPlantRemoveEditService,
     @InjectRepository(LogPlantRemove)
     private readonly logPlantRemoveRepository: Repository<LogPlantRemove>,
     @InjectRepository(LogPlantRemoveNow)
@@ -205,6 +208,17 @@ export class LogPlantRemoveService {
     console.log(logPlantRemoveNow);
     console.log('input');
     console.log(input);
+
+    // INSERT LOG
+    await this.logPlantRemoveEditService.insertLogPlantRemoveEdit({
+      token: input.token,
+      barcode: input.barcode.toString(),
+      edit_by: createBy,
+      remove_date: input.remove_date,
+      plant_remove_type_id: parseInt(input.plant_remove_type_id.toString()),
+      remark: input.remark,
+    });
+
     if (!logPlantRemoveNow) {
       if (
         !input.plant_remove_type_id ||
@@ -527,6 +541,17 @@ export class LogPlantRemoveService {
 
       for (let i = 0; i < result.length; i++) {
         const barcode = result[i].barcode;
+        // INSERT LOG
+        await this.logPlantRemoveEditService.insertLogPlantRemoveEdit({
+          token: input.token,
+          barcode: barcode,
+          edit_by: createBy,
+          remove_date: input.update_remove_date,
+          plant_remove_type_id: parseInt(
+            input.update_plant_remove_type_id.toString(),
+          ),
+          remark: input.update_remark,
+        });
         await this.logPlantRemoveRepository.update(
           { barcode },
           {
@@ -540,7 +565,6 @@ export class LogPlantRemoveService {
         );
         totalLog++;
       }
-
       return {
         code: 200,
         data: {
@@ -867,6 +891,19 @@ export class LogPlantRemoveService {
 
       for (let i = 0; i < result.length; i++) {
         const barcode = result[i].barcode;
+
+        // INSERT LOG
+        await this.logPlantRemoveEditService.insertLogPlantRemoveEdit({
+          token: input.token,
+          barcode: barcode,
+          edit_by: createBy,
+          remove_date: input.update_remove_date,
+          plant_remove_type_id: parseInt(
+            input.update_plant_remove_type_id.toString(),
+          ),
+          remark: input.update_remark,
+        });
+
         const resultUpdate = await this.logPlantRemoveRepository.update(
           { barcode },
           {
