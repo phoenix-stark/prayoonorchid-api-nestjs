@@ -61,12 +61,9 @@ export class ExcelService {
       employee_name: 'ชื่อ-นามสกุลพนักงาน',
       date_import: 'วัน/เดือน/ปี ที่นำเข้า',
       plant_code: 'รหัสพันธุ์ไม้',
-      order_no: 'จำนวนสั่ง',
-      customer_name: 'ชื่อคู่ค้า',
       plant_family_main: 'สายพันธุ์หลัก',
       main_work: 'ประเภทงานหลัก',
       type_work: 'ประเภทงาน',
-      food: 'อาหารวุ้น',
       import_number: 'จำนวนนำเข้า',
     });
     // Add Data Row
@@ -83,12 +80,9 @@ export class ExcelService {
           'YYYY-MM-DD',
         ),
         plant_code: rowsDB.receipt_code,
-        order_no: rowsDB.receipt_num_order,
-        customer_name: rowsDB.customer_name,
         plant_family_main: rowsDB.plant_family_main,
         main_work: rowsDB.main_work_type,
         type_work: rowsDB.work_type,
-        food: rowsDB.food,
         import_number: parseInt(rowsDB.total_import.toString()),
       });
     }
@@ -108,9 +102,6 @@ export class ExcelService {
         `F${i + 1}`,
         `G${i + 1}`,
         `H${i + 1}`,
-        `I${i + 1}`,
-        `J${i + 1}`,
-        `K${i + 1}`,
       ].map((cell) => {
         sheet.getCell(cell).style = {
           border: {
@@ -131,13 +122,10 @@ export class ExcelService {
       { key: 'B', width: 20, align: 'center' },
       { key: 'C', width: 20, align: 'center' },
       { key: 'D', width: 15, align: 'center' },
-      { key: 'E', width: 10, align: 'right' },
+      { key: 'E', width: 10, align: 'left' },
       { key: 'F', width: 20, align: 'left' },
       { key: 'G', width: 25, align: 'left' },
-      { key: 'H', width: 15, align: 'left' },
-      { key: 'I', width: 15, align: 'left' },
-      { key: 'J', width: 10, align: 'left' },
-      { key: 'K', width: 15, align: 'center' },
+      { key: 'H', width: 15, align: 'center' },
     ];
 
     // Column Row Data
@@ -166,24 +154,22 @@ export class ExcelService {
     });
 
     // Header
-    ['A2', 'B2', 'C2', 'D2', 'E2', 'F2', 'G2', 'H2', 'I2', 'J2', 'K2'].map(
-      (cell) => {
-        sheet.getCell(cell).style = {
-          font: {
-            bold: true,
-          },
-          alignment: {
-            horizontal: 'center',
-          },
-          border: {
-            top: { style: 'thin' },
-            left: { style: 'thin' },
-            bottom: { style: 'thin' },
-            right: { style: 'thin' },
-          },
-        };
-      },
-    );
+    ['A2', 'B2', 'C2', 'D2', 'E2', 'F2', 'G2', 'H2'].map((cell) => {
+      sheet.getCell(cell).style = {
+        font: {
+          bold: true,
+        },
+        alignment: {
+          horizontal: 'center',
+        },
+        border: {
+          top: { style: 'thin' },
+          left: { style: 'thin' },
+          bottom: { style: 'thin' },
+          right: { style: 'thin' },
+        },
+      };
+    });
 
     sheet.getCell('A1').alignment = { horizontal: 'left' };
 

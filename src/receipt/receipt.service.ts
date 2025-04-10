@@ -564,6 +564,9 @@ export class ReceiptService {
         receipt_id: receiptEntity.receipt_receipt_id,
         code: receiptEntity.receipt_code,
         name: receiptEntity.receipt_name,
+        date: this.momentWrapper
+          .momentDate(receiptEntity.receipt_date)
+          .format('YYYY-MM-DD'),
         num_order: receiptEntity.receipt_num_order,
         create_by: {
           member_id: receiptEntity.member_member_id,
@@ -573,7 +576,9 @@ export class ReceiptService {
           name: receiptEntity.member_name,
           surname: receiptEntity.member_surname,
         },
-        create_at: receiptEntity.receipt_create_at,
+        create_at: this.momentWrapper
+          .momentDate(receiptEntity.receipt_create_at)
+          .format('YYYY-MM-DD'),
         family_main: {
           id: receiptEntity.family_main_id,
           description: receiptEntity.family_main_description,
