@@ -116,6 +116,7 @@ export class LogPlantRemoveService {
       });
       console.log('logEntity:');
       console.log(logEntity);
+      console.log('timePerDay : ' + timePerDay);
       if (!logEntity) {
         console.log('isNew=0');
         isNew = 1;
@@ -136,7 +137,8 @@ export class LogPlantRemoveService {
       logEntity.remark = input.remark;
       logEntity.remove_date = input.remove_date;
       logEntity.time_per_day = parseInt(timePerDay);
-
+      console.log('logEntity new');
+      console.log(logEntity);
       const newLogPlant = await this.logPlantRemoveNowRepository.save(
         logEntity,
       );

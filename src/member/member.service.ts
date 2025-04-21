@@ -547,6 +547,8 @@ export class MemberService {
       );
     }
 
+    const parts = input.word.trim().split(/\s+/);
+
     const query = this.memberRepository
       .createQueryBuilder('member')
       .leftJoinAndSelect(
@@ -556,13 +558,94 @@ export class MemberService {
       )
       .where(
         new Brackets((qb) => {
-          qb.where('member.name LIKE :name', { name: `%${input.word}%` })
-            .orWhere('member.surname LIKE :surname', {
-              surname: `%${input.word}%`,
-            })
-            .orWhere('member.username LIKE :username', {
-              username: `%${input.word}%`,
+          if (parts.length == 1) {
+            qb.where('member.name LIKE :name', {
+              name: `%${parts[0]}%`,
+            }).orWhere('member.surname LIKE :surname', {
+              surname: `%${parts[0]}%`,
             });
+          } else {
+            const [firstName, lastName] = parts;
+            qb.where(
+              '(member.name LIKE :name AND member.surname LIKE :surname)',
+              {
+                name: `%${firstName}%`,
+                surname: `%${lastName}%`,
+              },
+            ).orWhere(
+              '(member.name LIKE :name AND member.surname LIKE :surname)',
+              {
+                name: `%${lastName}%`,
+                surname: `%${firstName}%`,
+              },
+            );
+          }
+        }),
+      )
+      .andWhere('member.grant_id = :grant_id', { grant_id: input.grant });
+
+    query
+      .select(['member', 'sources_grant'])
+      .orderBy('name', 'ASC')
+      .addOrderBy('surname', 'ASC')
+      .getRawMany();
+
+    const memberEntities = await query.getRawMany();
+    const results = [];
+    for (let i = 0; i < memberEntities.length; i++) {
+      const memberEntity = memberEntities[i];
+      const info = {
+        member_id: memberEntity.member_member_id,
+        username: memberEntity.member_username,
+        email: memberEntity.member_email,
+        phone: memberEntity.member_phone,
+        name: memberEntity.member_name,
+        surname: memberEntity.member_surname,
+        is_block: memberEntity.member_is_block,
+        grant: memberEntity.sources_grant_id
+          ? {
+              id: memberEntity.sources_grant_id,
+              description: memberEntity.sources_grant_description,
+            }
+          : null,
+      };
+
+      results.push(info);
+    }
+
+    return {
+      code: 200,
+      data: results,
+    };
+  }
+
+  async searchMemberId(input: MemberSearchInput): Promise<any> {
+    const logTokenEntity = await this.logTokenService.getLogToken({
+      token: input.token,
+    } as LogTokenGetInput);
+
+    if (!logTokenEntity) {
+      throw new HttpException(
+        {
+          code: 400,
+          message: 'Username นี้ ถูก Block',
+        },
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    const query = this.memberRepository
+      .createQueryBuilder('member')
+      .leftJoinAndSelect(
+        SourcesGrant,
+        'sources_grant',
+        'sources_grant.id = member.grant_id',
+      )
+      .where(
+        new Brackets((qb) => {
+          qb.where('member.member_id LIKE :member_id', {
+            member_id: `%${input.word}%`,
+          });
         }),
       )
       .andWhere('member.grant_id = :grant_id', { grant_id: input.grant });

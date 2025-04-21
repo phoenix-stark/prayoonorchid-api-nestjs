@@ -54,6 +54,12 @@ export class MemberController {
     return await this.memberService.searchMember(input);
   }
 
+  @Get('search/id')
+  @HttpCode(200)
+  async searchMemberId(@Query() input: MemberSearchInput): Promise<any[]> {
+    return await this.memberService.searchMemberId(input);
+  }
+
   @Get('search/word')
   @HttpCode(200)
   async searchMemberWord(

@@ -870,7 +870,7 @@ export class ExcelService {
     const book = new Workbook();
     const sheet = book.addWorksheet('Sheet1');
     const filter = this.getFilter(input.filter);
-    sheet.mergeCells('A1:Q1');
+    sheet.mergeCells('A1:P1');
     sheet.getCell('A1').value = `วันที่นำเข้าเริ่มต้น: ${this.momentWrapper
       .momentDate(filter.filter[8].import_start_date.description)
       .format('DD/MM/YYYY')}, วันที่นำเข้าสิ้นสุด: ${this.momentWrapper
@@ -894,7 +894,6 @@ export class ExcelService {
       employee_name: 'ชื่อ-นามสกุลพนักงาน',
       date_import: 'วัน/เดือน/ปี ที่นำเข้า',
       plant_code: 'รหัสพันธุ์ไม้',
-      order_no: 'จำนวนสั่ง',
       customer_name: 'ชื่อคู่ค้า',
       plant_family_main: 'สายพันธุ์หลัก',
       main_work: 'ประเภทงานหลัก',
@@ -923,7 +922,6 @@ export class ExcelService {
           'YYYY-MM-DD',
         ),
         plant_code: rowsDB.receipt_code,
-        order_no: rowsDB.receipt_num_order,
         customer_name: rowsDB.customer_name,
         plant_family_main: rowsDB.plant_family_main,
         main_work: rowsDB.main_work_type,
@@ -963,7 +961,6 @@ export class ExcelService {
         `N${i + 1}`,
         `O${i + 1}`,
         `P${i + 1}`,
-        `Q${i + 1}`,
       ].map((cell) => {
         sheet.getCell(cell).style = {
           border: {
@@ -988,14 +985,13 @@ export class ExcelService {
       { key: 'G', width: 15, align: 'left' },
       { key: 'H', width: 15, align: 'left' },
       { key: 'I', width: 15, align: 'left' },
-      { key: 'J', width: 15, align: 'left' },
+      { key: 'J', width: 15, align: 'center' },
       { key: 'K', width: 10, align: 'center' },
       { key: 'L', width: 10, align: 'center' },
       { key: 'M', width: 10, align: 'center' },
       { key: 'N', width: 10, align: 'center' },
       { key: 'O', width: 15, align: 'center' },
       { key: 'P', width: 15, align: 'center' },
-      { key: 'Q', width: 15, align: 'center' },
     ];
 
     // Column Row Data
@@ -1041,7 +1037,6 @@ export class ExcelService {
       'N2',
       'O2',
       'P2',
-      'Q2',
     ].map((cell) => {
       sheet.getCell(cell).style = {
         font: {
@@ -1091,7 +1086,7 @@ export class ExcelService {
   ): Promise<any> {
     const book = new Workbook();
     const sheet = book.addWorksheet('Sheet1');
-    sheet.mergeCells('A1:Q1');
+    sheet.mergeCells('A1:P1');
 
     let strId = '';
     if (input.work_main_types) {
@@ -1127,7 +1122,6 @@ export class ExcelService {
       employee_name: 'ชื่อ-นามสกุลพนักงาน',
       date_import: 'วัน/เดือน/ปี ที่นำเข้า',
       plant_code: 'รหัสพันธุ์ไม้',
-      order_no: 'จำนวนสั่ง',
       customer_name: 'ชื่อคู่ค้า',
       plant_family_main: 'สายพันธุ์หลัก',
       main_work: 'ประเภทงานหลัก',
@@ -1157,7 +1151,6 @@ export class ExcelService {
           'YYYY-MM-DD',
         ),
         plant_code: rowsDB.receipt_code,
-        order_no: rowsDB.receipt_num_order,
         customer_name: rowsDB.customer_name,
         plant_family_main: rowsDB.plant_family_main,
         main_work: rowsDB.main_work_type,
@@ -1197,7 +1190,6 @@ export class ExcelService {
         `N${i + 1}`,
         `O${i + 1}`,
         `P${i + 1}`,
-        `Q${i + 1}`,
       ].map((cell) => {
         sheet.getCell(cell).style = {
           border: {
@@ -1222,14 +1214,13 @@ export class ExcelService {
       { key: 'G', width: 15, align: 'left' },
       { key: 'H', width: 15, align: 'left' },
       { key: 'I', width: 15, align: 'left' },
-      { key: 'J', width: 15, align: 'left' },
+      { key: 'J', width: 15, align: 'center' },
       { key: 'K', width: 10, align: 'center' },
       { key: 'L', width: 10, align: 'center' },
       { key: 'M', width: 10, align: 'center' },
       { key: 'N', width: 10, align: 'center' },
       { key: 'O', width: 15, align: 'center' },
       { key: 'P', width: 15, align: 'center' },
-      { key: 'Q', width: 15, align: 'center' },
     ];
 
     // Column Row Data
@@ -1275,7 +1266,6 @@ export class ExcelService {
       'N2',
       'O2',
       'P2',
-      'Q2',
     ].map((cell) => {
       sheet.getCell(cell).style = {
         font: {

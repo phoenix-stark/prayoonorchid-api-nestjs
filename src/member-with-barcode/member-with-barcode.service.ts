@@ -138,13 +138,13 @@ export class MemberWithBarcodeService {
     const checkBarcodeStartResult = await this.getByBarcode({
       barcode: input.new_barcode_start,
     } as MemberWithBarcodeGetByBarcodeInput);
-
+    console.log(checkBarcodeStartResult);
+    console.log(input);
     if (
       input.new_barcode_start &&
       (!checkBarcodeStartResult ||
         (checkBarcodeStartResult &&
-          checkBarcodeStartResult.barcode_start == input.prev_barcode_start &&
-          checkBarcodeStartResult.member_id == input.member_id))
+          checkBarcodeStartResult.barcode_start == input.prev_barcode_start))
     ) {
       isCheckBarcodeStart = true;
     }
@@ -156,36 +156,13 @@ export class MemberWithBarcodeService {
       input.new_barcode_end &&
       (!checkBarcodeEndResult ||
         (checkBarcodeEndResult &&
-          checkBarcodeEndResult.barcode_end == input.prev_barcode_end &&
-          checkBarcodeEndResult.member_id == input.member_id))
+          checkBarcodeEndResult.barcode_end == input.prev_barcode_end))
     ) {
       isCheckBarcodeEnd = true;
     }
 
-    if (isCheckBarcodeStart && isCheckBarcodeEnd) {
-      // delete
-      await this.deleteMember({
-        member_id: input.member_id,
-        barcode_start: input.prev_barcode_start,
-        barcode_end: input.prev_barcode_end,
-      } as MemberWithBarcodeDeleteInput);
-
-      const memberWithBarcodeNewEntity = await this.insertMemberWithBarcode({
-        token: input.token,
-        member_id: input.member_id,
-        barcode_start: input.new_barcode_start,
-        barcode_end: input.new_barcode_end,
-      } as MemberWithBarcodeCreateInput);
-
-      return {
-        code: 200,
-        data: {
-          data: {
-            log_id: memberWithBarcodeNewEntity.log_id,
-          },
-        },
-      };
-    }
+    console.log('isCheckBarcodeStart: ' + isCheckBarcodeStart);
+    console.log('isCheckBarcodeEnd: ' + isCheckBarcodeEnd);
 
     if (isCheckBarcodeStart == false) {
       throw new HttpException(
@@ -205,6 +182,35 @@ export class MemberWithBarcodeService {
         },
         HttpStatus.BAD_REQUEST,
       );
+    }
+
+    if (isCheckBarcodeStart && isCheckBarcodeEnd) {
+      const checkBarcodeStartPrev = await this.getByBarcode({
+        barcode: input.prev_barcode_start,
+      } as MemberWithBarcodeGetByBarcodeInput);
+
+      // delete
+      await this.deleteMember({
+        member_id: checkBarcodeStartPrev.member_id,
+        barcode_start: checkBarcodeStartPrev.barcode_start,
+        barcode_end: checkBarcodeStartPrev.barcode_end,
+      } as MemberWithBarcodeDeleteInput);
+
+      const memberWithBarcodeNewEntity = await this.insertMemberWithBarcode({
+        token: input.token,
+        member_id: input.member_id,
+        barcode_start: input.new_barcode_start,
+        barcode_end: input.new_barcode_end,
+      } as MemberWithBarcodeCreateInput);
+
+      return {
+        code: 200,
+        data: {
+          data: {
+            log_id: memberWithBarcodeNewEntity.log_id,
+          },
+        },
+      };
     }
   }
 
