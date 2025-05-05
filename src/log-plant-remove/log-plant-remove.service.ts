@@ -55,6 +55,8 @@ export class LogPlantRemoveService {
     private readonly logPlantRemoveNowRepository: Repository<LogPlantRemoveNow>,
     @InjectRepository(LogPlantImportNow)
     private readonly logPlantImportNowRepository: Repository<LogPlantImportNow>,
+    @InjectRepository(LogPlantImport)
+    private readonly logPlantImportRepository: Repository<LogPlantImport>,
     private momentWrapper: MomentService,
   ) {}
 
@@ -188,7 +190,7 @@ export class LogPlantRemoveService {
       };
     }
 
-    const logPlantImport = await this.logPlantImportNowRepository.findOne({
+    const logPlantImport = await this.logPlantImportRepository.findOne({
       where: {
         barcode: `${input.barcode}`,
       },
@@ -200,7 +202,7 @@ export class LogPlantRemoveService {
       };
     }
 
-    let logPlantRemoveNow = await this.logPlantRemoveNowRepository.findOne({
+    let logPlantRemoveNow = await this.logPlantRemoveRepository.findOne({
       where: {
         barcode: `${input.barcode}`,
       },

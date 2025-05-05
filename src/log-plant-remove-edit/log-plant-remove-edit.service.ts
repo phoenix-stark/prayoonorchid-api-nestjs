@@ -121,7 +121,7 @@ export class LogPlantRemoveEditService {
 
     return {
       data: {
-        log_plant_id: newLogPlant.log_plant_import_id,
+        barcode: input.barcode,
       },
     };
   }
