@@ -21,9 +21,9 @@ fullnameOverride: dev-prayoonorchid-api-nestjs
 #   List name of resources which you want to reference.
 #   To refer to a configMap or secret resource outside pod.
 #
-envFrom: {}
-  #  configMaps:
-  #    - prayoonorchid-api-nestjs
+envFrom:
+  configMaps:
+    - dev-prayoonorchid-api-nestjs
   #  secrets:
   #    - prayoonorchid-api-nestjs
 
@@ -33,9 +33,18 @@ envFrom: {}
 #   The resource name will be same as your project name.
 #   Baware of value type is always be string.
 configMaps:
-  create: false
+  create: true
   data:
-    ENV: ""
+    ENVIRONMENT: "develop"
+    APP_DEBUG: "true"
+    APP_PORT: "3000"
+    DB_TYPE: "mysql"
+    DB_HOST: "psc-mysql.phoenix-stark.internal"
+    DB_PORT: "3306"
+    DB_DATABASE: "dev_prayoonorchid_db"
+    DB_USERNAME: "prayoonorchid_user"
+    DB_PASSWORD: "NHxA3zLWy17tZgwl"
+    DB_SYNCHRONIZE: "true"
 
 # secret
 #   Array of key, value.

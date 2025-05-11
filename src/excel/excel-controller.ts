@@ -18,6 +18,10 @@ import { Readable } from 'stream';
 import { ExcelExportReportStockInput } from './dto/excel-export-report-stock.input';
 import { ReportGetInput } from './dto/report-get.input';
 import { ExcelService } from './excel-service';
+import { ReportGetProductionMultipleInput } from 'src/report/dto/report-get-production-multiple.input';
+import { ReportGetStockInput } from 'src/report/dto/report-get-stock.input';
+import { ReportGetFailInput } from 'src/report/dto/report-get-fail.input';
+import { ReportGetRemoveAllInput } from 'src/report/dto/report-get-remove-all.input';
 
 @Controller('excel')
 export class ExcelController {
@@ -30,7 +34,7 @@ export class ExcelController {
   @HttpCode(200)
   @Header('Content-Type', 'text/xlsx')
   async exportReportBottle(
-    @Query() input: ReportGetInput,
+    @Query() input: ReportGetStockInput,
     @Res() res: Response,
   ) {
     const result = await this.excelService.exportReportBottle(input);
@@ -52,7 +56,7 @@ export class ExcelController {
   @HttpCode(200)
   @Header('Content-Type', 'text/xlsx')
   async exportReportRemoveAll(
-    @Query() input: ReportGetInput,
+    @Query() input: ReportGetRemoveAllInput,
     @Res() res: Response,
   ) {
     const result = await this.excelService.exportReportRemoveAll(input);
@@ -96,7 +100,7 @@ export class ExcelController {
   @HttpCode(200)
   @Header('Content-Type', 'text/xlsx')
   async exportReportStockMultiple(
-    @Query() input: ReportGetInput,
+    @Query() input: ReportGetStockInput,
     @Res() res: Response,
   ) {
     const result = await this.excelService.exportReportStockMultiple(input);
@@ -140,7 +144,7 @@ export class ExcelController {
   @HttpCode(200)
   @Header('Content-Type', 'text/xlsx')
   async exportReportProductionMultiple(
-    @Query() input: ReportGetInput,
+    @Query() input: ReportGetProductionMultipleInput,
     @Res() res: Response,
   ) {
     const result = await this.excelService.exportReportProductionMultiple(
@@ -163,7 +167,10 @@ export class ExcelController {
   @Get('report-fail')
   @HttpCode(200)
   @Header('Content-Type', 'text/xlsx')
-  async exportReportFail(@Query() input: ReportGetInput, @Res() res: Response) {
+  async exportReportFail(
+    @Query() input: ReportGetFailInput,
+    @Res() res: Response,
+  ) {
     const result = await this.excelService.exportReportFail(input);
     const buffer = readFileSync(result);
 
