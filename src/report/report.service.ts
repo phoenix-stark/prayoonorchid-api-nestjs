@@ -2436,6 +2436,7 @@ export class ReportService {
     const filterFamilyMainDescIsMatchAll = input.family_main_desc_is_match_all;
     const filterCustomerId = input.customer_id;
     const filterCustomerIdIsMatchAll = input.customer_id_is_match_all;
+    const filterEmployeeIdIsMatchAll = input.employee_id_is_match_all;
 
     if (filterImportStart == '' || filterImportEnd == '') {
       return {
@@ -2504,20 +2505,6 @@ export class ReportService {
           }
         }
 
-        // Work Type
-        if (filterWorkTypeId) {
-          sub.andWhere('import.work_type_id = :workType ', {
-            workType: filterWorkTypeId,
-          });
-        }
-
-        // Employee
-        if (filterEmployeeId && filterEmployeeId !== '') {
-          sub.andWhere('import.member_made = :employee ', {
-            employee: filterEmployeeId,
-          });
-        }
-
         return sub;
       }, 'result_group')
 
@@ -2558,7 +2545,7 @@ export class ReportService {
       );
     // Code
     if (filterReceiptCode && filterReceiptCode != '') {
-      if (filterReceiptCodeIsMatchAll == true) {
+      if (filterReceiptCodeIsMatchAll + '' == 'true') {
         query.andWhere('receipt_tb.code  LIKE :code ', {
           code: `${filterReceiptCode}`,
         });
@@ -2575,7 +2562,7 @@ export class ReportService {
 
     // Receipt Name
     if (filterReceiptName && filterReceiptName != '') {
-      if (filterReceiptNameIsMatchAll == true) {
+      if (filterReceiptNameIsMatchAll + '' == 'true') {
         query.andWhere('receipt_tb.name  LIKE :receipt_name ', {
           receipt_name: `${filterReceiptName}`,
         });
@@ -2586,8 +2573,9 @@ export class ReportService {
       }
     }
 
+    // FOOD
     if (filterFoodPlantDesc && filterFoodPlantDesc != '') {
-      if (filterFoodPlantDescIsMatchAll == true) {
+      if (filterFoodPlantDescIsMatchAll + '' == 'true') {
         query.andWhere('food_plant.description  LIKE :food ', {
           food: `${filterFoodPlantDesc}`,
         });
@@ -2598,9 +2586,16 @@ export class ReportService {
       }
     }
 
+    // Work Type
+    if (filterWorkTypeId) {
+      query.andWhere('sources_work_type_tb.description LIKE :workType ', {
+        workType: `%${filterWorkTypeId}%`,
+      });
+    }
+
     // Family main
     if (filterFamilyMainDesc && filterFamilyMainDesc != '') {
-      if (filterFamilyMainDescIsMatchAll == true) {
+      if (filterFamilyMainDescIsMatchAll + '' == 'true') {
         query.andWhere('plant_family_main_tb.description  LIKE :familyMain ', {
           familyMain: `${filterFamilyMainDesc}`,
         });
@@ -2613,22 +2608,41 @@ export class ReportService {
 
     // Customer
     if (filterCustomerId && filterCustomerId != '') {
-      if (filterCustomerIdIsMatchAll == true) {
+      if (filterCustomerIdIsMatchAll + '' == 'true') {
         query.andWhere('customer_tb.name  LIKE :customer ', {
           customer: `${filterCustomerId}`,
         });
       } else {
         query.andWhere('customer_tb.name  LIKE :customer ', {
-          customer: `${filterCustomerId}`,
+          customer: `%${filterCustomerId}%`,
         });
       }
     }
 
     // Employee
-    if (filterEmployeeId && filterEmployeeId != '') {
-      query.andWhere('result_group.member_made = :employee ', {
-        employee: filterEmployeeId,
-      });
+    if (filterEmployeeId && filterEmployeeId !== '') {
+      const parts = filterEmployeeId.trim().split(' ');
+      const firstName = parts[0];
+      const lastName = parts[1] || '';
+
+      if (filterEmployeeIdIsMatchAll + '' == 'true') {
+        // ต้องตรงทั้งชื่อและนามสกุล
+        query.andWhere('member_tb.name LIKE :firstName', {
+          firstName: `${firstName}`,
+        });
+        query.andWhere('member_tb.surname LIKE :lastName', {
+          lastName: `${lastName}`,
+        });
+      } else {
+        // ตรงชื่อหรือนามสกุล อย่างใดอย่างหนึ่งก็ได้
+        query.andWhere(
+          '(member_tb.name LIKE :firstName OR member_tb.surname LIKE :lastName) OR (member_tb.surname LIKE :firstName OR member_tb.name LIKE :lastName)',
+          {
+            firstName: `%${firstName}%`,
+            lastName: `%${lastName}%`,
+          },
+        );
+      }
     }
 
     const queryTotal = query;
@@ -2822,7 +2836,7 @@ export class ReportService {
       );
     // Code
     if (filterReceiptCode && filterReceiptCode != '') {
-      if (filterReceiptCodeIsMatchAll == true) {
+      if (filterReceiptCodeIsMatchAll + '' == 'true') {
         query.andWhere('receipt_tb.code  LIKE :code ', {
           code: `${filterReceiptCode}`,
         });
@@ -2839,7 +2853,7 @@ export class ReportService {
 
     // Receipt Name
     if (filterReceiptName && filterReceiptName != '') {
-      if (filterReceiptNameIsMatchAll == true) {
+      if (filterReceiptNameIsMatchAll + '' == 'true') {
         query.andWhere('receipt_tb.name  LIKE :receipt_name ', {
           receipt_name: `${filterReceiptName}`,
         });
@@ -2852,7 +2866,7 @@ export class ReportService {
 
     // FOOD PLANT
     if (filterFoodPlantDesc && filterFoodPlantDesc != '') {
-      if (filterFoodPlantDescIsMatchAll == true) {
+      if (filterFoodPlantDescIsMatchAll + '' == 'true') {
         query.andWhere('food_plant.description  LIKE :food ', {
           food: `${filterFoodPlantDesc}`,
         });
@@ -2865,7 +2879,7 @@ export class ReportService {
 
     // Family main
     if (filterFamilyMainDesc && filterFamilyMainDesc != '') {
-      if (filterFamilyMainDescIsMatchAll == true) {
+      if (filterFamilyMainDescIsMatchAll + '' == 'true') {
         query.andWhere('plant_family_main_tb.description  LIKE :familyMain ', {
           familyMain: `${filterFamilyMainDesc}`,
         });
@@ -2878,7 +2892,7 @@ export class ReportService {
 
     // Customer
     if (filterCustomerId && filterCustomerId != '') {
-      if (filterCustomerIdIsMatchAll == true) {
+      if (filterCustomerIdIsMatchAll + '' == 'true') {
         query.andWhere('customer_tb.customer_id  LIKE :customer ', {
           customer: `${filterCustomerId}`,
         });
@@ -3003,6 +3017,11 @@ export class ReportService {
             'remove.log_plant_import_id = import.log_plant_import_id',
           )
           .leftJoin(
+            SourcesWorkType,
+            'sources_work_type_tb',
+            'sources_work_type_tb.id = import.work_type_id',
+          )
+          .leftJoin(
             Receipt,
             'receipt_tb',
             'receipt_tb.receipt_id = import.receipt_id',
@@ -3051,8 +3070,8 @@ export class ReportService {
 
         // Work Type
         if (filterWorkTypeId) {
-          sub.andWhere('import.work_type_id = :workType ', {
-            workType: filterWorkTypeId,
+          sub.andWhere('sources_work_type_tb.description LIKE :workType ', {
+            workType: `%${filterWorkTypeId}%`,
           });
         }
 
@@ -3076,20 +3095,20 @@ export class ReportService {
 
         // Customer
         if (filterCustomerId && filterCustomerId != '') {
-          if (filterCustomerIdIsMatchAll == true) {
+          if (filterCustomerIdIsMatchAll + '' == 'true') {
             sub.andWhere('customer_tb.name  LIKE :customer ', {
               customer: `${filterCustomerId}`,
             });
           } else {
             sub.andWhere('customer_tb.name  LIKE :customer ', {
-              customer: `${filterCustomerId}`,
+              customer: `%${filterCustomerId}%`,
             });
           }
         }
 
         // Food
         if (filterFoodPlantDesc && filterFoodPlantDesc != '') {
-          if (filterFoodPlantDescIsMatchAll == true) {
+          if (filterFoodPlantDescIsMatchAll + '' == 'true') {
             sub.andWhere('food_plant_tb.description  LIKE :food ', {
               food: `${filterFoodPlantDesc}`,
             });
@@ -3524,7 +3543,7 @@ export class ReportService {
       );
     // Code
     if (filterReceiptCode != '') {
-      if (filterReceiptCodeIsMatchAll == true) {
+      if (filterReceiptCodeIsMatchAll + '' == 'true') {
         query.andWhere('receipt_tb.code  LIKE :code ', {
           code: `${filterReceiptCode}`,
         });
@@ -3541,7 +3560,7 @@ export class ReportService {
 
     // Receipt Name
     if (filterReceiptName != '') {
-      if (filterReceiptNameIsMatchAll == true) {
+      if (filterReceiptNameIsMatchAll + '' == 'true') {
         query.andWhere('receipt_tb.name  LIKE :receipt_name ', {
           receipt_name: `${filterReceiptName}`,
         });
@@ -3554,7 +3573,7 @@ export class ReportService {
 
     // FOOD PLANT
     if (filterFoodPlantDesc != '') {
-      if (filterFoodPlantDescIsMatchAll == true) {
+      if (filterFoodPlantDescIsMatchAll + '' == 'true') {
         query.andWhere('food_plant_tb.description  LIKE :food ', {
           food: `${filterFoodPlantDesc}`,
         });
@@ -3567,7 +3586,7 @@ export class ReportService {
 
     // Family main
     if (filterFamilyMainDesc != '') {
-      if (filterFamilyMainDescIsMatchAll == true) {
+      if (filterFamilyMainDescIsMatchAll + '' == 'true') {
         query.andWhere('plant_family_main_tb.description  LIKE :familyMain ', {
           familyMain: `${filterFamilyMainDesc}`,
         });
@@ -3580,7 +3599,7 @@ export class ReportService {
 
     // Customer
     if (filterCustomerId != '') {
-      if (filterCustomerIdIsMatchAll == true) {
+      if (filterCustomerIdIsMatchAll + '' == 'true') {
         query.andWhere('customer_tb.customer_id  LIKE :customer ', {
           customer: `${filterCustomerId}`,
         });
