@@ -16,4 +16,5 @@ export class ReportGetLogPlantImportGroupingInput {
   family_main_desc_is_match_all: boolean;
   customer_id: string;
   customer_id_is_match_all: boolean;
+  employee_id_is_match_all: boolean;
 }

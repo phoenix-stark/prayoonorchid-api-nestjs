@@ -210,8 +210,6 @@ export class LogPlantRemoveService {
 
     console.log('logPlantRemoveNow:');
     console.log(logPlantRemoveNow);
-    console.log('input');
-    console.log(input);
 
     // INSERT LOG
     await this.logPlantRemoveEditService.insertLogPlantRemoveEdit({
@@ -233,6 +231,25 @@ export class LogPlantRemoveService {
       ) {
         // NO SAVE
         console.log('OUT OF CONDITION');
+        if (
+          input.plant_remove_type_id.toString() == '' ||
+          isNaN(input.plant_remove_type_id)
+        ) {
+          await this.logPlantRemoveRepository
+            .createQueryBuilder()
+            .where('barcode = :barcode', {
+              barcode: `${input.barcode}`,
+            })
+            .delete()
+            .execute();
+          await this.logPlantRemoveNowRepository
+            .createQueryBuilder()
+            .where('barcode = :barcode', {
+              barcode: `${input.barcode}`,
+            })
+            .delete()
+            .execute();
+        }
         return {
           data: {},
         };
@@ -251,7 +268,29 @@ export class LogPlantRemoveService {
       logPlantRemoveNow.receipt_id = logPlantImport.receipt_id;
       logPlantRemoveNow.create_by = createBy;
       logPlantRemoveNow.remark = input.remark;
-      logPlantRemoveNow.time_per_day = parseInt(input.time_per_day);
+
+      // TIME PER DAY
+      let timePerDay = input.time_per_day;
+      if (timePerDay == '0' || timePerDay == '') {
+        const logPlantRemoveNowTimePerDayRepository =
+          await this.logPlantRemoveNowRepository.findOne({
+            where: {
+              remove_date: input.remove_date,
+            },
+            order: {
+              time_per_day: 'DESC',
+            },
+          });
+        if (!logPlantRemoveNowTimePerDayRepository) {
+          timePerDay = '1';
+        } else {
+          timePerDay = `${
+            logPlantRemoveNowTimePerDayRepository.time_per_day + 1
+          }`;
+        }
+      }
+
+      logPlantRemoveNow.time_per_day = parseInt(timePerDay);
 
       // INSERT
       await this.logPlantRemoveRepository.save(logPlantRemoveNow);
@@ -260,31 +299,51 @@ export class LogPlantRemoveService {
       console.log('INSERT');
       console.log(logPlantRemoveNow);
     } else {
-      console.log('CASE#2');
+      console.log('CASE#2 CREATE');
       console.log(input);
-      if (
-        !input.plant_remove_type_id ||
-        input.plant_remove_type_id.toString() == '' ||
-        input.plant_remove_type_id.toString() == '-1' ||
-        !input.remove_date ||
-        input.remove_date == ''
-      ) {
-        console.log('DELETE');
-        // DELETE
-        await this.deleteBarcode({
-          barcode: input.barcode,
-        } as LogRemoveDeleteInput);
-      } else {
-        logPlantRemoveNow.remove_date = input.remove_date;
-        logPlantRemoveNow.plant_remove_type_id = input.plant_remove_type_id;
-        logPlantRemoveNow.create_by = createBy;
-        logPlantRemoveNow.remark = input.remark;
-        console.log('UPDATE');
-        console.log(logPlantRemoveNow);
-      }
 
-      await this.logPlantRemoveNowRepository.save(logPlantRemoveNow);
-      await this.logPlantRemoveRepository.save(logPlantRemoveNow);
+      if (
+        input.plant_remove_type_id.toString() == '' ||
+        isNaN(input.plant_remove_type_id)
+      ) {
+        await this.logPlantRemoveRepository
+          .createQueryBuilder()
+          .where('barcode = :barcode', {
+            barcode: `${input.barcode}`,
+          })
+          .delete()
+          .execute();
+        await this.logPlantRemoveNowRepository
+          .createQueryBuilder()
+          .where('barcode = :barcode', {
+            barcode: `${input.barcode}`,
+          })
+          .delete()
+          .execute();
+      } else {
+        if (
+          !input.plant_remove_type_id ||
+          input.plant_remove_type_id.toString() == '-1' ||
+          !input.remove_date ||
+          input.remove_date == ''
+        ) {
+          console.log('DELETE');
+          // DELETE
+          await this.deleteBarcode({
+            barcode: input.barcode,
+          } as LogRemoveDeleteInput);
+        } else {
+          logPlantRemoveNow.remove_date = input.remove_date;
+          logPlantRemoveNow.plant_remove_type_id = input.plant_remove_type_id;
+          logPlantRemoveNow.create_by = createBy;
+          logPlantRemoveNow.remark = input.remark;
+          console.log('UPDATE');
+          console.log(logPlantRemoveNow);
+        }
+
+        await this.logPlantRemoveNowRepository.save(logPlantRemoveNow);
+        await this.logPlantRemoveRepository.save(logPlantRemoveNow);
+      }
     }
 
     return {

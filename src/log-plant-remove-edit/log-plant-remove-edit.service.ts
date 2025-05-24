@@ -59,6 +59,8 @@ export class LogPlantRemoveEditService {
       },
     });
     console.log(input);
+    console.log('newLogPlant');
+    console.log(newLogPlant);
     if (newLogPlant) {
       let message = '';
       const dt = this.formatDateToExcel(
@@ -75,33 +77,49 @@ export class LogPlantRemoveEditService {
       if (newLogPlant.plant_remove_type_id != input.plant_remove_type_id) {
         let descOld = '';
         let descNew = '';
-
+        console.log('newLogPlant.plant_remove_type_id ');
+        console.log(newLogPlant);
         // GET OLD
-        const plantTypeOld =
-          await this.sourcesPlantRemoveTypeService.getSourcesPlantRemoveTypeById(
-            {
-              token: input.token,
-              id: newLogPlant.plant_remove_type_id,
-            },
-          );
+        let plantTypeOld = null;
 
+        if (newLogPlant.plant_remove_type_id) {
+          plantTypeOld =
+            await this.sourcesPlantRemoveTypeService.getSourcesPlantRemoveTypeById(
+              {
+                token: input.token,
+                id: newLogPlant.plant_remove_type_id,
+              },
+            );
+        }
+        console.log(plantTypeOld);
         // GET NEW
-        const plantTypeNew =
-          await this.sourcesPlantRemoveTypeService.getSourcesPlantRemoveTypeById(
-            {
-              token: input.token,
-              id: input.plant_remove_type_id,
-            },
-          );
-        if (plantTypeOld.data) {
-          descOld = plantTypeOld.data.description;
-        }
+        let plantTypeNew = null;
+        if (
+          input.plant_remove_type_id.toString() == '' ||
+          isNaN(input.plant_remove_type_id)
+        ) {
+          console.log('newLogPlant.plant_remove_type_id == "" ');
+          message += `แก้ไข สาเหตุ จาก ${descOld} เป็น ไม่มี, `;
+        } else {
+          plantTypeNew =
+            await this.sourcesPlantRemoveTypeService.getSourcesPlantRemoveTypeById(
+              {
+                token: input.token,
+                id: input.plant_remove_type_id,
+              },
+            );
+          console.log('plantTypeNew:');
+          console.log(plantTypeNew);
+          if (plantTypeOld.data) {
+            descOld = plantTypeOld.data.description;
+          }
 
-        if (plantTypeNew.data) {
-          descNew = plantTypeNew.data.description;
-        }
+          if (plantTypeNew.data) {
+            descNew = plantTypeNew.data.description;
+          }
 
-        message += `แก้ไข สาเหตุ จาก ${descOld} เป็น ${descNew}, `;
+          message += `แก้ไข สาเหตุ จาก ${descOld} เป็น ${descNew}, `;
+        }
       }
 
       if (newLogPlant.remark != input.remark) {

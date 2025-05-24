@@ -19,4 +19,5 @@ export class ReportGetProductionMultipleInput {
   customer_name_desc: string;
   employee_name?: string;
   employee_surname?: string;
+  employee_id_is_match_all: boolean;
 }
