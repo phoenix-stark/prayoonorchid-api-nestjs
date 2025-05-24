@@ -107,7 +107,7 @@ export class ReportService {
             'food_plant.food_id = import.food_plant_id',
           );
         // Code
-        if (filter.filter[1].plant_code.description !== '') {
+        if (filter.filter[1].plant_code.description != '') {
           if (filter.filter[1].plant_code.is_match_all === true) {
             sub.andWhere('receipt_tb.code  LIKE :code ', {
               code: `${filter.filter[1].plant_code.description}`,
@@ -376,8 +376,8 @@ export class ReportService {
             'food_plant.food_id = import.food_plant_id',
           );
         // Code
-        if (input.receipt_code_desc && input.receipt_code_desc !== '') {
-          if (input.receipt_code_is_match_all === true) {
+        if (input.receipt_code_desc && input.receipt_code_desc != '') {
+          if (input.receipt_code_is_match_all + '' == 'true') {
             sub.andWhere('receipt_tb.code  LIKE :code ', {
               code: `${input.receipt_code_desc}`,
             });
@@ -443,12 +443,13 @@ export class ReportService {
           }
         }
 
-        // Employee
-        if (input.employee_id && input.employee_id !== '') {
-          sub.andWhere('import.member_made = :employee ', {
-            employee: input.employee_id,
-          });
-        }
+        // // Employee
+        // if (input.employee_id && input.employee_id !== '') {
+        //   sub.andWhere('import.member_made = :employee ', {
+        //     employee: input.employee_id,
+        //   });
+        // }
+
         return sub;
       }, 'result_group')
       .leftJoin(
@@ -488,8 +489,8 @@ export class ReportService {
       );
 
     // Code
-    if (input.receipt_code_desc && input.receipt_code_desc !== '') {
-      if (input.receipt_code_is_match_all === true) {
+    if (input.receipt_code_desc && input.receipt_code_desc != '') {
+      if (input.receipt_code_is_match_all + '' == 'true') {
         query.andWhere('receipt_tb.code  LIKE :code ', {
           code: `${input.receipt_code_desc}`,
         });
@@ -505,8 +506,8 @@ export class ReportService {
     }
 
     // Receipt Name
-    if (input.receipt_name_desc && input.receipt_name_desc !== '') {
-      if (input.receipt_name_is_match_all === true) {
+    if (input.receipt_name_desc && input.receipt_name_desc != '') {
+      if (input.receipt_name_is_match_all + '' == 'true') {
         query.andWhere('receipt_tb.name  LIKE :receipt_name ', {
           receipt_name: `${input.receipt_name_desc}`,
         });
@@ -531,8 +532,8 @@ export class ReportService {
     }
 
     // Customer
-    if (input.customer_id_desc && input.customer_id_desc !== '') {
-      if (input.customer_id_is_match_all === true) {
+    if (input.customer_id_desc && input.customer_id_desc != '') {
+      if (input.customer_id_is_match_all + '' == 'true') {
         query.andWhere('( customer_tb.name  LIKE :customer  )', {
           customer: `${input.customer_id_desc}`,
         });
@@ -544,10 +545,39 @@ export class ReportService {
     }
 
     // Employee
-    if (input.employee_id && input.employee_id !== '') {
-      query.andWhere('result_group.member_made = :employee ', {
-        employee: input.employee_id,
-      });
+    console.log('employee-where');
+    console.log(input);
+    console.log('input.employee_id: ' + input.employee_id);
+    console.log(
+      'input.employee_id_is_match_all: ' + input.employee_id_is_match_all,
+    );
+    if (input.employee_id && input.employee_id != '') {
+      const parts = input.employee_id.trim().split(' ');
+      const firstName = parts[0];
+      const lastName = parts[1] || '';
+
+      if (input.employee_id_is_match_all + '' == 'true') {
+        console.log('CASE11');
+        // ต้องตรงทั้งชื่อและนามสกุล
+        query.andWhere('member_tb.name LIKE :firstName', {
+          firstName: `${firstName}`,
+        });
+        query.andWhere('member_tb.surname LIKE :lastName', {
+          lastName: `${lastName}`,
+        });
+      } else {
+        // ตรงชื่อหรือนามสกุล อย่างใดอย่างหนึ่งก็ได้
+        console.log('CASE22');
+        console.log(firstName);
+        console.log(lastName);
+        query.andWhere(
+          '(member_tb.name LIKE :firstName OR member_tb.surname LIKE :lastName) OR (member_tb.surname LIKE :firstName OR member_tb.name LIKE :lastName)',
+          {
+            firstName: `%${firstName}%`,
+            lastName: `%${lastName}%`,
+          },
+        );
+      }
     }
 
     const startIndex: number = GetIndexStartOfPage(input.page, input.per_page);
