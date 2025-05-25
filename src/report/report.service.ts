@@ -2114,23 +2114,6 @@ export class ReportService {
             });
           }
         }
-
-        // Employee
-        if (input.employee_id && input.employee_id !== '') {
-          sub.andWhere('import.member_made = :employee ', {
-            employee: input.employee_id,
-          });
-        }
-
-        // Remove Type
-        if (
-          input.reason_remove_type !== '0' &&
-          input.reason_remove_type !== ''
-        ) {
-          sub.andWhere('remove.plant_remove_type_id = :reason ', {
-            reason: input.reason_remove_type,
-          });
-        }
         return sub;
       }, 'result_group')
       .leftJoin(
@@ -2232,8 +2215,34 @@ export class ReportService {
 
     // Employee
     if (input.employee_id && input.employee_id !== '') {
-      query.andWhere('result_group.member_made = :employee ', {
-        employee: input.employee_id,
+      const parts = input.employee_id.trim().split(' ');
+      const firstName = parts[0];
+      const lastName = parts[1] || null;
+
+      if (input.employee_id_is_match_all + '' == 'true') {
+        // ต้องตรงทั้งชื่อและนามสกุล
+        query.andWhere('member_tb.name LIKE :firstName', {
+          firstName: `${firstName}`,
+        });
+        query.andWhere('member_tb.surname LIKE :lastName', {
+          lastName: `${lastName}`,
+        });
+      } else {
+        // ตรงชื่อหรือนามสกุล อย่างใดอย่างหนึ่งก็ได้
+        query.andWhere(
+          '(member_tb.name LIKE :firstName OR member_tb.surname LIKE :lastName) OR (member_tb.surname LIKE :firstName OR member_tb.name LIKE :lastName)',
+          {
+            firstName: `%${firstName}%`,
+            lastName: `%${lastName}%`,
+          },
+        );
+      }
+    }
+
+    // Remove Type
+    if (input.reason_remove_type_desc && input.reason_remove_type_desc != '') {
+      query.andWhere('sources_plant_remove_type_tb.description LIKE :reason ', {
+        reason: `%${input.reason_remove_type_desc}%`,
       });
     }
 
@@ -2266,6 +2275,7 @@ export class ReportService {
       query.limit(input.per_page);
     }
     const data = await query.getRawMany();
+    console.log( await query.getQueryAndParameters());
     const startIndex: number = GetIndexStartOfPage(input.page, input.per_page);
     const endIndex: number =
       parseInt(startIndex + '') + parseInt(input.per_page + '') - 1;

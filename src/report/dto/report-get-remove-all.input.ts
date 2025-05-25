@@ -21,4 +21,5 @@ export class ReportGetRemoveAllInput {
   employee_surname?: string;
   reason_remove_type: string;
   reason_remove_type_desc: string;
+  employee_id_is_match_all: boolean;
 }
