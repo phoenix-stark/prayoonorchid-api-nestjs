@@ -1663,13 +1663,6 @@ export class ReportService {
             });
           }
         }
-
-        // Employee
-        if (input.employee_id && input.employee_id !== '') {
-          sub.andWhere('import.member_made = :employee ', {
-            employee: input.employee_id,
-          });
-        }
         return sub;
       }, 'result_group')
       .leftJoin(
@@ -1680,11 +1673,29 @@ export class ReportService {
 
     // Employee
     if (input.employee_id && input.employee_id !== '') {
-      query.andWhere('result_group.member_made = :employee ', {
-        employee: input.employee_id,
-      });
-    }
+      const parts = input.employee_id.trim().split(' ');
+      const firstName = parts[0];
+      const lastName = parts[1] || null;
 
+      if (input.employee_id_is_match_all + '' == 'true') {
+        // ต้องตรงทั้งชื่อและนามสกุล
+        query.andWhere('member_tb.name LIKE :firstName', {
+          firstName: `${firstName}`,
+        });
+        query.andWhere('member_tb.surname LIKE :lastName', {
+          lastName: `${lastName}`,
+        });
+      } else {
+        // ตรงชื่อหรือนามสกุล อย่างใดอย่างหนึ่งก็ได้
+        query.andWhere(
+          '(member_tb.name LIKE :firstName OR member_tb.surname LIKE :lastName) OR (member_tb.surname LIKE :firstName OR member_tb.name LIKE :lastName)',
+          {
+            firstName: `%${firstName}%`,
+            lastName: `%${lastName}%`,
+          },
+        );
+      }
+    }
     const queryTotal = query;
     const totalAll = await queryTotal.select('COUNT(*)', 'total').getRawOne();
 
@@ -1928,13 +1939,6 @@ export class ReportService {
             });
           }
         }
-
-        // Employee
-        if (input.employee_id && input.employee_id !== '') {
-          sub.andWhere('import.member_made = :employee ', {
-            employee: input.employee_id,
-          });
-        }
         return sub;
       }, 'result_group')
       .leftJoin(
@@ -1945,9 +1949,28 @@ export class ReportService {
 
     // Employee
     if (input.employee_id && input.employee_id !== '') {
-      query.andWhere('result_group.member_made = :employee ', {
-        employee: input.employee_id,
-      });
+      const parts = input.employee_id.trim().split(' ');
+      const firstName = parts[0];
+      const lastName = parts[1] || null;
+
+      if (input.employee_id_is_match_all + '' == 'true') {
+        // ต้องตรงทั้งชื่อและนามสกุล
+        query.andWhere('member_tb.name LIKE :firstName', {
+          firstName: `${firstName}`,
+        });
+        query.andWhere('member_tb.surname LIKE :lastName', {
+          lastName: `${lastName}`,
+        });
+      } else {
+        // ตรงชื่อหรือนามสกุล อย่างใดอย่างหนึ่งก็ได้
+        query.andWhere(
+          '(member_tb.name LIKE :firstName OR member_tb.surname LIKE :lastName) OR (member_tb.surname LIKE :firstName OR member_tb.name LIKE :lastName)',
+          {
+            firstName: `%${firstName}%`,
+            lastName: `%${lastName}%`,
+          },
+        );
+      }
     }
 
     query
