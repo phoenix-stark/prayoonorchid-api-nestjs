@@ -1064,12 +1064,12 @@ export class ReportService {
         FoodPlant,
         'food_plant_tb',
         'food_plant_tb.food_id = result_group.food_plant_id',
-      )
-      .leftJoin(
-        Member,
-        'member_tb',
-        'member_tb.member_id = result_group.member_made',
       );
+    // .leftJoin(
+    //   Member,
+    //   'member_tb',
+    //   'member_tb.member_id = result_group.member_made',
+    // );
     // Code
     if (input.receipt_code_desc && input.receipt_code_desc !== '') {
       if (input.receipt_code_is_match_all + '' == 'true') {
@@ -1100,31 +1100,31 @@ export class ReportService {
       }
     }
 
-    // Employee
-    if (input.employee_id && input.employee_id != '') {
-      const parts = input.employee_id.trim().split(' ');
-      const firstName = parts[0];
-      const lastName = parts[1] || null;
+    // // Employee
+    // if (input.employee_id && input.employee_id != '') {
+    //   const parts = input.employee_id.trim().split(' ');
+    //   const firstName = parts[0];
+    //   const lastName = parts[1] || null;
 
-      if (input.employee_id_is_match_all + '' == 'true') {
-        // ต้องตรงทั้งชื่อและนามสกุล
-        query.andWhere('member_tb.name LIKE :firstName', {
-          firstName: `${firstName}`,
-        });
-        query.andWhere('member_tb.surname LIKE :lastName', {
-          lastName: `${lastName}`,
-        });
-      } else {
-        // ตรงชื่อหรือนามสกุล อย่างใดอย่างหนึ่งก็ได้
-        query.andWhere(
-          '(member_tb.name LIKE :firstName OR member_tb.surname LIKE :lastName OR member_tb.surname LIKE :firstName OR member_tb.name LIKE :lastName)',
-          {
-            firstName: `%${firstName}%`,
-            lastName: `%${lastName}%`,
-          },
-        );
-      }
-    }
+    //   if (input.employee_id_is_match_all + '' == 'true') {
+    //     // ต้องตรงทั้งชื่อและนามสกุล
+    //     query.andWhere('member_tb.name LIKE :firstName', {
+    //       firstName: `${firstName}`,
+    //     });
+    //     query.andWhere('member_tb.surname LIKE :lastName', {
+    //       lastName: `${lastName}`,
+    //     });
+    //   } else {
+    //     // ตรงชื่อหรือนามสกุล อย่างใดอย่างหนึ่งก็ได้
+    //     query.andWhere(
+    //       '(member_tb.name LIKE :firstName OR member_tb.surname LIKE :lastName OR member_tb.surname LIKE :firstName OR member_tb.name LIKE :lastName)',
+    //       {
+    //         firstName: `%${firstName}%`,
+    //         lastName: `%${lastName}%`,
+    //       },
+    //     );
+    //   }
+    // }
 
     // Family main
     if (input.family_main_desc && input.family_main_desc !== '') {
@@ -1161,9 +1161,9 @@ export class ReportService {
       .addSelect('receipt_tb.num_order', 'receipt_num_order')
       .addSelect('receipt_tb.name', 'receipt_name')
       .addSelect('customer_tb.name', 'customer_name')
-      .addSelect('member_tb.name', 'member_name')
-      .addSelect('member_tb.surname', 'member_surname')
-      .addSelect('result_group.member_made', 'member_made')
+      // .addSelect('member_tb.name', 'member_name')
+      // .addSelect('member_tb.surname', 'member_surname')
+      // .addSelect('result_group.member_made', 'member_made')
       .addSelect('plant_family_main_tb.description', 'plant_family_main')
       .addSelect('sources_work_main_type_tb.description', 'main_work_type')
       .addSelect('sources_work_type_tb.description', 'work_type')
@@ -2275,7 +2275,7 @@ export class ReportService {
       query.limit(input.per_page);
     }
     const data = await query.getRawMany();
-    console.log( await query.getQueryAndParameters());
+    console.log(await query.getQueryAndParameters());
     const startIndex: number = GetIndexStartOfPage(input.page, input.per_page);
     const endIndex: number =
       parseInt(startIndex + '') + parseInt(input.per_page + '') - 1;
