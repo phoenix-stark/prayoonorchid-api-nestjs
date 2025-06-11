@@ -903,7 +903,7 @@ export class ReportService {
           .addSelect('import.main_work_type_id', 'main_work_type_id')
           .addSelect('import.work_type_id', 'work_type_id')
           .addSelect('import.food_plant_id', 'food_plant_id')
-          .addSelect('import.member_made', 'member_made')
+          // .addSelect('import.member_made', 'member_made')
           .addSelect('COUNT(*)', 'total_import')
           .addSelect(
             'SUM(case when remove.plant_remove_type_id = 1 then 1 else 0 end)',
@@ -931,7 +931,7 @@ export class ReportService {
           .addGroupBy('import.main_work_type_id')
           .addGroupBy('import.work_type_id')
           .addGroupBy('import.food_plant_id')
-          .addGroupBy('import.member_made')
+          // .addGroupBy('import.member_made')
           .leftJoin(
             LogPlantRemove,
             'remove',
