@@ -11,4 +11,7 @@ export class ReportGetLogPlantRemoveTimeInput {
   customer_id: string;
   customer_id_is_match_all: boolean;
   plant_remove_type_id: string;
+
+  receipt_code: string;
+  receipt_code_is_match_all: boolean;
 }

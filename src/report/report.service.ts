@@ -3097,7 +3097,9 @@ export class ReportService {
     const filterRemoveStart = input.remove_start;
     const filterRemoveEnd = input.remove_end;
 
-    const filterMainWorkTypeDesc = input.main_work_type;
+    const filterReceiptCode = input.receipt_code;
+    const filterReceiptCodeIsMatchAll = input.receipt_code_is_match_all;
+
     const filterWorkTypeId = input.work_type_id;
     const filterEmployeeId = input.employee_id;
     const filterFoodPlantDesc = input.food_plant_desc;
@@ -3162,6 +3164,24 @@ export class ReportService {
             'food_plant_tb',
             'food_plant_tb.food_id = import.food_plant_id',
           );
+
+        // Code
+        if (filterReceiptCode != '') {
+          if (filterReceiptCodeIsMatchAll + '' == 'true') {
+            sub.andWhere('receipt_tb.code  LIKE :code ', {
+              code: `${filterReceiptCode}`,
+            });
+          } else {
+            sub.andWhere('receipt_tb.code  LIKE :code ', {
+              code: `%${filterReceiptCode}%`,
+            });
+          }
+        } else {
+          sub.andWhere('receipt_tb.code  LIKE :code ', {
+            code: `%%`,
+          });
+        }
+
         // Remove Date
         if (
           filterRemoveStart &&
