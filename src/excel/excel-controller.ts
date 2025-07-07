@@ -22,6 +22,11 @@ import { ReportGetProductionMultipleInput } from 'src/report/dto/report-get-prod
 import { ReportGetStockInput } from 'src/report/dto/report-get-stock.input';
 import { ReportGetFailInput } from 'src/report/dto/report-get-fail.input';
 import { ReportGetRemoveAllInput } from 'src/report/dto/report-get-remove-all.input';
+import { ReportGetLogPlantImportGroupingInput } from 'src/report/dto/report-get-log-plant-import-grouping.input';
+import { ReportGetLogPlantImportGroupingDetailInput } from 'src/report/dto/report-get-log-plant-import-grouping-detail.input';
+import { ReportGetLogPlantRemoveTimeInput } from 'src/report/dto/report-get-log-plant-remove-time.input';
+import { ReportGetLogPlantRemoveGroupingInput } from 'src/report/dto/report-get-log-plant-remove-grouping.input';
+import { ReportGetLogPlantRemoveGroupingDetailInput } from 'src/report/dto/report-get-log-plant-remove-grouping-detail.input';
 
 @Controller('excel')
 export class ExcelController {
@@ -191,6 +196,130 @@ export class ExcelController {
   @Header('Content-Type', 'text/xlsx')
   async exportReceipt(@Res() res: Response) {
     const result = await this.excelService.exportReceipt();
+    const buffer = readFileSync(result);
+
+    const stream = new Readable();
+    stream.push(buffer);
+    stream.push(null);
+
+    res.set({
+      'Content-Type':
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      'Content-Length': buffer.length,
+    });
+    stream.pipe(res);
+  }
+
+  // รายงาน ประวัตินำเข้า
+  @Get('report-log-plant-import-history-grouping')
+  @HttpCode(200)
+  @Header('Content-Type', 'text/xlsx')
+  async exportReportLogPlantImportHistoryGrouping(
+    @Query() input: ReportGetLogPlantImportGroupingInput,
+    @Res() res: Response,
+  ) {
+    const result =
+      await this.excelService.exportReportLogPlantImportHistoryGrouping(input);
+    const buffer = readFileSync(result);
+
+    const stream = new Readable();
+    stream.push(buffer);
+    stream.push(null);
+
+    res.set({
+      'Content-Type':
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      'Content-Length': buffer.length,
+    });
+    stream.pipe(res);
+  }
+
+  // รายงาน รายละเอียด ประวัตินำเข้า
+  @Get('report-log-plant-import-history-grouping-detail')
+  @HttpCode(200)
+  @Header('Content-Type', 'text/xlsx')
+  async exportReportLogPlantImportHistoryGroupingDetail(
+    @Query() input: ReportGetLogPlantImportGroupingDetailInput,
+    @Res() res: Response,
+  ) {
+    const result =
+      await this.excelService.exportReportLogPlantImportHistoryGroupingDetail(
+        input,
+      );
+    const buffer = readFileSync(result);
+
+    const stream = new Readable();
+    stream.push(buffer);
+    stream.push(null);
+
+    res.set({
+      'Content-Type':
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      'Content-Length': buffer.length,
+    });
+    stream.pipe(res);
+  }
+
+  // รายงาน ประวัตินำออก แยกตามครั้ง
+  @Get('report-log-plant-remove-history-time')
+  @HttpCode(200)
+  @Header('Content-Type', 'text/xlsx')
+  async exportReportLogPlantRemoveHistoryTime(
+    @Query() input: ReportGetLogPlantRemoveTimeInput,
+    @Res() res: Response,
+  ) {
+    const result =
+      await this.excelService.exportReportLogPlantRemoveHistoryTime(input);
+    const buffer = readFileSync(result);
+
+    const stream = new Readable();
+    stream.push(buffer);
+    stream.push(null);
+
+    res.set({
+      'Content-Type':
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      'Content-Length': buffer.length,
+    });
+    stream.pipe(res);
+  }
+
+  // รายงาน รายละเอียด การนำออก
+  @Get('report-log-plant-remove-history-grouping')
+  @HttpCode(200)
+  @Header('Content-Type', 'text/xlsx')
+  async exportReportLogPlantRemoveHistoryGrouping(
+    @Query() input: ReportGetLogPlantRemoveGroupingInput,
+    @Res() res: Response,
+  ) {
+    const result =
+      await this.excelService.exportReportLogPlantRemoveHistoryGrouping(input);
+    const buffer = readFileSync(result);
+
+    const stream = new Readable();
+    stream.push(buffer);
+    stream.push(null);
+
+    res.set({
+      'Content-Type':
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      'Content-Length': buffer.length,
+    });
+    stream.pipe(res);
+  }
+
+  // รายงาน รายละเอียด การนำออก
+  @Get('report-log-plant-remove-history-grouping-detail')
+  @HttpCode(200)
+  @Header('Content-Type', 'text/xlsx')
+  async exportReportLogPlantRemoveHistoryGroupingDetail(
+    @Query() input: ReportGetLogPlantRemoveGroupingDetailInput,
+    @Res() res: Response,
+  ) {
+    const result =
+      await this.excelService.exportReportLogPlantRemoveHistoryGroupingDetail(
+        input,
+      );
     const buffer = readFileSync(result);
 
     const stream = new Readable();

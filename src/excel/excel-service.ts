@@ -12,6 +12,11 @@ import { ReportGetStockInput } from 'src/report/dto/report-get-stock.input';
 import { ReportGetBottleInput } from 'src/report/dto/report-get-bottle.input';
 import { ReportGetFailInput } from 'src/report/dto/report-get-fail.input';
 import { ReportGetRemoveAllInput } from 'src/report/dto/report-get-remove-all.input';
+import { ReportGetLogPlantImportGroupingInput } from 'src/report/dto/report-get-log-plant-import-grouping.input';
+import { ReportGetLogPlantImportGroupingDetailInput } from 'src/report/dto/report-get-log-plant-import-grouping-detail.input';
+import { ReportGetLogPlantRemoveTimeInput } from 'src/report/dto/report-get-log-plant-remove-time.input';
+import { ReportGetLogPlantRemoveGroupingInput } from 'src/report/dto/report-get-log-plant-remove-grouping.input';
+import { ReportGetLogPlantRemoveGroupingDetailInput } from 'src/report/dto/report-get-log-plant-remove-grouping-detail.input';
 @Injectable()
 export class ExcelService {
   constructor(
@@ -1313,7 +1318,7 @@ export class ExcelService {
   async exportReportFail(input: ReportGetFailInput): Promise<any> {
     const book = new Workbook();
     const sheet = book.addWorksheet('Sheet1');
-    sheet.mergeCells('A1:F1');
+    sheet.mergeCells('A1:K1');
 
     let strId = '';
     if (input.work_main_types) {
@@ -1586,6 +1591,859 @@ export class ExcelService {
         {
           discardDescriptor: true,
           prefix: 'ใบงาน',
+          postfix: '.xlsx',
+          mode: parseInt('0600', 8),
+        },
+        async (_err, _file) => {
+          if (_err) throw _err;
+          book.xlsx
+            .writeFile(_file)
+            .then(() => {
+              resolve(_file);
+            })
+            .catch((err) => {
+              reject(err);
+            });
+        },
+      );
+    });
+    return file;
+  }
+
+  async exportReportLogPlantImportHistoryGrouping(
+    input: ReportGetLogPlantImportGroupingInput,
+  ): Promise<any> {
+    const book = new Workbook();
+    const sheet = book.addWorksheet('Sheet1');
+    sheet.mergeCells('A1:J1');
+
+    let strId = '';
+    if (input.main_work_type) {
+      const itemMainTask = JSON.parse(input.main_work_type);
+      for (let b = 0; b < itemMainTask.length; b++) {
+        const id = itemMainTask[b].description;
+        strId += id + ', ';
+      }
+      if (strId !== '') {
+        strId.substring(0, strId.length - 2);
+      }
+    }
+
+    sheet.getCell('A1').value = `วันที่นำเข้าเริ่มต้น: ${this.momentWrapper
+      .momentDate(input.import_start)
+      .format('DD/MM/YYYY')}, วันที่นำเข้าสิ้นสุด: ${this.momentWrapper
+      .momentDate(input.import_end)
+      .format('DD/MM/YYYY')}, รหัสพันธุ์ไม้: ${
+      input.receipt_code
+    } ชื่อพันธุ์ไม้: ${input.receipt_name}  สายพันธุ์หลัก: ${
+      input.family_main_desc
+    } ประเภทงานหลัก: ${strId} ชื่อคู่ค้า: ${input.customer_id} อาหารวุ้น: ${
+      input.food_plant_desc
+    } ชื่อ-นามสกุลพนักงาน: ${input.employee_id}`;
+
+    const data = [];
+    const rows = [];
+    data.push({
+      import_date: 'วันที่นำเข้า',
+      code: 'รหัสใบงาน',
+      family_name: 'สายพันธุ์',
+      name: 'ชื่อพันธุ์ไม้',
+      main_work_type: 'ประเภทงานหลัก',
+      work_type: 'ประเภทงาน',
+      food: 'อาหารวุ้น',
+      customer: 'ชื่อคู่ค้า',
+      total: 'จำนวนนำเข้า',
+      employee: 'ชื่อwนักงาน',
+    });
+    // Add Data Row
+    const result = await this.reportService.getReportLogImportHistoryGrouping(
+      input,
+    );
+    // Styles Data Row
+    for (let i = 0; i < result?.data?.data.length; i++) {
+      const rowsDB = result?.data?.data[i];
+      data.push({
+        import_date: this.formatDateToExcel(
+          this.momentWrapper
+            .momentDate(rowsDB.import_date)
+            .format('YYYY-MM-DD'),
+          'YYYY-MM-DD',
+        ),
+        code: rowsDB.receipt_code,
+        family_name: rowsDB.plant_family_main,
+        name: rowsDB.receipt_name,
+        main_work_type: rowsDB.main_work_type,
+        work_type: rowsDB.work_type,
+        food: rowsDB.food,
+        customer: rowsDB.customer_name,
+        total: parseInt(rowsDB.total_import.toString()),
+        employee: rowsDB.member_name + ' ' + rowsDB.member_surname,
+      });
+    }
+
+    data.forEach((doc) => {
+      rows.push(Object.values(doc));
+    });
+    sheet.addRows(rows);
+
+    // Styles Data Row
+    for (let i = 1; i < result.length; i++) {
+      [
+        `A${i + 1}`,
+        `B${i + 1}`,
+        `C${i + 1}`,
+        `D${i + 1}`,
+        `E${i + 1}`,
+        `F${i + 1}`,
+        `G${i + 1}`,
+        `H${i + 1}`,
+        `I${i + 1}`,
+        `J${i + 1}`,
+      ].map((cell) => {
+        sheet.getCell(cell).style = {
+          border: {
+            top: { style: 'thin' },
+            left: { style: 'thin' },
+            bottom: { style: 'thin' },
+            right: { style: 'thin' },
+          },
+        };
+      });
+    }
+
+    // Column style
+    const colsStyle = [
+      { key: 'A', width: 20, align: 'left' },
+      { key: 'B', width: 30, align: 'left' },
+      { key: 'C', width: 40, align: 'left' },
+      { key: 'D', width: 40, align: 'left' },
+      { key: 'E', width: 40, align: 'left' },
+      { key: 'F', width: 40, align: 'left' },
+      { key: 'G', width: 40, align: 'left' },
+      { key: 'H', width: 40, align: 'left' },
+      { key: 'I', width: 40, align: 'center' },
+      { key: 'J', width: 40, align: 'left' },
+    ];
+
+    // Column Row Data
+    colsStyle.forEach((column, key) => {
+      sheet.getColumn(column.key).width = column.width;
+      sheet.getColumn(column.key).alignment = {
+        horizontal: 'center',
+      };
+    });
+
+    colsStyle.forEach((column, key) => {
+      sheet.getColumn(column.key).width = column.width;
+      if (column.align === 'center') {
+        sheet.getColumn(column.key).alignment = {
+          horizontal: 'center',
+        };
+      } else if (column.align === 'right') {
+        sheet.getColumn(column.key).alignment = {
+          horizontal: 'right',
+        };
+      } else {
+        sheet.getColumn(column.key).alignment = {
+          horizontal: 'left',
+        };
+      }
+    });
+
+    // Header
+    ['A1', 'B1', 'C1', 'D1', 'E1', 'F1', 'G1', 'H1', 'I1', 'J1'].map((cell) => {
+      sheet.getCell(cell).style = {
+        font: {
+          bold: true,
+        },
+        alignment: {
+          horizontal: 'center',
+        },
+        border: {
+          top: { style: 'thin' },
+          left: { style: 'thin' },
+          bottom: { style: 'thin' },
+          right: { style: 'thin' },
+        },
+      };
+    });
+
+    // Write Excel
+    const file = new Promise((resolve, reject) => {
+      tmp.file(
+        {
+          discardDescriptor: true,
+          prefix: 'ประวัตินำเข้า',
+          postfix: '.xlsx',
+          mode: parseInt('0600', 8),
+        },
+        async (_err, _file) => {
+          if (_err) throw _err;
+          book.xlsx
+            .writeFile(_file)
+            .then(() => {
+              resolve(_file);
+            })
+            .catch((err) => {
+              reject(err);
+            });
+        },
+      );
+    });
+    return file;
+  }
+
+  async exportReportLogPlantImportHistoryGroupingDetail(
+    input: ReportGetLogPlantImportGroupingDetailInput,
+  ): Promise<any> {
+    const book = new Workbook();
+    const sheet = book.addWorksheet('Sheet1');
+    sheet.mergeCells('A1:K1');
+
+    sheet.getCell('A1').value = `วันที่นำเข้าเริ่มต้น: ${this.momentWrapper
+      .momentDate(input.import_start)
+      .format('DD/MM/YYYY')}, วันที่นำเข้าสิ้นสุด: ${this.momentWrapper
+      .momentDate(input.import_end)
+      .format('DD/MM/YYYY')}, รหัสพันธุ์ไม้: ${
+      input.receipt_code
+    } ชื่อพันธุ์ไม้: ${input.receipt_name}  สายพันธุ์หลัก: ${
+      input.family_main_desc
+    } ประเภทงานหลัก: ${input.main_work_type_desc}อาหารวุ้น: ${
+      input.food_plant_desc
+    } ครั้งที่: ${input.time_per_day}`;
+
+    const data = [];
+    const rows = [];
+    data.push({
+      barcode: 'Barcode',
+      import_date: 'วันที่นำเข้า',
+      code: 'รหัสใบงาน',
+      name: 'ชื่อพันธุ์ไม้',
+      family_name: 'สายพันธุ์',
+      main_work_type: 'ประเภทงานหลัก',
+      work_type: 'ประเภทงาน',
+      food: 'อาหารวุ้น',
+      customer: 'ชื่อคู่ค้า',
+      employee: 'ชื่อwนักงาน',
+      remove_type: 'การนำออก',
+    });
+    // Add Data Row
+    const result =
+      await this.reportService.getReportLogImportHistoryGroupingDetail(input);
+    // Styles Data Row
+    for (let i = 0; i < result?.data?.data.length; i++) {
+      const rowsDB = result?.data?.data[i];
+      data.push({
+        barcode: rowsDB.barcode,
+        import_date: this.formatDateToExcel(
+          this.momentWrapper
+            .momentDate(rowsDB.import_date)
+            .format('YYYY-MM-DD'),
+          'YYYY-MM-DD',
+        ),
+        code: rowsDB.receipt_code,
+        family_name: rowsDB.plant_family_main,
+        name: rowsDB.receipt_name,
+        main_work_type: rowsDB.main_work_type,
+        work_type: rowsDB.work_type,
+        food: rowsDB.food,
+        customer: rowsDB.customer_name,
+        employee: rowsDB.member_name + ' ' + rowsDB.member_surname,
+        remove_type: rowsDB.remove_type,
+      });
+    }
+
+    data.forEach((doc) => {
+      rows.push(Object.values(doc));
+    });
+    sheet.addRows(rows);
+
+    // Styles Data Row
+    for (let i = 1; i < result.length; i++) {
+      [
+        `A${i + 1}`,
+        `B${i + 1}`,
+        `C${i + 1}`,
+        `D${i + 1}`,
+        `E${i + 1}`,
+        `F${i + 1}`,
+        `G${i + 1}`,
+        `H${i + 1}`,
+        `I${i + 1}`,
+        `J${i + 1}`,
+        `K${i + 1}`,
+      ].map((cell) => {
+        sheet.getCell(cell).style = {
+          border: {
+            top: { style: 'thin' },
+            left: { style: 'thin' },
+            bottom: { style: 'thin' },
+            right: { style: 'thin' },
+          },
+        };
+      });
+    }
+
+    // Column style
+    const colsStyle = [
+      { key: 'A', width: 20, align: 'left' },
+      { key: 'B', width: 30, align: 'left' },
+      { key: 'C', width: 40, align: 'left' },
+      { key: 'D', width: 40, align: 'left' },
+      { key: 'E', width: 40, align: 'left' },
+      { key: 'F', width: 40, align: 'left' },
+      { key: 'G', width: 40, align: 'left' },
+      { key: 'H', width: 40, align: 'left' },
+      { key: 'I', width: 40, align: 'left' },
+      { key: 'J', width: 40, align: 'left' },
+      { key: 'K', width: 40, align: 'left' },
+    ];
+
+    // Column Row Data
+    colsStyle.forEach((column, key) => {
+      sheet.getColumn(column.key).width = column.width;
+      sheet.getColumn(column.key).alignment = {
+        horizontal: 'center',
+      };
+    });
+
+    colsStyle.forEach((column, key) => {
+      sheet.getColumn(column.key).width = column.width;
+      if (column.align === 'center') {
+        sheet.getColumn(column.key).alignment = {
+          horizontal: 'center',
+        };
+      } else if (column.align === 'right') {
+        sheet.getColumn(column.key).alignment = {
+          horizontal: 'right',
+        };
+      } else {
+        sheet.getColumn(column.key).alignment = {
+          horizontal: 'left',
+        };
+      }
+    });
+
+    // Header
+    ['A1', 'B1', 'C1', 'D1', 'E1', 'F1', 'G1', 'H1', 'I1', 'J1', 'K1'].map(
+      (cell) => {
+        sheet.getCell(cell).style = {
+          font: {
+            bold: true,
+          },
+          alignment: {
+            horizontal: 'center',
+          },
+          border: {
+            top: { style: 'thin' },
+            left: { style: 'thin' },
+            bottom: { style: 'thin' },
+            right: { style: 'thin' },
+          },
+        };
+      },
+    );
+
+    // Write Excel
+    const file = new Promise((resolve, reject) => {
+      tmp.file(
+        {
+          discardDescriptor: true,
+          prefix: 'รายละเอียดประวัตินำเข้า',
+          postfix: '.xlsx',
+          mode: parseInt('0600', 8),
+        },
+        async (_err, _file) => {
+          if (_err) throw _err;
+          book.xlsx
+            .writeFile(_file)
+            .then(() => {
+              resolve(_file);
+            })
+            .catch((err) => {
+              reject(err);
+            });
+        },
+      );
+    });
+    return file;
+  }
+
+  async exportReportLogPlantRemoveHistoryTime(
+    input: ReportGetLogPlantRemoveTimeInput,
+  ): Promise<any> {
+    const book = new Workbook();
+    const sheet = book.addWorksheet('Sheet1');
+    sheet.mergeCells('A1:E1');
+
+    sheet.getCell('A1').value = `วันที่นำออกเริ่มต้น: ${this.momentWrapper
+      .momentDate(input.remove_start)
+      .format('DD/MM/YYYY')}, วันที่นำออกสิ้นสุด: ${this.momentWrapper
+      .momentDate(input.remove_end)
+      .format('DD/MM/YYYY')}, รหัสพันธุ์ไม้: ${
+      input.receipt_code
+    }  อาหารวุ้น: ${input.food_plant_desc} `;
+
+    const data = [];
+    const rows = [];
+    data.push({
+      remove_date: 'วันที่นำออก',
+      total: 'จำนวนนำออก',
+      employee: 'ชื่อพนักงานนำออก',
+      remove_type: 'สาเหตุ',
+      time: 'ครั้งที่',
+    });
+    // Add Data Row
+    const result = await this.reportService.getReportLogRemoveHistoryTime(
+      input,
+    );
+    // Styles Data Row
+    for (let i = 0; i < result?.data?.data.length; i++) {
+      const rowsDB = result?.data?.data[i];
+      data.push({
+        remove_date: this.formatDateToExcel(
+          this.momentWrapper
+            .momentDate(rowsDB.remove_date)
+            .format('YYYY-MM-DD'),
+          'YYYY-MM-DD',
+        ),
+        total: parseInt(rowsDB.total_remove.toString()),
+        employee: rowsDB.member_name + ' ' + rowsDB.member_surname,
+        remove_type: rowsDB.remove_type,
+        time: parseInt(rowsDB.time_per_day.toString()),
+      });
+    }
+
+    data.forEach((doc) => {
+      rows.push(Object.values(doc));
+    });
+    sheet.addRows(rows);
+
+    // Styles Data Row
+    for (let i = 1; i < result.length; i++) {
+      [`A${i + 1}`, `B${i + 1}`, `C${i + 1}`, `D${i + 1}`, `E${i + 1}`].map(
+        (cell) => {
+          sheet.getCell(cell).style = {
+            border: {
+              top: { style: 'thin' },
+              left: { style: 'thin' },
+              bottom: { style: 'thin' },
+              right: { style: 'thin' },
+            },
+          };
+        },
+      );
+    }
+
+    // Column style
+    const colsStyle = [
+      { key: 'A', width: 20, align: 'left' },
+      { key: 'B', width: 30, align: 'center' },
+      { key: 'C', width: 40, align: 'left' },
+      { key: 'D', width: 40, align: 'left' },
+      { key: 'E', width: 40, align: 'center' },
+    ];
+
+    // Column Row Data
+    colsStyle.forEach((column, key) => {
+      sheet.getColumn(column.key).width = column.width;
+      sheet.getColumn(column.key).alignment = {
+        horizontal: 'center',
+      };
+    });
+
+    colsStyle.forEach((column, key) => {
+      sheet.getColumn(column.key).width = column.width;
+      if (column.align === 'center') {
+        sheet.getColumn(column.key).alignment = {
+          horizontal: 'center',
+        };
+      } else if (column.align === 'right') {
+        sheet.getColumn(column.key).alignment = {
+          horizontal: 'right',
+        };
+      } else {
+        sheet.getColumn(column.key).alignment = {
+          horizontal: 'left',
+        };
+      }
+    });
+
+    // Header
+    ['A1', 'B1', 'C1', 'D1', 'E1'].map((cell) => {
+      sheet.getCell(cell).style = {
+        font: {
+          bold: true,
+        },
+        alignment: {
+          horizontal: 'center',
+        },
+        border: {
+          top: { style: 'thin' },
+          left: { style: 'thin' },
+          bottom: { style: 'thin' },
+          right: { style: 'thin' },
+        },
+      };
+    });
+
+    // Write Excel
+    const file = new Promise((resolve, reject) => {
+      tmp.file(
+        {
+          discardDescriptor: true,
+          prefix: 'ประวัตินำออก แยกตามครั้ง',
+          postfix: '.xlsx',
+          mode: parseInt('0600', 8),
+        },
+        async (_err, _file) => {
+          if (_err) throw _err;
+          book.xlsx
+            .writeFile(_file)
+            .then(() => {
+              resolve(_file);
+            })
+            .catch((err) => {
+              reject(err);
+            });
+        },
+      );
+    });
+    return file;
+  }
+
+  async exportReportLogPlantRemoveHistoryGrouping(
+    input: ReportGetLogPlantRemoveGroupingInput,
+  ): Promise<any> {
+    const book = new Workbook();
+    const sheet = book.addWorksheet('Sheet1');
+    sheet.mergeCells('A1:K1');
+
+    sheet.getCell('A1').value = `วันที่นำออกเริ่มต้น: ${this.momentWrapper
+      .momentDate(input.remove_start)
+      .format('DD/MM/YYYY')}, วันที่นำออกสิ้นสุด: ${this.momentWrapper
+      .momentDate(input.remove_end)
+      .format('DD/MM/YYYY')}`;
+
+    const data = [];
+    const rows = [];
+    data.push({
+      import_date: 'วันที่นำเข้า',
+      remove_date: 'วันที่นำออก',
+      code: 'รหัสใบงาน',
+      family_name: 'สายพันธุ์',
+      name: 'ชื่อพันธุ์ไม้',
+      main_work_type: 'ประเภทงานหลัก',
+      work_type: 'ประเภทงาน',
+      food: 'อาหารวุ้น',
+      remove_type: 'สาเหตุ',
+      total: 'จำนวนนำออก',
+      employee: 'ชื่อwนักงาน',
+    });
+    // Add Data Row
+    const result = await this.reportService.getReportLogRemoveHistoryGrouping(
+      input,
+    );
+    // Styles Data Row
+    for (let i = 0; i < result?.data?.data.length; i++) {
+      const rowsDB = result?.data?.data[i];
+      data.push({
+        import_date: this.formatDateToExcel(
+          this.momentWrapper
+            .momentDate(rowsDB.import_date)
+            .format('YYYY-MM-DD'),
+          'YYYY-MM-DD',
+        ),
+        remove_date: this.formatDateToExcel(
+          this.momentWrapper
+            .momentDate(rowsDB.remove_date)
+            .format('YYYY-MM-DD'),
+          'YYYY-MM-DD',
+        ),
+        code: rowsDB.receipt_code,
+        family_name: rowsDB.plant_family_main,
+        name: rowsDB.receipt_name,
+        main_work_type: rowsDB.main_work_type,
+        work_type: rowsDB.work_type,
+        food: rowsDB.food,
+        remove_type: rowsDB.remove_type,
+        total: parseInt(rowsDB.total_remove.toString()),
+        employee: rowsDB.member_name + ' ' + rowsDB.member_surname,
+      });
+    }
+
+    data.forEach((doc) => {
+      rows.push(Object.values(doc));
+    });
+    sheet.addRows(rows);
+
+    // Styles Data Row
+    for (let i = 1; i < result.length; i++) {
+      [
+        `A${i + 1}`,
+        `B${i + 1}`,
+        `C${i + 1}`,
+        `D${i + 1}`,
+        `E${i + 1}`,
+        `F${i + 1}`,
+        `G${i + 1}`,
+        `H${i + 1}`,
+        `I${i + 1}`,
+        `J${i + 1}`,
+        `K${i + 1}`,
+      ].map((cell) => {
+        sheet.getCell(cell).style = {
+          border: {
+            top: { style: 'thin' },
+            left: { style: 'thin' },
+            bottom: { style: 'thin' },
+            right: { style: 'thin' },
+          },
+        };
+      });
+    }
+
+    // Column style
+    const colsStyle = [
+      { key: 'A', width: 20, align: 'left' },
+      { key: 'B', width: 30, align: 'left' },
+      { key: 'C', width: 40, align: 'left' },
+      { key: 'D', width: 40, align: 'left' },
+      { key: 'E', width: 40, align: 'left' },
+      { key: 'F', width: 40, align: 'left' },
+      { key: 'G', width: 40, align: 'left' },
+      { key: 'H', width: 40, align: 'left' },
+      { key: 'I', width: 40, align: 'left' },
+      { key: 'J', width: 40, align: 'center' },
+      { key: 'K', width: 40, align: 'left' },
+    ];
+
+    // Column Row Data
+    colsStyle.forEach((column, key) => {
+      sheet.getColumn(column.key).width = column.width;
+      sheet.getColumn(column.key).alignment = {
+        horizontal: 'center',
+      };
+    });
+
+    colsStyle.forEach((column, key) => {
+      sheet.getColumn(column.key).width = column.width;
+      if (column.align === 'center') {
+        sheet.getColumn(column.key).alignment = {
+          horizontal: 'center',
+        };
+      } else if (column.align === 'right') {
+        sheet.getColumn(column.key).alignment = {
+          horizontal: 'right',
+        };
+      } else {
+        sheet.getColumn(column.key).alignment = {
+          horizontal: 'left',
+        };
+      }
+    });
+
+    // Header
+    ['A1', 'B1', 'C1', 'D1', 'E1', 'F1', 'G1', 'H1', 'I1', 'J1', 'K1'].map(
+      (cell) => {
+        sheet.getCell(cell).style = {
+          font: {
+            bold: true,
+          },
+          alignment: {
+            horizontal: 'center',
+          },
+          border: {
+            top: { style: 'thin' },
+            left: { style: 'thin' },
+            bottom: { style: 'thin' },
+            right: { style: 'thin' },
+          },
+        };
+      },
+    );
+
+    // Write Excel
+    const file = new Promise((resolve, reject) => {
+      tmp.file(
+        {
+          discardDescriptor: true,
+          prefix: 'รายละเอียด การนำออก',
+          postfix: '.xlsx',
+          mode: parseInt('0600', 8),
+        },
+        async (_err, _file) => {
+          if (_err) throw _err;
+          book.xlsx
+            .writeFile(_file)
+            .then(() => {
+              resolve(_file);
+            })
+            .catch((err) => {
+              reject(err);
+            });
+        },
+      );
+    });
+    return file;
+  }
+
+  async exportReportLogPlantRemoveHistoryGroupingDetail(
+    input: ReportGetLogPlantRemoveGroupingDetailInput,
+  ): Promise<any> {
+    const book = new Workbook();
+    const sheet = book.addWorksheet('Sheet1');
+    sheet.mergeCells('A1:K1');
+
+    sheet.getCell('A1').value = `วันที่นำออกเริ่มต้น: ${this.momentWrapper
+      .momentDate(input.remove_start)
+      .format('DD/MM/YYYY')}, วันที่นำออกสิ้นสุด: ${this.momentWrapper
+      .momentDate(input.remove_end)
+      .format('DD/MM/YYYY')}`;
+
+    const data = [];
+    const rows = [];
+    data.push({
+      barcode: 'barcode',
+      import_date: 'วันที่นำเข้า',
+      remove_date: 'วันที่นำออก',
+      code: 'รหัสใบงาน',
+      name: 'ชื่อพันธุ์ไม้',
+      main_work_type: 'ประเภทงานหลัก',
+      work_type: 'ประเภทงาน',
+      food: 'อาหารวุ้น',
+      remove_type: 'สาเหตุ',
+      note: 'หมายเหตุ',
+      employee: 'ชื่อwนักงาน',
+    });
+    // Add Data Row
+    const result =
+      await this.reportService.getReportLogRemoveHistoryGroupingDetail(input);
+    // Styles Data Row
+    for (let i = 0; i < result?.data?.data.length; i++) {
+      const rowsDB = result?.data?.data[i];
+      data.push({
+        barcode: rowsDB.barcode,
+        import_date: this.formatDateToExcel(
+          this.momentWrapper
+            .momentDate(rowsDB.import_date)
+            .format('YYYY-MM-DD'),
+          'YYYY-MM-DD',
+        ),
+        remove_date: this.formatDateToExcel(
+          this.momentWrapper
+            .momentDate(rowsDB.remove_date)
+            .format('YYYY-MM-DD'),
+          'YYYY-MM-DD',
+        ),
+        code: rowsDB.receipt_code,
+        name: rowsDB.receipt_name,
+        main_work_type: rowsDB.main_work_type,
+        work_type: rowsDB.work_type,
+        food: rowsDB.food,
+        remove_type: rowsDB.remove_type,
+        note: rowsDB.remark,
+        employee: rowsDB.member_name + ' ' + rowsDB.member_surname,
+      });
+    }
+
+    data.forEach((doc) => {
+      rows.push(Object.values(doc));
+    });
+    sheet.addRows(rows);
+
+    // Styles Data Row
+    for (let i = 1; i < result.length; i++) {
+      [
+        `A${i + 1}`,
+        `B${i + 1}`,
+        `C${i + 1}`,
+        `D${i + 1}`,
+        `E${i + 1}`,
+        `F${i + 1}`,
+        `G${i + 1}`,
+        `H${i + 1}`,
+        `I${i + 1}`,
+        `J${i + 1}`,
+        `K${i + 1}`,
+      ].map((cell) => {
+        sheet.getCell(cell).style = {
+          border: {
+            top: { style: 'thin' },
+            left: { style: 'thin' },
+            bottom: { style: 'thin' },
+            right: { style: 'thin' },
+          },
+        };
+      });
+    }
+
+    // Column style
+    const colsStyle = [
+      { key: 'A', width: 20, align: 'left' },
+      { key: 'B', width: 30, align: 'left' },
+      { key: 'C', width: 40, align: 'left' },
+      { key: 'D', width: 40, align: 'left' },
+      { key: 'E', width: 40, align: 'left' },
+      { key: 'F', width: 40, align: 'left' },
+      { key: 'G', width: 40, align: 'left' },
+      { key: 'H', width: 40, align: 'left' },
+      { key: 'I', width: 40, align: 'left' },
+      { key: 'J', width: 40, align: 'left' },
+      { key: 'K', width: 40, align: 'left' },
+    ];
+
+    // Column Row Data
+    colsStyle.forEach((column, key) => {
+      sheet.getColumn(column.key).width = column.width;
+      sheet.getColumn(column.key).alignment = {
+        horizontal: 'center',
+      };
+    });
+
+    colsStyle.forEach((column, key) => {
+      sheet.getColumn(column.key).width = column.width;
+      if (column.align === 'center') {
+        sheet.getColumn(column.key).alignment = {
+          horizontal: 'center',
+        };
+      } else if (column.align === 'right') {
+        sheet.getColumn(column.key).alignment = {
+          horizontal: 'right',
+        };
+      } else {
+        sheet.getColumn(column.key).alignment = {
+          horizontal: 'left',
+        };
+      }
+    });
+
+    // Header
+    ['A1', 'B1', 'C1', 'D1', 'E1', 'F1', 'G1', 'H1', 'I1', 'J1', 'K1'].map(
+      (cell) => {
+        sheet.getCell(cell).style = {
+          font: {
+            bold: true,
+          },
+          alignment: {
+            horizontal: 'center',
+          },
+          border: {
+            top: { style: 'thin' },
+            left: { style: 'thin' },
+            bottom: { style: 'thin' },
+            right: { style: 'thin' },
+          },
+        };
+      },
+    );
+
+    // Write Excel
+    const file = new Promise((resolve, reject) => {
+      tmp.file(
+        {
+          discardDescriptor: true,
+          prefix: 'รายละเอียด การนำออก',
           postfix: '.xlsx',
           mode: parseInt('0600', 8),
         },
