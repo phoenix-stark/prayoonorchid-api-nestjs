@@ -13,6 +13,9 @@ import { MemberWithBarcodeModule } from 'src/member-with-barcode/member-with-bar
 import { LogTokenModule } from 'src/log-token/log-token.module';
 import { ReceiptModule } from 'src/receipt/receipt.module';
 import { LogPlantRemove } from 'src/log-plant-remove/entity/log-plant-remove-entity.model';
+import { LogPlantRemoveNow } from 'src/log-plant-remove/entity/log-plant-remove-now-entity.model';
+import { LogPlantRemoveEditService } from 'src/log-plant-remove-edit/log-plant-remove-edit.service';
+import { LogPlantRemoveEditModule } from 'src/log-plant-remove-edit/log-plant-remove-edit.module';
 
 @Module({
   imports: [
@@ -20,6 +23,7 @@ import { LogPlantRemove } from 'src/log-plant-remove/entity/log-plant-remove-ent
       LogPlantImport,
       LogPlantImportNow,
       LogPlantRemove,
+      LogPlantRemoveNow,
       Member,
       FoodPlant,
       SourcesWorkType,
@@ -28,6 +32,7 @@ import { LogPlantRemove } from 'src/log-plant-remove/entity/log-plant-remove-ent
     MemberWithBarcodeModule,
     forwardRef(() => ReceiptModule),
     forwardRef(() => LogTokenModule),
+    forwardRef(() => LogPlantRemoveEditModule),
   ],
   controllers: [LogPlantImportController],
   providers: [LogPlantImportService, MomentService],

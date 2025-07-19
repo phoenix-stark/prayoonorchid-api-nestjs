@@ -47,8 +47,6 @@ export class LogPlantRemoveService {
     private readonly logTokenService: LogTokenService,
     @Inject(forwardRef(() => MemberWithBarcodeService))
     private readonly memberWithBarcodeService: MemberWithBarcodeService,
-    @Inject(forwardRef(() => LogPlantRemoveEditService))
-    private readonly logPlantRemoveEditService: LogPlantRemoveEditService,
     @InjectRepository(LogPlantRemove)
     private readonly logPlantRemoveRepository: Repository<LogPlantRemove>,
     @InjectRepository(LogPlantRemoveNow)
@@ -58,6 +56,7 @@ export class LogPlantRemoveService {
     @InjectRepository(LogPlantImport)
     private readonly logPlantImportRepository: Repository<LogPlantImport>,
     private momentWrapper: MomentService,
+    private logPlantRemoveEditService: LogPlantRemoveEditService,
   ) {}
 
   async insertBarcode(input: LogRemoveCreateInput): Promise<any> {

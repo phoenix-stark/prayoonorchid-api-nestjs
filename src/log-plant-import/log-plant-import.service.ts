@@ -41,6 +41,9 @@ import { LogImportGetTotalByReceiptIdInput } from './dto/log-import-get-total-by
 import { GetIndexStartOfPage } from 'src/utils/calculate-page';
 import { ReportProductionResponse } from 'src/report/modal/report-production.response';
 import { SourcesPlantRemoveType } from 'src/sources-plant-remove-type/entity/sources-plant-remove-type-entity.model';
+import { LogImportUpdateAllListInput } from './dto/log-import-update-all-list.input';
+import { LogPlantRemoveEditService } from 'src/log-plant-remove-edit/log-plant-remove-edit.service';
+import { LogRemoveDeleteInput } from 'src/log-plant-remove/dto/log-remove-delete.input';
 
 @Injectable()
 export class LogPlantImportService {
@@ -57,6 +60,10 @@ export class LogPlantImportService {
     private readonly logPlantImportNowRepository: Repository<LogPlantImportNow>,
     @InjectRepository(LogPlantRemove)
     private readonly logPlantRemoveRepository: Repository<LogPlantRemove>,
+    @InjectRepository(LogPlantRemoveNow)
+    private readonly logPlantRemoveNowRepository: Repository<LogPlantRemoveNow>,
+    @Inject(forwardRef(() => LogPlantRemoveEditService))
+    private readonly logPlantRemoveEditService: LogPlantRemoveEditService,
     @InjectRepository(FoodPlant)
     private readonly foodPlantRepository: Repository<FoodPlant>,
     @InjectRepository(SourcesWorkType)
@@ -638,6 +645,215 @@ export class LogPlantImportService {
         },
       };
     }
+  }
+
+  async updateBarcodeAllList(input: LogImportUpdateAllListInput): Promise<any> {
+    const logTokenEntity = await this.logTokenService.getLogToken({
+      token: input.token,
+    } as LogTokenGetInput);
+
+    if (!logTokenEntity) {
+      throw new HttpException(
+        {
+          code: 400,
+          message: 'Username นี้ ถูก Block',
+        },
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+    const createAt = this.momentWrapper.moment().format('YYYY-MM-DD HH:mm:ss');
+    const createBy = logTokenEntity.member_id;
+
+    // UPDATE-ALL
+    let totalImportNow = 0;
+    let totalImportLog = 0;
+    let totalRemoveNow = 0;
+    let totalRemoveLog = 0;
+    const result = input.barcodes;
+
+    // IMPORT-NOW
+    for (let i = 0; i < result.length; i++) {
+      const barcode = result[i];
+      await this.logPlantImportNowRepository.update(
+        { barcode }, // ค้นหาด้วย barcode
+        {
+          import_date: input.update_import_date,
+          receipt_id: input.update_receipt_id,
+          work_type_id: input.update_work_type_id,
+          main_work_type_id: input.update_main_work_type_id,
+          food_plant_id: `${input.update_food_id}`,
+        },
+      );
+      totalImportNow++;
+    }
+    // IMPORT-ALL
+    for (let i = 0; i < result.length; i++) {
+      const barcode = result[i];
+      await this.logPlantImportRepository.update(
+        { barcode }, // ค้นหาด้วย barcode
+        {
+          import_date: input.update_import_date,
+          receipt_id: input.update_receipt_id,
+          work_type_id: input.update_work_type_id,
+          main_work_type_id: input.update_main_work_type_id,
+          food_plant_id: `${input.update_food_id}`,
+        },
+      );
+      totalImportLog++;
+    }
+
+    // REMOVE
+    for (let i = 0; i < result.length; i++) {
+      const barcode = result[i];
+      if (
+        input.update_plant_remove_type_id.toString() == '' ||
+        isNaN(input.update_plant_remove_type_id)
+      ) {
+        await this.logPlantRemoveNowRepository
+          .createQueryBuilder()
+          .where('barcode = :barcode', {
+            barcode: `${barcode}`,
+          })
+          .delete()
+          .execute();
+      } else {
+        await this.logPlantRemoveNowRepository.update(
+          { barcode }, // ค้นหาด้วย barcode
+          {
+            remove_date: input.update_remove_date,
+            plant_remove_type_id: input.update_plant_remove_type_id,
+            remark: input.update_remark,
+            create_by: createBy,
+            create_at: createAt,
+          },
+        );
+      }
+      totalRemoveNow++;
+    }
+
+    // REMOVE-All
+    for (let i = 0; i < result.length; i++) {
+      const barcode = result[i];
+
+      const logPlantRemoveNow = await this.logPlantRemoveRepository.findOne({
+        where: {
+          barcode: `${barcode}`,
+        },
+      });
+
+      if (!logPlantRemoveNow) {
+        // NEW IN DB
+        if (
+          !(
+            !input.update_plant_remove_type_id ||
+            input.update_plant_remove_type_id.toString() == '-1' ||
+            !input.update_remove_date ||
+            input.update_remove_date == ''
+          )
+        ) {
+          // NEW
+          const logPlantImport = await this.logPlantImportRepository.findOne({
+            where: {
+              barcode: `${barcode}`,
+            },
+          });
+          if (logPlantImport) {
+            const logPlantRemoveNow = new LogPlantRemoveNow();
+            logPlantRemoveNow.log_plant_import_id =
+              logPlantImport.log_plant_import_id;
+            logPlantRemoveNow.barcode = `${barcode}`;
+            logPlantRemoveNow.create_at = this.momentWrapper
+              .moment()
+              .format('YYYY-MM-DD HH:mm:ss');
+            logPlantRemoveNow.remove_date = input.update_remove_date;
+            logPlantRemoveNow.plant_remove_type_id =
+              input.update_plant_remove_type_id;
+            logPlantRemoveNow.receipt_id = logPlantImport.receipt_id;
+            logPlantRemoveNow.create_by = createBy;
+            logPlantRemoveNow.remark = input.update_remark;
+
+            // TIME PER DAY
+            let timePerDay = '';
+            if (timePerDay == '0' || timePerDay == '') {
+              const logPlantRemoveNowTimePerDayRepository =
+                await this.logPlantRemoveNowRepository.findOne({
+                  where: {
+                    remove_date: input.update_remove_date,
+                  },
+                  order: {
+                    time_per_day: 'DESC',
+                  },
+                });
+              if (!logPlantRemoveNowTimePerDayRepository) {
+                timePerDay = '1';
+              } else {
+                timePerDay = `${
+                  logPlantRemoveNowTimePerDayRepository.time_per_day + 1
+                }`;
+              }
+            }
+
+            logPlantRemoveNow.time_per_day = parseInt(timePerDay);
+
+            // INSERT
+            await this.logPlantRemoveRepository.save(logPlantRemoveNow);
+            await this.logPlantRemoveNowRepository.save(logPlantRemoveNow);
+          }
+        }
+      } else {
+        // HAVE IN DB
+        if (!input.update_remove_date || input.update_remove_date == '') {
+          // NO SAVE
+          console.log('OUT OF CONDITION');
+          if (
+            input.update_plant_remove_type_id.toString() == '' ||
+            isNaN(input.update_plant_remove_type_id)
+          ) {
+            await this.logPlantRemoveRepository
+              .createQueryBuilder()
+              .where('barcode = :barcode', {
+                barcode: `${barcode}`,
+              })
+              .delete()
+              .execute();
+          }
+        } else {
+          await this.logPlantRemoveRepository.update(
+            { barcode }, // ค้นหาด้วย barcode
+            {
+              remove_date: input.update_remove_date,
+              plant_remove_type_id: input.update_plant_remove_type_id,
+              remark: input.update_remark,
+              create_by: createBy,
+              create_at: createAt,
+            },
+          );
+        }
+
+        // INSERT LOG
+        await this.logPlantRemoveEditService.insertLogPlantRemoveEdit({
+          token: input.token,
+          barcode: barcode,
+          edit_by: createBy,
+          remove_date: input.update_remove_date,
+          plant_remove_type_id: parseInt(
+            input.update_plant_remove_type_id.toString(),
+          ),
+          remark: input.update_remark,
+        });
+      }
+      totalRemoveLog++;
+    }
+
+    return {
+      code: 200,
+      data: {
+        total_import_now: totalImportNow,
+        total_import_log: totalImportLog,
+        total_remove_now: totalRemoveNow,
+        total_remove_log: totalRemoveLog,
+      },
+    };
   }
 
   async deleteBarcode(input: LogImportDeleteInput): Promise<any> {
