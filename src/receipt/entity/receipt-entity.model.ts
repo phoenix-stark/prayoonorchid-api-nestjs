@@ -1,4 +1,4 @@
-import { Entity, Column, PrimaryColumn } from 'typeorm';
+import { Entity, Column, PrimaryColumn, Index } from 'typeorm';
 
 @Entity({ name: 'receipt', synchronize: false })
 export class Receipt {
@@ -32,6 +32,7 @@ export class Receipt {
   @Column()
   customer_id: string;
 
+  @Index()
   @Column()
   code: string;
 }

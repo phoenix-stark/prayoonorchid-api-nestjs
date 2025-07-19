@@ -1,10 +1,11 @@
-import { Entity, Column, PrimaryColumn } from 'typeorm';
+import { Entity, Column, PrimaryColumn, Index } from 'typeorm';
 
 @Entity({ name: 'log_plant_remove', synchronize: false })
 export class LogPlantRemove {
   @PrimaryColumn()
   log_plant_import_id: number;
 
+  @Index()
   @Column()
   barcode: string;
 

@@ -1,10 +1,11 @@
-import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, Index } from 'typeorm';
 
 @Entity({ name: 'log_plant_import_1', synchronize: false })
 export class LogPlantImport {
   @PrimaryGeneratedColumn()
   log_plant_import_id: number;
 
+  @Index()
   @Column()
   barcode: string;
 
