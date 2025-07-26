@@ -2754,10 +2754,10 @@ export class ReportService {
 
       if (filterEmployeeIdIsMatchAll + '' == 'true') {
         // ต้องตรงทั้งชื่อและนามสกุล
-        query.andWhere('member_tb.name LIKE :firstName', {
+        query.andWhere('member_tb.name = :firstName', {
           firstName: `${firstName}`,
         });
-        query.andWhere('member_tb.surname LIKE :lastName', {
+        query.andWhere('member_tb.surname = :lastName', {
           lastName: `${lastName}`,
         });
       } else {
