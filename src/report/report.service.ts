@@ -2671,15 +2671,21 @@ export class ReportService {
         'sources_work_type_tb.id = result_group.work_type_id',
       );
     // Code
+    console.log('filterReceiptCode:' + filterReceiptCode);
+    console.log('filterReceiptCodeIsMatchAll:' + filterReceiptCodeIsMatchAll);
+    console.log('filterReceiptName:' + filterReceiptName);
+    console.log('filterReceiptNameIsMatchAll:' + filterReceiptNameIsMatchAll);
     if (filterReceiptCode && filterReceiptCode != '') {
       if (filterReceiptCodeIsMatchAll + '' == 'true') {
         query.andWhere('receipt_tb.code  LIKE :code ', {
           code: `${filterReceiptCode}`,
         });
+        console.log('filterReceiptCode:CASE1');
       } else {
         query.andWhere('receipt_tb.code  LIKE :code ', {
           code: `%${filterReceiptCode}%`,
         });
+        console.log('filterReceiptCode:CASE2');
       }
     } else {
       // Receipt Name
@@ -2688,15 +2694,18 @@ export class ReportService {
           query.andWhere('receipt_tb.name  LIKE :receipt_name ', {
             receipt_name: `${filterReceiptName}`,
           });
+          console.log('filterReceiptCode:CASE3');
         } else {
           query.andWhere('receipt_tb.name  LIKE :receipt_name ', {
             receipt_name: `%${filterReceiptName}%`,
           });
+          console.log('filterReceiptCode:CASE4');
         }
       } else {
         query.andWhere('receipt_tb.code  LIKE :code ', {
           code: `%%`,
         });
+        console.log('filterReceiptCode:CASE5');
       }
     }
 
