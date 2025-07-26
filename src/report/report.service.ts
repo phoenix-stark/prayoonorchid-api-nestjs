@@ -2682,20 +2682,20 @@ export class ReportService {
         });
       }
     } else {
-      query.andWhere('receipt_tb.code  LIKE :code ', {
-        code: `%%`,
-      });
-    }
-
-    // Receipt Name
-    if (filterReceiptName && filterReceiptName != '') {
-      if (filterReceiptNameIsMatchAll + '' == 'true') {
-        query.andWhere('receipt_tb.name  LIKE :receipt_name ', {
-          receipt_name: `${filterReceiptName}`,
-        });
+      // Receipt Name
+      if (filterReceiptName && filterReceiptName != '') {
+        if (filterReceiptNameIsMatchAll + '' == 'true') {
+          query.andWhere('receipt_tb.name  LIKE :receipt_name ', {
+            receipt_name: `${filterReceiptName}`,
+          });
+        } else {
+          query.andWhere('receipt_tb.name  LIKE :receipt_name ', {
+            receipt_name: `%${filterReceiptName}%`,
+          });
+        }
       } else {
-        query.andWhere('receipt_tb.name  LIKE :receipt_name ', {
-          receipt_name: `%${filterReceiptName}%`,
+        query.andWhere('receipt_tb.code  LIKE :code ', {
+          code: `%%`,
         });
       }
     }
