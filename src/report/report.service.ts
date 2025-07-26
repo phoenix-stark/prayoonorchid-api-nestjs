@@ -2747,10 +2747,12 @@ export class ReportService {
     }
 
     // Employee
+    console.log('filterEmployeeIdIsMatchAll:' + filterEmployeeIdIsMatchAll);
     if (filterEmployeeId && filterEmployeeId !== '') {
       const parts = filterEmployeeId.trim().split(' ');
       const firstName = parts[0];
       const lastName = parts[1] || null;
+      console.log(parts);
 
       if (filterEmployeeIdIsMatchAll + '' == 'true') {
         // ต้องตรงทั้งชื่อและนามสกุล
@@ -2760,6 +2762,7 @@ export class ReportService {
         query.andWhere('member_tb.surname = :lastName', {
           lastName: `${lastName}`,
         });
+        console.log('CASE1:');
       } else {
         // ตรงชื่อหรือนามสกุล อย่างใดอย่างหนึ่งก็ได้
         query.andWhere(
@@ -2769,6 +2772,7 @@ export class ReportService {
             lastName: `%${lastName}%`,
           },
         );
+        console.log('CASE2:');
       }
     }
 
@@ -2941,12 +2945,12 @@ export class ReportService {
           });
         }
 
-        // Employee
-        if (filterEmployeeId && filterEmployeeId != '') {
-          sub.andWhere('import.member_made = :employee ', {
-            employee: filterEmployeeId,
-          });
-        }
+        // // Employee
+        // if (filterEmployeeId && filterEmployeeId != '') {
+        //   sub.andWhere('import.member_made = :employee ', {
+        //     employee: filterEmployeeId,
+        //   });
+        // }
 
         // TIME PER DAY
         if (filterTimePerDay && filterTimePerDay != '') {
