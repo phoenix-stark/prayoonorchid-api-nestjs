@@ -2677,7 +2677,7 @@ export class ReportService {
     console.log('filterReceiptNameIsMatchAll:' + filterReceiptNameIsMatchAll);
     if (filterReceiptCode && filterReceiptCode != '') {
       if (filterReceiptCodeIsMatchAll + '' == 'true') {
-        query.andWhere('receipt_tb.code  LIKE :code ', {
+        query.andWhere('receipt_tb.code  = :code ', {
           code: `${filterReceiptCode}`,
         });
         console.log('filterReceiptCode:CASE1');
