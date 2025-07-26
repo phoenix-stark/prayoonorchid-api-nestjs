@@ -2775,7 +2775,7 @@ export class ReportService {
       } else {
         // ตรงชื่อหรือนามสกุล อย่างใดอย่างหนึ่งก็ได้
         query.andWhere(
-          '(member_tb.name LIKE :firstName OR member_tb.surname LIKE :lastName) OR (member_tb.surname LIKE :firstName OR member_tb.name LIKE :lastName)',
+          '((member_tb.name LIKE :firstName OR member_tb.surname LIKE :lastName) OR (member_tb.surname LIKE :firstName OR member_tb.name LIKE :lastName))',
           {
             firstName: `%${firstName}%`,
             lastName: `%${lastName}%`,
