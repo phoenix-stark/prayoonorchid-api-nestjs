@@ -2747,28 +2747,23 @@ export class ReportService {
     }
 
     // Employee
-    if (filterEmployeeId && filterEmployeeId.trim() !== '') {
+    if (filterEmployeeId && filterEmployeeId !== '') {
       const parts = filterEmployeeId.trim().split(' ');
       const firstName = parts[0];
-      const lastName = parts[1] || '';
+      const lastName = parts[1] || null;
 
-      if (filterEmployeeIdIsMatchAll + '' === 'true') {
+      if (filterEmployeeIdIsMatchAll + '' == 'true') {
         // ต้องตรงทั้งชื่อและนามสกุล
         query.andWhere('member_tb.name LIKE :firstName', {
-          firstName: firstName,
+          firstName: `${firstName}`,
         });
         query.andWhere('member_tb.surname LIKE :lastName', {
-          lastName: lastName,
+          lastName: `${lastName}`,
         });
       } else {
-        // ชื่อหรือนามสกุล ตรงอย่างใดอย่างหนึ่งก็ได้
+        // ตรงชื่อหรือนามสกุล อย่างใดอย่างหนึ่งก็ได้
         query.andWhere(
-          `(
-            member_tb.name LIKE :firstName OR 
-            member_tb.surname LIKE :firstName OR 
-            member_tb.name LIKE :lastName OR 
-            member_tb.surname LIKE :lastName
-          )`,
+          '(member_tb.name LIKE :firstName OR member_tb.surname LIKE :lastName) OR (member_tb.surname LIKE :firstName OR member_tb.name LIKE :lastName)',
           {
             firstName: `%${firstName}%`,
             lastName: `%${lastName}%`,
@@ -2776,6 +2771,37 @@ export class ReportService {
         );
       }
     }
+
+    // // Employee
+    // if (filterEmployeeId && filterEmployeeId.trim() !== '') {
+    //   const parts = filterEmployeeId.trim().split(' ');
+    //   const firstName = parts[0];
+    //   const lastName = parts[1] || '';
+
+    //   if (filterEmployeeIdIsMatchAll + '' === 'true') {
+    //     // ต้องตรงทั้งชื่อและนามสกุล
+    //     query.andWhere('member_tb.name LIKE :firstName', {
+    //       firstName: firstName,
+    //     });
+    //     query.andWhere('member_tb.surname LIKE :lastName', {
+    //       lastName: lastName,
+    //     });
+    //   } else {
+    //     // ชื่อหรือนามสกุล ตรงอย่างใดอย่างหนึ่งก็ได้
+    //     query.andWhere(
+    //       `(
+    //         member_tb.name LIKE :firstName OR
+    //         member_tb.surname LIKE :firstName OR
+    //         member_tb.name LIKE :lastName OR
+    //         member_tb.surname LIKE :lastName
+    //       )`,
+    //       {
+    //         firstName: `%${firstName}%`,
+    //         lastName: `%${lastName}%`,
+    //       },
+    //     );
+    //   }
+    // }
 
     const queryTotal = query;
     const totalAll = await queryTotal.select('COUNT(*)', 'total').getRawOne();
