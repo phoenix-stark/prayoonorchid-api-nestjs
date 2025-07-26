@@ -2816,6 +2816,8 @@ export class ReportService {
     //   }
     // }
 
+    console.log(await query.getQueryAndParameters());
+
     const queryTotal = query;
     const totalAll = await queryTotal.select('COUNT(*)', 'total').getRawOne();
 
