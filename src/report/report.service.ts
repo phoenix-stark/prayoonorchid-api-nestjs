@@ -2816,8 +2816,6 @@ export class ReportService {
     //   }
     // }
 
-    console.log(await query.getQueryAndParameters());
-
     const queryTotal = query;
     const totalAll = await queryTotal.select('COUNT(*)', 'total').getRawOne();
 
@@ -2852,6 +2850,8 @@ export class ReportService {
       query.offset(start);
       query.limit(input.per_page);
     }
+
+    console.log(await query.getQueryAndParameters());
     const data = await query.getRawMany();
 
     const result = {
