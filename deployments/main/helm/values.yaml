@@ -41,7 +41,7 @@ configMaps:
     DB_TYPE: "mysql"
     DB_HOST: "psc-mysql.phoenix-stark.internal"
     DB_PORT: "3306"
-    DB_DATABASE: "prayoonorchid_db_2"
+    DB_DATABASE: "prayoonorchid_db"
     DB_USERNAME: "prayoonorchid_user"
     DB_PASSWORD: "NHxA3zLWy17tZgwl"
     DB_SYNCHRONIZE: "true"
