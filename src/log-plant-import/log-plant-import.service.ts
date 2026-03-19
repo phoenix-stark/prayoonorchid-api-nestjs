@@ -96,6 +96,14 @@ export class LogPlantImportService {
         HttpStatus.BAD_REQUEST,
       );
     }
+
+    if (input.barcode < 1000000) {
+      return {
+        code: 400,
+        message: `Barcode ${input.barcode} รูปแบบไม่ถูกต้อง`,
+      };
+    }
+
     const createBy = logTokenEntity.member_id;
 
     // Check Barcode
